@@ -1,3 +1,7 @@
-from django.shortcuts import render
+from rest_framework import viewsets
+from vote.models import Districts
+from api import serializers as apiSerializers
 
-# Create your views here.
+class DistrictsViewSet(viewsets.ModelViewSet):
+    queryset = Districts.objects.all()
+    serializer_class = apiSerializers.DistrictsSerializer

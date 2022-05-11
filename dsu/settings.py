@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'api.apps.ApiConfig',
-    'vote.apps.VoteConfig'
+    'vote.apps.VoteConfig',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
