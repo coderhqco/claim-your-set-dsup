@@ -1,0 +1,24 @@
+[
+    {
+        "model":"vote.user",
+        "fields":{
+            "district":"NY01",
+            "name":"test1",
+            "email":"test1@gmail.com",
+            "address":"some random address",
+            "password":"Z123123z",
+            "updated_at":"2022-10-10:10:10"
+        }
+    },
+    {
+        "model":"vote.user",
+        "fields":{
+            "district":"NY01",
+            "name":"test2",
+            "email":"test2@gmail.com",
+            "address":"some random address",
+            "password":"Z123123z",
+            "updated_at":"2022-02-10:10:20"
+        }
+    }
+]
