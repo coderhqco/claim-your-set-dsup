@@ -1,0 +1,289 @@
+a#logo {
+  float: left;
+  margin-right: 10px;
+  font-size: 1.7em;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+  padding-top: 9px;
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+
+.center.jumbotron.section_first h1 {
+  font-size: 48px;
+    letter-spacing: 1px;
+    text-align: left;
+}
+
+.part-2 {
+    text-align: left;
+    margin-top: 30px;
+}
+.part-2 h2 {
+  color: #777;
+  font-size: 2em;
+  letter-spacing: -1px;
+  text-align: left;
+  font-weight: normal;
+  margin-bottom: 30px;
+}
+
+footer.footer {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    top: 100px;
+} 
+ul#bs-example-navbar-collapse-1 a {
+  font-size: 20px;
+  font-weight: 600;
+  font-family: sans-serif;
+}
+ul.nav-item {
+    display: inline-flex;
+}
+
+ul.nav-item li a {
+  color: #555555;
+  font-size: 16px;
+}
+ul.nav-item li {
+    list-style: none;
+    margin-left: 15px;
+}
+ 
+.center.jumbotron.section_first {
+  position: relative;
+  top: 60px;
+  text-align: left;
+  height: 430px;
+  /*padding: 10px 60px !important;*/
+}
+.center.img_section img {
+  width: auto;
+  height: 101%;
+  margin-left: 10%;
+}
+a.btn-xl.btn-primary {
+  padding: 10px 40px;
+  font-size: 20px;
+  border-radius: 10px;
+}
+
+a.btn.btn-lg.btn-primary {
+  padding: 10px 90px;
+  font-size: 18px;
+  line-height: 1.3333333;
+  border-radius: 10px;
+}
+
+.section_btn {
+  padding: 10px 0px;
+}
+small.small_section {
+  font-size: 100%;
+  color: #555555;
+}
+.center.img_section {
+  position: relative;
+  top: 60px;
+  width: 87%;
+  height: 430px;
+}
+
+/*page-2 css start */
+
+.container.Enter_the_Floor {
+  position: relative;
+  top: 70px;
+}
+.center.If_already {
+  text-align: center;
+}
+p.claimed {
+  font-size: 1.5em;
+  line-height: 1.5em;
+}
+p.pad {
+  margin-top: 10px;
+  line-height: 1.5em;
+  font-size: 1.5em;
+}
+h1.pad {
+  font-size: 3em;
+  letter-spacing: 1px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+input.btn-xl.btn-primary.btn-wrap-text {
+  padding: 12px;
+    width: 100%;
+    margin: 0 auto;
+    border-radius: 10px;
+    border: none;
+    font-size: 20px;
+}
+.input_btn {
+  width: 50%;
+  margin: 0 auto;
+}
+.center.jumbotron.input_box {
+  margin-top: 40px;
+}
+h1.text-center.sec_Enter{
+  font-size: 3em;
+letter-spacing: 1px;
+margin-bottom: 30px;
+text-align: center;
+}
+p.pad.already {
+  margin: 20px 0px;
+}
+input.btn-xl.btn-primary {
+  padding: 10px 50px;
+  font-size: 20px;
+  border-radius: 10px;
+  border: none;
+  margin-top: 15px;
+}
+.center.jumbotron.If_already {
+  padding: 25px 60px;
+}
+label.checkbox.inline {
+  padding-top: 10px;
+}
+input#session_email {
+  margin-bottom: 15px;
+}
+input#session_password {
+  margin-bottom: 5px;
+}
+/*page-2 css end */
+
+
+
+/*page-3 css start */
+
+p.help_section {
+  font-size: 1.5em;
+  line-height: 1.5em;
+  margin-bottom: 50px;
+}
+
+
+/*page-3 css  end */
+
+
+.row.form_section_form {
+  margin-right: -15px;
+  margin-left: -15px;
+  margin-top: 100px;
+}
+
+
+
+/*3-feb-2022 css start */
+
+.row.label_input_sec {
+  margin: 0px !important;
+}
+input[type=checkbox] {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  box-shadow: 0px 1px 3px 1px;
+}
+input#user_district {
+  margin-bottom: 20px;
+}
+input#registered {
+  margin-left: 60px;
+  position: relative;
+  top: 5px;
+}
+input#eligible {
+  position: relative;
+  bottom: 35px;
+  align-items: center;
+  justify-content: center;
+  margin-left: 32px;
+}
+label.believe_label {
+  width: 51%;
+}
+
+/*3-feb-2022 css start */
+
+
+ul#bs-example-navbar-collapse-1 {
+  color: white;
+  font-size: 22px;
+}
+.container.header_container {
+  display: block !important;
+}
+
+
+
+a.btn.btn-primary.text-center.Creat_pod.My_pod {
+  width: 50%;
+  margin: 0 auto;
+}
+
+input[type=text], select {
+  width: 100%;
+  padding: 12px 20px; 
+  margin: 0px 0; 
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  }
+
+  input[type=submit] {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  }
+
+  input[type=submit]:hover {
+  background-color: #45a049;
+  }
+
+  button.btn.vote {
+    background: #008000 !important;
+    color: #ffffff !important;
+    font-size: 14px;
+    margin-left: 20px;
+    position: relative;
+    /* top: -16px; */
+}
+
+.padding-box{
+padding: 0 !important;
+margin-top: 20px !important;
+}
+ul.messages {
+  padding-left: 0 !important;
+}
+.image_check {
+  display: flex;
+}
+.image_check img {
+  width: 30px;
+    margin-right: 0px;
+    height: 30px;
+}
+
