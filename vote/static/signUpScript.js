@@ -5,7 +5,7 @@ var district = document.querySelector("input[name='district']");
 district.addEventListener('change', (event) => {
   let district_code = event.target.value;
   $.ajax({
-    url:'votePortal-api/districts',
+    url:'api/districts/',
     method:'get',
     success:function(res){
       for(let i=0; i<res.length; i++){
@@ -37,6 +37,21 @@ function validate_invalid(e){
 }
 
 // check email for and formating and validate it on mouse leave
+function generateString(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+ }
+ return result;
+}
+
+window.addEventListener('load', (event) => {
+  var username = document.querySelector("input[name='username']");
+  username.value = generateString(5)
+});
+
 
 var email = document.querySelector("input[name='email']");
 email.addEventListener('change', (event)=>{
@@ -70,11 +85,12 @@ generatePss.addEventListener('click', (Event)=>{
   // generate a password and show it on password labal
   let  pass = generatePassword();
   // add the generated password into password input field as well
-   document.querySelector("input[name='password']").value = pass;
-   document.querySelector("input[name='confirmation']").value = pass;
-   document.querySelector("input[name='password']").type='text';
+   document.querySelector("input[name='password1']").value = pass;
+   document.querySelector("input[name='password2']").value = pass;
+   document.querySelector("input[name='password1']").type='text';
    document.getElementById('basic-addon2').innerHTML = 'Hide';
 })
+
 function generatePassword() {
   var length = 8,
       charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
@@ -90,7 +106,7 @@ function generatePassword() {
 let show = document.getElementById('basic-addon2')
 show.style.cursor = "pointer";
 show.addEventListener('click', function(event){
-  let inpt = document.querySelector("input[name='password']");
+  let inpt = document.querySelector("input[name='password1']");
   if (inpt.type === "password") {
     inpt.type = "text";
     event.target.innerHTML = 'Hide';

@@ -1,0 +1,46 @@
+{% extends 'vote/base.html'%}
+{% load static %}
+
+{%block css%}
+<style>
+
+.center{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+</style>
+{%endblock css%}
+{%block content%}
+
+{% include 'vote/header.html' %}
+<div class="container">
+    <div class="row center">
+        <div class="col">
+            <h3 class="text-success text-center">Almost there... </h3>
+            {% if messages%}
+            <ul class="messages">
+                {% for message in messages %}
+                    <div class="row">
+                    {%if "success" in message.tags%}
+                    <div class="col-sm-12 padding-box">
+                        <div class="alert {{ message.tags }} alert-dismissible" role="alert" >
+                            <div class="image_check">
+                                <img src="{% static 'image/pics.png' %}"> <br>
+                                <p class="text-center">{{ message }}</p> 
+                            </div>
+                        </div>
+                    </div>
+                    {%endif%}
+                    </div>
+                {% endfor %}
+            </ul> 
+            {%endif%} 
+        </div> 
+    </div>
+</div> 
+
+{%endblock content%}
+
+

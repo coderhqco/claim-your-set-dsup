@@ -1,0 +1,146 @@
+{%extends "vote/base.html" %}
+{% load static %}
+
+{% block css %}
+<style>
+  .textarea.form-control {
+    height: 36px;
+  }
+  .user {
+  text-transform: uppercase;
+}
+  </style>
+{% endblock css%}
+
+{%block content%}
+{%include 'vote/header.html'%}
+<div class="container Enter_the_Floor">
+
+  <div class="row">
+    <div class="col">
+        {%if form.errors%}
+          {% for error in form.errors%}
+          {% if error == 'username' %}
+          <div class="alert alert-danger" role="alert">
+              Your username is not availible 
+            </div>
+            {%endif%}
+          {%endfor%}
+        {%endif%}
+
+    </div>
+  </div>
+  <form class="form-horizontal form-label-left mx-auto" method="POST">
+    {% csrf_token %}
+      <div class="row d-flex justify-content-center">
+        <div class="col col-sm-12 col-md-6" id="big-font">
+          {{form.username}}
+
+          <label for="{{ form.district.id_for_label }}">{{form.district.label}}:</label>
+          {{ form.district }}
+          <span class="error text-danger hide" ></span>
+          {% for error in form.district.errors %}
+          <span class="error text-danger">
+              <strong>{{ error|escape }}</strong>
+          </span>
+          {%endfor%}<br> <br>
+      
+          <label for="{{ form.name.id_for_label }}">{{form.legalName.label}}:</label>
+          {{ form.legalName }}
+          {% for error in form.LegalName.errors %}
+          <span class="error text-danger">  
+              <strong>{{ error|escape }}</strong>
+          </span>
+          {%endfor%}<br> <br>
+
+          <label for="{{ form.registered.id_for_label }}">Registration Status:</label>
+          <div class="form-check">
+            <input class="form-check-input" checked type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+            <label class="form-check-label" for="flexRadioDefault1">
+              I am legally registered to vote in this US congressional district.
+            </label>
+          </div>
+          {% for error in form.is_reg.errors %}
+          <span class="error text-danger">
+              <strong>{{ error|escape }}</strong>
+          </span>
+          {%endfor%}
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2">
+            <label class="form-check-label" for="flexRadioDefault2">
+              I believe i am eligible to vote in this district under the name and address i will provide below and i intend to register as a voter within 30 days.
+            </label>
+          </div>
+          {% for error in form.is_reg1.errors %}
+          <span class="error text-danger">
+              <strong>{{ error|escape }}</strong>
+          </span>
+          {%endfor%}<br>
+          
+          <label for="{{ form.email.id_for_label }}">Email:</label>
+          {{form.email}}
+          <span class="error text-danger hide" ></span>
+          {% for error in form.email.errors %}
+          <span class="error text-danger">
+              <strong>{{ error|escape }}</strong>
+          </span>
+          {%endfor%}<br> <br>
+
+          <label for="{{ form.address.id_for_label }}">Address:</label>
+          {{form.address}}
+          
+          {% for error in form.address.errors %}
+          <span class="error text-danger">
+              <strong>{{ error|escape }}</strong>
+          </span>
+          {%endfor%}<br> <br>
+        
+          <label for="{{ form.password1.id_for_label }}">Password:</label>
+          <div class="input-group">
+            <input type="password" name="password1" 
+            class="form-control" id="id_password" 
+            style="padding: 5px 10px;" placeholder="ENTER YOUR PASSWORD"
+            aria-describedby="basic-addon">
+            <span class="input-group-text" id="basic-addon2">Show</span>
+          </div>
+          
+          <span>Please enter a password with following guidelines: </span>
+          <ul>
+            <li>least 8 characters long</li>
+            <li>includes number</li>
+            <li>inlcudes upper and lower case</li>
+          </ul>
+          <span class="btn btn-primary" id="generatePassoword">Generate a password</span>
+          <br>
+          {% for error in form.password1.errors %}
+          <span class="error text-danger">
+              <strong>{{ error|escape }}</strong>
+          </span>
+          {%endfor%}<br>
+
+          <label for="{{ form.confirmation.id_for_label }}">{{form.password2.label}}:</label>
+          {{ form.password2 }}
+          
+          {% for error in form.password2.errors %}
+          <span class="error text-danger">
+              <strong>{{ error|escape }}</strong>
+          </span>
+          {%endfor%}<br>
+
+          <input type="submit" name="submit" value="Create my account" class="btn-xl btn-primary btn-wrap-text" data-disable-with="Create my account" />
+
+        </div>
+      </div> 
+  </form>  
+</div>
+
+{%include "vote/footer.html" %}
+{%endblock content%}
+
+   
+{%block js%}
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="{% static 'signUpScript.js' %}"></script>
+{%endblock js%}
+

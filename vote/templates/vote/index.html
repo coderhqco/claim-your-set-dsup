@@ -1,13 +1,53 @@
-{%extends 'vote/base.html' %}
+{%extends 'vote/base.html'%}
 {% load static %}
 
-{%block css%}
-{%endblock css%}
-
 {%block content%}
-<h1>this is the index</h1>
+
+{%include 'vote/header.html' %}
+
+<div class="container">
+  <div class="row">
+    {% if messages %}
+        {% for message in messages %}
+         <div class="alert alert-success" role="alert">{{message}}</div>
+        {% endfor %}
+    {% endif %}
+  </div>
+  <div class="row mt-5">
+
+    <div class="col col-sm-12 col-md-8 col-lg-8">
+      <div class="text-center ">
+        <h1 class="m-4">Welcome to the Democracy Straight-Up Project!</h1>
+        <div class="text-center">
+          <h2 class="text-secondary m-4"> Vote directly on federal legislation. </h2>
+            <div class="row">
+              {%if user.is_autunticated %}
+              {%else%}
+              <div class="col col-sm-12 col-md-6 col-lg-6">
+                <a class="btn btn-lg btn-primary m-3 text-decoration-none" href="{%url 'ClainYouSeat'%}">Claim Your Seat</a> 
+              </div>
+              <div class="col col-sm-12 col-md-6 col-lg-6">
+                <a class="btn btn-lg btn-primary m-3 text-decoration-none" href="{% url 'EnterTheFloor' %}">Enter the Floor</a>
+              </div>
+              {%endif%}
+            </div>
+        </div>
+      </div>
+    </div>
+    <div class="col col-sm-12 col-md-4 col-lg-4 mt-5">
+      <div class="container text-center ">
+        <a href="https://rubyonrails.org/" class="mx-auto">
+          <img src="{% static 'image/hello.jpg' %}"  class="mx-auto"
+          alt="Head shot of chimpanzee stroking his chin as if mulling over a particularly tricky thought"  />
+        </a>
+      </div>
+    </div>
+  </div>  
+</div>
+
+{%include 'vote/footer.html'%}
+
 {%endblock content%}
 
-{%block js%}
 
-{%endblock js%}
+

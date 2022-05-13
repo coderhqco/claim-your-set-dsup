@@ -23,22 +23,15 @@ class Districts(models.Model):
 class Users(models.Model):
     # the username is districtCode + 5-digit entry code
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-
+    legalName = models.CharField(max_length=60,null=True,blank=True)
     district = models.ForeignKey(Districts, on_delete=models.DO_NOTHING, null=True, blank=True)
-    
     # i am registered to vote in this district
     is_reg = models.BooleanField(default=False)
-
     # this is for if the user is registered with conditional. 
     verificationScore = models.SmallIntegerField(default=0,null=True, blank=True)
-
     address = models.CharField(max_length=150, null=True, blank=True)
-
     # userType is the from 0 to 5. 
     userType = models.PositiveSmallIntegerField(default=0)
-
-    createdDate = models.DateTimeField(auto_now=True)
-    
     voterID = models.IntegerField(null=True, blank=True)
 
     def __str__(self) -> str:
