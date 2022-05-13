@@ -52,7 +52,11 @@ def ClainYourSeat(request):
             usersDistrict = voteModels.Districts.objects.get(code = form.cleaned_data.get('district').upper())
             if usersDistrict:
                 user.users.district = usersDistrict
-                
+            
+            # set the is_reg true of the user is going to vote within 30 days
+            if request.POST.get('is_reg1'):
+                user.users.is_reg = True
+
             user.save()
             messages.success(
                 request,

@@ -50,8 +50,26 @@ class ClaimYourSeatForm(UserCreationForm):
         )
     )
 
-    is_reg = forms.BooleanField(required=False)
-    is_reg1 = forms.BooleanField(required=False)
+    is_reg  = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(
+            attrs={
+                'class': 'form-check-input', 
+                'type':'radio',
+                'id':'is_reg'
+            }
+        )
+    )
+    is_reg1 = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(
+            attrs={
+                'class': 'form-check-input', 
+                'type':'radio',
+                'id':'is_reg1'
+            }
+        )
+    )
 
     email = forms.EmailField(
         validators = [validate_email],

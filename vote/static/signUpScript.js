@@ -101,8 +101,8 @@ function generatePassword() {
   return retVal;
 }
 
-// toggle the show passoword
 
+// toggle the show passoword in claimYourSeat form page
 let show = document.getElementById('basic-addon2')
 show.style.cursor = "pointer";
 show.addEventListener('click', function(event){
@@ -115,3 +115,12 @@ show.addEventListener('click', function(event){
     event.target.innerHTML = 'Show';
   }
 })
+
+
+// check and uncheck radio button of is_rag and is_reg1 in claimyourseat page form
+$("#is_reg").click(function () {
+    $("input:radio[name=is_reg1]")[0].checked = false;
+});
+$("#is_reg1").click(function () {
+    $("input:radio[name=is_reg]")[0].checked = false;
+});
