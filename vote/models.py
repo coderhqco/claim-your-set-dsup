@@ -3,6 +3,7 @@ from pyexpat import model
 from turtle import update
 from django.db import models
 from django.contrib.auth.models import User
+
 # District model (table) is for listing of all US districts 
 class Districts(models.Model):
     name = models.CharField(max_length=60, null=True, blank=True)
