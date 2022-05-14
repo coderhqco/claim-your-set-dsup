@@ -1,12 +1,9 @@
-from dataclasses import fields
-from logging import PlaceHolder
-from operator import truediv
 from django.contrib.auth.models import User
 from django import forms
 from django.contrib.auth.forms import UsernameField, UserCreationForm
 from vote import models as voteModels
 from django.core.exceptions import ValidationError
-from django.contrib.auth.validators import ASCIIUsernameValidator
+
 # to over come the dublicate emails. (to be unique)
 def validate_email(value):
     if User.objects.filter(email = value).exists():

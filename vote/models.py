@@ -1,6 +1,3 @@
-from operator import mod, truediv
-from pyexpat import model
-from turtle import update
 from django.db import models
 from django.contrib.auth.models import User
 
