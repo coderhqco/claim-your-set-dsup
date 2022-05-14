@@ -103,7 +103,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
+DISABLE_COLLECTSTATIC=1
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
