@@ -5,10 +5,11 @@
 
 {%include 'vote/header.html' %}
 
-<h1>this is the pod page</h1>
-{{object}} <br>
-{{object.created_at}}
+<h1>this is the pod page (House Keeping). IN PROGRESS....</h1>
 
+POD: {{object}} <br>
+Date Created: {{object.created_at}}
+ <br>
 <p>members:</p>
 <ul>
     {%for member in object.podmember_set.all%}
