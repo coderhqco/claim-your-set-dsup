@@ -1,0 +1,26 @@
+{%extends 'vote/base.html'%}
+{% load static %}
+
+{%block content%}
+
+{%include 'vote/header.html' %}
+
+<h1>this is the pod page</h1>
+{{object}} <br>
+{{object.created_at}}
+
+<p>members:</p>
+<ul>
+    {%for member in object.podmember_set.all%}
+    <li>
+        user: {{member}}| member: {{member.is_member}} | is_delegate: {{member.is_delegate}} 
+    </li>
+    {%endfor%}
+</ul>
+
+{%include 'vote/footer.html'%}
+
+{%endblock content%}
+
+
+

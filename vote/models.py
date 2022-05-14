@@ -39,14 +39,13 @@ class Users(models.Model):
         return self.user.username
     
 
-
 class Pod(models.Model):
-    code = models.SmallIntegerField(max_length=5)
+    code = models.CharField(max_length=5, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return super().self.code
+        return str(self.code)
 
     def is_active(self):
         # check if the member is between 6 to 12 and return true
@@ -64,9 +63,9 @@ class PodMember(models.Model):
     date_joined = models.DateTimeField(auto_now_add=True)
     date_left = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
-    is_members = models.BooleanField(default=False)
+    is_member = models.BooleanField(default=False)
     is_delegate = models.BooleanField(default=False)
 
     def __str__(self) -> str:
-        return super().str(self.user + self.pod)
+        return self.user.username
     

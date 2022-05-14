@@ -1,10 +1,9 @@
 from django.shortcuts import render, HttpResponse, redirect
-from django.views.generic import TemplateView, ListView, DetailView,CreateView, FormView
+from django.views.generic import DetailView
 from vote import models as voteModels
 from vote import forms as voteForms
 from django.contrib.auth.models import User
 from django.contrib import messages
-
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes,force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -13,10 +12,7 @@ from django.core.mail import EmailMessage
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import authenticate, login,logout
 from django.contrib.auth.decorators import login_required
-from django.contrib import auth
 
-from django.contrib.auth.hashers import check_password
-from hashlib import sha1
 
 def entry_code_generator():
     """
@@ -131,12 +127,55 @@ def EnterTheFloor(request):
   return render(request,"vote/EnterTheFloor.html")
 
 def userLogout(request):
-  auth.logout(request)
+  logout(request)
   return redirect('/')
 
 @login_required(login_url = 'EnterTheFloor')
-def houseKeeping(request):
+def voterPage(request):
     if request.user.is_authenticated:
         return render(request, 'vote/VoterPage.html')  
     return redirect('EntertheFloor')  
     
+
+
+class HouseKeepingPod(DetailView):
+    model = voteModels.Pod
+    template_name = 'vote/HouseKeeping.html'
+
+
+def pod_code_generator():
+    """
+    this is the pod code generator. 
+    It uses random and checks for the database. 
+    return the code if it's not taken
+    """
+    import random
+    code  = str(random.choice('abcdefghijklmnpqrstuvwxyz'))
+    code += str(random.randint(1,9))
+    code += str(random.choice('abcdefghijklmnpqrstuvwxyz'))
+    code += str(random.randint(1,9))
+    code += str(random.choice('abcdefghijklmnpqrstuvwxyz'))
+    code = code.upper()
+    is_exist = voteModels.Pod.objects.filter(code = code).exists()
+    
+    if is_exist:
+        pod_code_generator()
+    return code
+
+@login_required(login_url='EnterTheFloor')
+def CreatePod(request):
+    # check the request.user if the user can create a pod
+    # check if the user has not being a member of any kind. 
+    
+    # create a pod
+    pod = voteModels.Pod.objects.create(code = pod_code_generator())
+    pod.save()
+
+    # add the user to pod member as delegate
+    pod_member_obj = voteModels.PodMember.objects.create(
+        user = request.user, 
+        pod = pod, 
+        is_delegate = True,
+        is_member = True
+    ) 
+    return redirect('pod', pk = pod.pk)
