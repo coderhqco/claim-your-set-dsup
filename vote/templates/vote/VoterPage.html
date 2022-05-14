@@ -19,13 +19,24 @@ tbody{
 {% block content%}
 {%include 'vote/header.html' %}
 <div class="container">
+    <div class="row">
+        <div class="col">
+            <!-- if the user has ir_reg-->
+            {%if user.users.is_reg%}
+            <div class="alert alert-warning">
+                <p>you have got 30 days from {{user.date_joined|date:"M d Y"}} to vote. You can not join a POD either.</p>
+            </div>
+            {%endif%}
+        </div>
+    </div>
 
     <div class="row mt-3">
         <div class="col-sm-12 col-md-12 col-lg-12">
-            <h1 class="text-center">Voter Page for {{request.user.name}}</h1>
+            <h1 class="text-center">Voter Page for {{user.users.legalName}}</h1>
+            <h3 class="text-center">your verification score: {{user.users.verificationScore}}/7</h3>
         </div>
         <div class="col-sm-12 col-md-12 col-lg-12">
-            <h1 class="text-center"> District: {{obj|upper}}</h1>
+            <h1 class="text-center"> District: {{user.users.district}} </h1>
         </div>
     </div>
 
@@ -35,83 +46,84 @@ tbody{
                 <li><a href="#">List of Delegates</a></li>
                 <li><a href="vote:chatHome">Back-and-Forth</a></li>
                 <li><a href="vote:member_indx">Member Contact Page</a></li>
-                <li><a href="/pod/{{key1}}">Pod Housekeeping Page {{key1}}</a></li>
+                <li><a href="/pod">Pod Housekeeping Page</a></li>
             </ul>
         </div>
-        {% if fpod == request.user.id and value > 0 %}
-        <div class="col-sm-12 col-md-8 col-lg-8 ">
-            <div class="row">
-                <div class="col-sm-12 col-md-6 col-lg-6 ">
-                    <div class="row mb-3 ">
-                        <div class="col-sm-12 col-md-6 col-lg-6 d-flex justify-content-center">
-                            <a class="btn btn-primary m-2" href="pod/{{key1}}">My pod</a>
-                        </div>
-                        <div class=" col-sm-12 col-md-6 col-lg-6 d-flex justify-content-center">
-                            <a class="btn btn-primary m-2" href="fjoin">Join First Link</a>
-                        </div>
-                        <div class=" col-sm-12 col-md-6 col-lg-6 d-flex justify-content-center">
-                            <a class="btn btn-primary m-2" href="fpod">Create First Link</a>
-                        </div>
-                        <div class=" col-sm-12 col-md-6 col-lg-6  d-flex justify-content-center">
-                            <a class="btn btn-primary m-2" href="/home">Back-and-Forth</a>
+        {% if user.users.userType == 2 %}
+            <div class="col-sm-12 col-md-8 col-lg-8 ">
+                <div class="row">
+                    <div class="col-sm-12 col-md-6 col-lg-6 ">
+                        <div class="row mb-3 ">
+                            <div class="col-sm-12 col-md-6 col-lg-6 d-flex justify-content-center">
+                                <a class="btn btn-primary m-2" href="pod/{{key1}}">My pod</a>
+                            </div>
+                            <div class=" col-sm-12 col-md-6 col-lg-6 d-flex justify-content-center">
+                                <a class="btn btn-primary m-2" href="fjoin">Join First Link</a>
+                            </div>
+                            <div class=" col-sm-12 col-md-6 col-lg-6 d-flex justify-content-center">
+                                <a class="btn btn-primary m-2" href="fpod">Create First Link</a>
+                            </div>
+                            <div class=" col-sm-12 col-md-6 col-lg-6  d-flex justify-content-center">
+                                <a class="btn btn-primary m-2" href="/home">Back-and-Forth</a>
+                            </div>
                         </div>
                     </div>
+                    <div class="col-sm-12 col-md-6 col-lg-6 d-flex justify-content-center">
+                        <ul class="a">
+                            <li><a href="#">First Link Meeting Schedule</a></li>
+                            <li><a href="#">Meeting Minutes Log</a></li>
+                            <li><a href="#">Bill Metrics</a></li>
+                            <li><a href="#">Voter Settings</a></li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="col-sm-12 col-md-6 col-lg-6 d-flex justify-content-center">
-                    <ul class="a">
-                        <li><a href="#">First Link Meeting Schedule</a></li>
-                        <li><a href="#">Meeting Minutes Log</a></li>
-                        <li><a href="#">Bill Metrics</a></li>
-                        <li><a href="#">Voter Settings</a></li>
-                    </ul>
+            </div>
+        {% elif user.users.userType == 1 %}
+            <div class="col-sm-12 col-md-4">
+                <div class="btn_section text-center m-2">
+                    <a class="btn btn-primary text-center Creat_pod" href="pod/{{key1}}">My pod</a>
+                </div>
+                
+                <div class="btn_section text-center m-2">
+                    <a class="btn btn-primary text-center Creat_pod" href="/home">Back-and-Forth</a>
+                </div> 
+            </div>
+            <div class="col-sm-12 col-md-4" >
+                <div class="row mb-11">
+                    <div class="col-md-12 d-flex justify-content-center">    
+                        <ul class="a">
+                            <li><a href="#">First  Link Meeting Schedule</a></li>
+                            <li><a href="#">Meeting Minutes Log</a></li>
+                            <li><a href="#">Bill Metrics</a></li>
+                            <li><a href="#">Voting Settings</a></li>
+                        </ul> 
+                    </div>               
                 </div>
             </div>
-        </div>
-        {% elif fkey == 0 %}
-        <div class="col-sm-12 col-md-4 ">
-            <div class="btn_section text-center m-2">
-                <a class="btn btn-primary text-center Creat_pod" href="pod/{{key1}}">My pod</a>
-            </div>
-            
-            <div class="btn_section text-center m-2">
-                <a class="btn btn-primary text-center Creat_pod" href="/home">Back-and-Forth</a>
-            </div> 
-        </div>
-        <div class="col-sm-12 col-md-4 " >
-            <div class="row mb-11">
-                <div class="col-md-12 d-flex justify-content-center">    
-                    <ul class="a">
-                        <li><a href="#">First  Link Meeting Schedule</a></li>
-                        <li><a href="#">Meeting Minutes Log</a></li>
-                        <li><a href="#">Bill Metrics</a></li>
-                        <li><a href="#">Voting Settings</a></li>
-                    </ul> 
-                </div>               
-            </div>
-        </div>
         {%else%}
-        <div class=" col-sm-12 col-md-8">
-            <div class="row">
-                <div class="col-sm-12 col-md-6 ">
-                  <div class="row">
-                      <div class=" col-sm-12 d-flex justify-content-center">
-                        <a class="btn  btn-primary m-2" href="join">Join a Pod</a>
-                      </div>
-                      <div class="col-sm-12 d-flex justify-content-center">
-                        <a class="btn  btn-primary m-2" href="pod">Create a Pod</a>
-                      </div>
-                  </div>
-                </div>
-                <div class=" col-sm-12 col-md-6 d-flex justify-content-center">
-                    <ul class="a">
-                        <li><a href="#">First  Link Meeting Schedule</a></li>
-                        <li><a href="#">Meeting Minutes Log</a></li>
-                        <li><a href="#">Bill Metrics</a></li>
-                        <li><a href="#">Voting Settings</a></li>
-                    </ul>  
+            <div class=" col-sm-12 col-md-8">
+                <div class="row">
+                    <div class="col-sm-12 col-md-6 ">
+
+                    <div class="row">
+                        <div class=" col-sm-12 d-flex justify-content-center">
+                            <a class="btn  btn-primary m-2" href="join">Join a Pod</a>
+                        </div>
+                        <div class="col-sm-12 d-flex justify-content-center">
+                            <a class="btn  btn-primary m-2" href="pod">Create a Pod</a>
+                        </div>
+                    </div>
+                    </div>
+                    <div class=" col-sm-12 col-md-6 d-flex justify-content-center">
+                        <ul class="a">
+                            <li><a href="#">First  Link Meeting Schedule</a></li>
+                            <li><a href="#">Meeting Minutes Log</a></li>
+                            <li><a href="#">Bill Metrics</a></li>
+                            <li><a href="#">Voting Settings</a></li>
+                        </ul>  
+                    </div>
                 </div>
             </div>
-        </div>
         {% endif %}
     </div>
 </div>

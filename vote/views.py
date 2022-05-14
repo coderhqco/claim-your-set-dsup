@@ -118,26 +118,25 @@ def EnterTheFloor(request):
     if authedUser is not None:
 
         # authenticate if has the same district code
-        if authedUser.users.district.code == district:
-            print("user is corrent")
-            print("auth user district: ", authedUser.users.district.code)
-            print("district: ", district)
-        else:
-            print("incorrent")
-            print("auth user district: ", authedUser.users.district.code)
-            print("district: ", district)
+        if authedUser.users.district.code != district:
             messages.error(request, 'Invalid Credential. Check if you have entered the right district code.')
             return redirect('EnterTheFloor')
 
         login(request,authedUser)
-        return redirect('houseKeeping')
+        return redirect('voterPage')
     else:
       messages.error(request,"Invalid Credential")
       return redirect('EnterTheFloor')
           
   return render(request,"vote/EnterTheFloor.html")
 
-
 def userLogout(request):
   auth.logout(request)
   return redirect('/')
+
+@login_required(login_url = 'EnterTheFloor')
+def houseKeeping(request):
+    if request.user.is_authenticated:
+        return render(request, 'vote/VoterPage.html')  
+    return redirect('EntertheFloor')  
+    

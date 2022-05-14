@@ -1,5 +1,6 @@
 from operator import mod, truediv
 from pyexpat import model
+from turtle import update
 from django.db import models
 from django.contrib.auth.models import User
 # District model (table) is for listing of all US districts 
@@ -38,3 +39,34 @@ class Users(models.Model):
         return self.user.username
     
 
+
+class Pod(models.Model):
+    code = models.SmallIntegerField(max_length=5)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return super().self.code
+
+    def is_active(self):
+        # check if the member is between 6 to 12 and return true
+        pass
+
+class PodMember(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    pod = models.ForeignKey(Pod, on_delete=models.CASCADE)
+    
+    # votes for others
+    vote_to = models.PositiveSmallIntegerField(default=0)
+
+    # being voted. all the votes user get
+    voted = models.PositiveSmallIntegerField(default=0)
+    date_joined = models.DateTimeField(auto_now_add=True)
+    date_left = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+    is_members = models.BooleanField(default=False)
+    is_delegate = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        return super().str(self.user + self.pod)
+    

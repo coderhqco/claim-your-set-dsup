@@ -9,7 +9,6 @@ urlpatterns = [
     path('activate/<uidb64>/<token>/',voteViews.activate, name='activate'),
     path('logout',voteViews.userLogout, name='logout'),
 
-
-    path('home',TemplateView.as_view(template_name="vote/houseKeeping.html"), name='houseKeeping'),
-
+    # the home page of user
+    path('home',voteViews.houseKeeping, name='voterPage'),
 ]
