@@ -13,6 +13,10 @@ from django.core.mail import EmailMessage
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import authenticate, login,logout
 from django.contrib.auth.decorators import login_required
+from django.contrib import auth
+
+from django.contrib.auth.hashers import check_password
+from hashlib import sha1
 
 def entry_code_generator():
     """
@@ -34,7 +38,7 @@ def entry_code_generator():
     return code
 
 
-def ClainYourSeat(request):
+def ClaimYourSeat(request):
     """this is the user creation function. It create a user and assign entry code and relevent info"""
     form = voteForms.ClaimYourSeatForm()
     if request.method == 'POST':
@@ -85,22 +89,43 @@ def ClainYourSeat(request):
 
 
 def activate(request, uidb64, token):
+    """after the claiming your seat, this function handles the activation of user via email"""
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         users = User.objects.get(id=uid)
     except(TypeError, ValueError, OverflowError, User.DoesNotExist):
         users = None
     if users is not None and account_activation_token.check_token(users, token):
-        users.is_active = User.objects.filter(id=uid).update(is_active=True)
+        users.is_active = User.objects.filter(id=uid).update(is_active=True, is_staff= True)
         login(request, users)
         messages.success(request,"Successfully Registered and Activated.")
-        return render(request, 'vote/index.html')
+        return render(request, 'vote/activationConfirmation.html',{'entry_code':users.username})
     else:
         return HttpResponse('Activation link is invalid!')
 
         
-class EnterTheFloor(CreateView):
-    model = voteModels.Users
-    fields = ['district']
-    template_name = 'vote/EnterTheFloor.html'
+def EnterTheFloor(request):
+  """
+  this is the login function. it asks for a POST request 
+  and looks for districts code, entry_code and password.
+  """
+  if request.method == "POST":
+    district = request.POST.get('district')
+    userName = request.POST.get('userName').upper()
+    upass = request.POST.get('password')
+    authedUser = authenticate(request,  username=userName, password=upass)
+    print("loged user: ", authedUser)
 
+    if authedUser is not None:
+        login(request,authedUser)
+        return redirect('home')
+    else:
+      messages.error(request,"Invalid Credential")
+      return redirect('EnterTheFloor')
+          
+  return render(request,"vote/EnterTheFloor.html")
+
+
+def userLogout(request):
+  auth.logout(request)
+  return redirect('/')

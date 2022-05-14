@@ -30,6 +30,22 @@
 
     </div>
   </div>
+  <div class="center If_already">
+    <h1 class="pad">Enter the Floor</h1>
+      <p class="claimed"> If you've already claimed your seat,<br>
+        you can enter the floor of your District Legislature (D-Leg).
+        <br>
+      </p>
+      <a class=" btn btn-xl btn-primary" href="{%url 'EnterTheFloor' %}">Enter the Floor</a>
+      <p class="claimed mt-3">Otherwise...</p>
+      <h1 class="pad">Claim Your Seat</h1>
+      <p class="claimed">Fill out the form below. <br>
+        <strong>NOTE:</strong> Enter your district as your two-letter state postal code <br> 
+        followed by a two-digit number. For instance, <br>
+        the third district in Alabama would be AL03.
+      </p>
+  </div>
+
   <form class="form-horizontal form-label-left mx-auto" method="POST">
     {% csrf_token %}
       <div class="row d-flex justify-content-center">

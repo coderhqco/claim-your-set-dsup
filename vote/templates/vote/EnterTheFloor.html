@@ -1,12 +1,90 @@
-{%extends 'vote/base.html'%}
-{%load static%}
+{% extends 'vote/base.html'%}
+{% load static %}
 
-{%block content%}
+{% block css%}
+{% endblock css%}
+
+{% block content%}
 {% include 'vote/header.html' %}
+<div class="container">
+  <!-- the info text area -->
+  <h1 class="text-center mt-5">Enter The Floor</h1>
+  <div class="row text-center ">
+    <div class="col col-sm-12 ">
+      <p >If you haven't done so already, to Enter the Floor, you must first</p>  
+      <a class="btn btn-primary mb-3" href="{% url 'ClaimYourSeat' %}">Claim Your Seat</a>
+      <p >If you've already Claimed Your Seat, Enter the Floor:</p>
+    </div>
+    
+  </div>
 
-<h1>this is the Enter the floor page.</h1>
-<h2>this is basiscally the login page</h2>
+  <!-- the form login area -->
+  <div class="row">
+    <div class="col-sm-12 col-md-3 col-lg-4" ></div>
+    <div class="col col-sm-12 col-md-6 col-lg-4">
+      <form class="form " method="POST" novalidate>
+        {% csrf_token %}
+        <label for="">District - Entry Code</label>
+        <div class="row">
+
+          <div class="col">
+            <input class="form-control" maxlength="4"  placeholder="District" type="text" name="district" id="district" style="text-transform:uppercase" />
+            <span class="error text-danger hide" ></span>
+            <span style="position: absolute; top: 15px; right: -2px;">-</span>
+          </div>
+
+          <div class="col">
+            <input class="form-control" maxlength="5" placeholder="Entry code" type="text" name="userName" id="username" style="text-transform:uppercase" />
+          </div>
+        </div>
+        <br>
+
+        <label for="session_password">Password</label>
+        <input class="form-control" type="password" name="password" id="password" />
+        
+
+        <div class="form-check">
+          <label class="checkbox inline" for="session_remember_me">
+            <input name="session[remember_me]" type="hidden" value="0" />
+            <input class="form-check-input" type="checkbox" value="1" name="session[remember_me]" id="session_remember_me" />
+             &nbsp&nbsp&nbsp<span>Remember me on this computer</span>
+          </label>  
+        </div>
+
+        <br><br>
+
+        <input type="submit" name="commit" value="Enter the Floor" class="btn-xl btn-primary" data-disable-with="Enter the Floor" />
+      </form>  
+    </div>
+    <div class="col-sm-12 col-md-3 col-lg-4"></div>
+  </div>
+  
+  <!-- the messages area -->
+  <div class="row">
+    <div class="col-sm-12 col-md-3 col-lg-4"></div>
+    <div class="col-sm-12 col-md-6 col-lg-4">
+      {% if messages%}
+      <ul class="messages">
+          {% for message in messages %}
+          <div class="container-fluid p-0">
+            <div class="alert {%if message.tags == 'error' %} alert-danger {%endif%} text-center" role="alert" >
+              <p>{{ message }} </p> 
+            </div>
+          </div>
+          {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+    <div class="col-sm-12 col-md-3 col-lg-4"></div>
+    
+  </div>
+
+</div>
 
 {%include 'vote/footer.html' %}
+{% endblock content%}
 
-{%endblock content%}
+{% block js%}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="{% static 'signUpScript.js' %}"></script>
+{% endblock js%}
