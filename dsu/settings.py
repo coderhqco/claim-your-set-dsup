@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-psh2t@r(#p1@qb)&po8e=mn$0$i@97y)if3626^udnv87li-56
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.0.115','92.168.141.208','127.0.0.1']
+ALLOWED_HOSTS = ['192.168.0.115','dsup-voting-portal.herokuapp.com','127.0.0.1']
 
 
 # Application definition
