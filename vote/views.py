@@ -110,15 +110,27 @@ def EnterTheFloor(request):
   and looks for districts code, entry_code and password.
   """
   if request.method == "POST":
-    district = request.POST.get('district')
+    district = request.POST.get('district').upper()
     userName = request.POST.get('userName').upper()
     upass = request.POST.get('password')
     authedUser = authenticate(request,  username=userName, password=upass)
-    print("loged user: ", authedUser)
 
     if authedUser is not None:
+
+        # authenticate if has the same district code
+        if authedUser.users.district.code == district:
+            print("user is corrent")
+            print("auth user district: ", authedUser.users.district.code)
+            print("district: ", district)
+        else:
+            print("incorrent")
+            print("auth user district: ", authedUser.users.district.code)
+            print("district: ", district)
+            messages.error(request, 'Invalid Credential. Check if you have entered the right district code.')
+            return redirect('EnterTheFloor')
+
         login(request,authedUser)
-        return redirect('home')
+        return redirect('houseKeeping')
     else:
       messages.error(request,"Invalid Credential")
       return redirect('EnterTheFloor')

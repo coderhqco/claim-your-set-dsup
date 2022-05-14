@@ -1,0 +1,219 @@
+{% extends 'vote/base.html'%}
+{%load static%}
+
+{%block css%}
+<style>
+a{
+    text-decoration: none;
+}
+.a li{
+    list-style: none;
+    margin: 5px 0;
+}
+tbody{
+    border-top: none!important;
+}
+</style>
+{%endblock css%}
+
+{% block content%}
+{%include 'vote/header.html' %}
+<div class="container">
+
+    <div class="row mt-3">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <h1 class="text-center">Voter Page for {{request.user.name}}</h1>
+        </div>
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <h1 class="text-center"> District: {{obj|upper}}</h1>
+        </div>
+    </div>
+
+    <div class="row mb-3 ">
+        <div class="col-sm-12 col-md-4 col-lg-4 d-flex justify-content-center"> 
+            <ul class="a">
+                <li><a href="#">List of Delegates</a></li>
+                <li><a href="vote:chatHome">Back-and-Forth</a></li>
+                <li><a href="vote:member_indx">Member Contact Page</a></li>
+                <li><a href="/pod/{{key1}}">Pod Housekeeping Page {{key1}}</a></li>
+            </ul>
+        </div>
+        {% if fpod == request.user.id and value > 0 %}
+        <div class="col-sm-12 col-md-8 col-lg-8 ">
+            <div class="row">
+                <div class="col-sm-12 col-md-6 col-lg-6 ">
+                    <div class="row mb-3 ">
+                        <div class="col-sm-12 col-md-6 col-lg-6 d-flex justify-content-center">
+                            <a class="btn btn-primary m-2" href="pod/{{key1}}">My pod</a>
+                        </div>
+                        <div class=" col-sm-12 col-md-6 col-lg-6 d-flex justify-content-center">
+                            <a class="btn btn-primary m-2" href="fjoin">Join First Link</a>
+                        </div>
+                        <div class=" col-sm-12 col-md-6 col-lg-6 d-flex justify-content-center">
+                            <a class="btn btn-primary m-2" href="fpod">Create First Link</a>
+                        </div>
+                        <div class=" col-sm-12 col-md-6 col-lg-6  d-flex justify-content-center">
+                            <a class="btn btn-primary m-2" href="/home">Back-and-Forth</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6 col-lg-6 d-flex justify-content-center">
+                    <ul class="a">
+                        <li><a href="#">First Link Meeting Schedule</a></li>
+                        <li><a href="#">Meeting Minutes Log</a></li>
+                        <li><a href="#">Bill Metrics</a></li>
+                        <li><a href="#">Voter Settings</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% elif fkey == 0 %}
+        <div class="col-sm-12 col-md-4 ">
+            <div class="btn_section text-center m-2">
+                <a class="btn btn-primary text-center Creat_pod" href="pod/{{key1}}">My pod</a>
+            </div>
+            
+            <div class="btn_section text-center m-2">
+                <a class="btn btn-primary text-center Creat_pod" href="/home">Back-and-Forth</a>
+            </div> 
+        </div>
+        <div class="col-sm-12 col-md-4 " >
+            <div class="row mb-11">
+                <div class="col-md-12 d-flex justify-content-center">    
+                    <ul class="a">
+                        <li><a href="#">First  Link Meeting Schedule</a></li>
+                        <li><a href="#">Meeting Minutes Log</a></li>
+                        <li><a href="#">Bill Metrics</a></li>
+                        <li><a href="#">Voting Settings</a></li>
+                    </ul> 
+                </div>               
+            </div>
+        </div>
+        {%else%}
+        <div class=" col-sm-12 col-md-8">
+            <div class="row">
+                <div class="col-sm-12 col-md-6 ">
+                  <div class="row">
+                      <div class=" col-sm-12 d-flex justify-content-center">
+                        <a class="btn  btn-primary m-2" href="join">Join a Pod</a>
+                      </div>
+                      <div class="col-sm-12 d-flex justify-content-center">
+                        <a class="btn  btn-primary m-2" href="pod">Create a Pod</a>
+                      </div>
+                  </div>
+                </div>
+                <div class=" col-sm-12 col-md-6 d-flex justify-content-center">
+                    <ul class="a">
+                        <li><a href="#">First  Link Meeting Schedule</a></li>
+                        <li><a href="#">Meeting Minutes Log</a></li>
+                        <li><a href="#">Bill Metrics</a></li>
+                        <li><a href="#">Voting Settings</a></li>
+                    </ul>  
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container">
+    <div class="row text-center" style="overflow: auto; display: block; white-space: nowrap;">
+        <table class="table table-bordered" >
+            <thead>
+                <tr>
+                    <th>Bill Number</th>
+                    <th>Short Title</th>
+                    <th>Sched'd for Vote</th>
+                    <th>Advice</th>
+                    <th>More...</th>
+                    <th>Your Vote</th>
+                    <th>District Tally</th>
+                    <th>Nat'l Tally</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>H.R. 0001</td>
+                    <td>Short Title</td>
+                    <td>Date</td>
+                    <td>Yea</td>
+                    <td><button type="button" class="btn btn_More">More...</button></td>
+                    <td>
+                        <fieldset>
+                            <div class="text-left section_lable_input">
+                                <label for="coding">Yea</label>
+                                <input type="radio"  id="Yea" name="interest" value="coding">
+                            </div>
+                            <div class="text-left section_lable_input">
+                                <label for="coding">Nay</label>
+                                <input type="radio"  id="Nay" name="interest" value="coding">
+                            </div>
+                            <div class="text-left section_lable_input">
+                                <label for="coding">Present</label>
+                                <input type="radio"  id="Prtesent" name="interest" value="coding">
+                            </div>
+                            <div class="text-left section_lable_input">
+                                <label for="coding">Proxy</label>
+                                <input type="radio"  id="Proxy" name="interest" value="coding">
+                            </div>
+                        </fieldset>
+                    </td>
+                    <td>
+                        <div><input id="textInput" class="custom mb-2" size="12"></div>
+                        <div><input id="textInput" class="custom mb-2" size="12"></div>
+                        <div><input id="textInput" class="custom mb-2" size="12"></div>
+                        <div><input id="textInput" class="custom" size="12"></div>
+                    </td>
+                    <td>
+                        <div><input id="textInput" class="custom mb-2" size="12"></div>
+                        <div><input id="textInput" class="custom mb-2" size="12"></div>
+                        <div><input id="textInput" class="custom mb-2" size="12"></div>
+                        <div><input id="textInput" class="custom" size="12"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>H.R 0002</td>
+                    <td>Short Title</td>
+                    <td>Date</td>
+                    <td>Yea</td>
+                    <td><button type="button" class="btn btn_More">More...</button></td>
+                    <td>
+                        <fieldset>
+                            <div class="text-left section_lable_input">
+                                <label for="coding" class="text-left">Yea</label>
+                                <input type="radio" id="Yea" name="interest" value="coding">
+                            </div>
+                            <div class="text-left section_lable_input">
+                                <label for="coding" class="text-left">Nay</label>
+                                <input type="radio" id="Nay" name="interest" value="coding">
+                            </div>
+                            <div class="text-left section_lable_input">
+                                <label for="coding" class="text-left">Present</label>
+                                <input type="radio" id="Prtesent" name="interest" value="coding">
+                            </div>
+                            <div class="text-left section_lable_input">
+                                <label for="coding">Proxy</label>
+                                <input type="radio" id="Proxy" name="interest" value="coding">
+                            </div>
+                        </fieldset>
+                    </td>
+                    <td>
+                        <div><input id="textInput" class="custom mb-2" size="12"></div>
+                        <div><input id="textInput" class="custom mb-2" size="12"></div>
+                        <div><input id="textInput" class="custom mb-2" size="12"></div>
+                        <div><input id="textInput" class="custom" size="12"></div>
+                    </td>
+                    <td>
+                        <div><input id="textInput" class="custom mb-2" size="12"></div>
+                        <div><input id="textInput" class="custom mb-2" size="12"></div>
+                        <div><input id="textInput" class="custom mb-2" size="12"></div>
+                        <div><input id="textInput" class="custom" size="12"></div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{%endblock content%}
+
