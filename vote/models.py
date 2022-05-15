@@ -46,8 +46,10 @@ class Pod(models.Model):
         return str(self.code)
 
     def is_active(self):
-        # check if the member is between 6 to 12 and return true
-        pass
+        # check if the member <= 12 and return true
+        if self.podmember_set.count() <= 12:
+            return True
+        return False
 
 class PodMember(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -59,7 +61,7 @@ class PodMember(models.Model):
     # being voted. all the votes user get
     voted = models.PositiveSmallIntegerField(default=0)
     date_joined = models.DateTimeField(auto_now_add=True)
-    date_left = models.DateTimeField(auto_now_add=True)
+    date_left = models.DateTimeField(null=True, blank=True)
     date_updated = models.DateTimeField(auto_now=True)
     is_member = models.BooleanField(default=False)
     is_delegate = models.BooleanField(default=False)

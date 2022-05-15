@@ -13,6 +13,7 @@ urlpatterns = [
     path('home',voteViews.voterPage, name='voterPage'),
 
     path('pod-create',voteViews.CreatePod, name='createPod'),
+    path('pod-join',voteViews.joinPod, name='joinPod'),
     path('pod/<int:pk>/', voteViews.HouseKeepingPod.as_view(), name='pod'),
 
 ]

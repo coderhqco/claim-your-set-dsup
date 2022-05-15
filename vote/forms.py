@@ -1,3 +1,4 @@
+from dataclasses import field
 from django.contrib.auth.models import User
 from django import forms
 from django.contrib.auth.forms import UsernameField, UserCreationForm
@@ -104,3 +105,22 @@ class UsersForm(forms.ModelForm):
     
 
 
+
+class JoinPodMemberForm(forms.ModelForm):
+    # is_delegate false, is_member false, user and pod
+    invitationCode = forms.CharField(
+        max_length=5,
+        label='Invitation Code',
+        widget=forms.TextInput(
+            attrs={
+                'placeholder': 'ENTER YOUR POD INVITATION CODE', 
+                'style':'text-transform: uppercase',
+                'autofocus':True
+            }
+        )
+    )
+    
+
+    class Meta:
+        model = voteModels.PodMember
+        fields = ['invitationCode']

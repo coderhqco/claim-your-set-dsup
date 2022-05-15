@@ -1,0 +1,46 @@
+{% extends 'vote/base.html'%}
+{%load static%}
+
+{%block css%}
+{% endblock css%}
+
+
+{% block content%}
+{%include 'vote/header.html' %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12 col-md-3"></div>
+        <div class="col-sm-12 col-md-6">
+
+            <p> this is the joining to a pod page.</p>
+            <p>this is under construction now.</p>
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-danger" role="alert"> {{message}}</div>
+                {% endfor %}
+            {% endif %}
+
+            {%if form.errors%}
+                {% for error in form.errors%}
+                    <div class="alert alert-danger" role="alert"> {{error}} </div>
+                {%endfor%}
+            {%endif%}
+
+            <form method="post"> {% csrf_token %}
+                <input type="hidden" name="user" value="{{user.pk}}">
+                    {{form}}
+                <button class="btn btn-success mt-2"> join Now</button>
+            </form>
+
+        </div>
+        <div class="col-sm-12 col-md-3"></div>
+    </div>
+</div>
+
+{% endblock content%}
+
+
+{% block js%}
+
+{% endblock js%}

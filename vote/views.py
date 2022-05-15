@@ -1,3 +1,4 @@
+from optparse import Values
 from django.shortcuts import render, HttpResponse, redirect
 from django.views.generic import DetailView
 from vote import models as voteModels
@@ -12,7 +13,7 @@ from django.core.mail import EmailMessage
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import authenticate, login,logout
 from django.contrib.auth.decorators import login_required
-
+from django.shortcuts import get_list_or_404, get_object_or_404
 
 def entry_code_generator():
     """
@@ -132,15 +133,29 @@ def userLogout(request):
 
 @login_required(login_url = 'EnterTheFloor')
 def voterPage(request):
-    if request.user.is_authenticated:
-        return render(request, 'vote/VoterPage.html')  
-    return redirect('EntertheFloor')  
+    podMember = False
+
+    # get the user if he/she is a member of a pod
+    if request.user.users.userType ==1:
+        podMember = voteModels.PodMember.objects.get(user = request.user)
+        
+    data={
+        'pod': podMember,
+        'title': 'Voter Page',
+    }
+    return render(request, 'vote/VoterPage.html',data)   
     
 
 
+# this the home page of a pod
 class HouseKeepingPod(DetailView):
     model = voteModels.Pod
     template_name = 'vote/HouseKeeping.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = "House Keeping Page"
+        return context
 
 
 def pod_code_generator():
@@ -171,11 +186,74 @@ def CreatePod(request):
     pod = voteModels.Pod.objects.create(code = pod_code_generator())
     pod.save()
 
+    # set the userType attribute of the creator to 1
+    user = request.user
+    user.users.userType +=1
+    user.save()
+
     # add the user to pod member as delegate
     pod_member_obj = voteModels.PodMember.objects.create(
         user = request.user, 
         pod = pod, 
         is_delegate = True,
         is_member = True
-    ) 
+    )
+    pod_member_obj.save()
+
     return redirect('pod', pk = pod.pk)
+
+
+def pod_joining_validation(user,pod):
+    """
+    this function validate weather a user can enter a pod.
+    It check if pod is active.
+    It check if user is already a member
+    It check if userType is 0
+    """
+    result = True
+    if not pod.is_active():
+        result = False
+
+    podmembers = pod.podmember_set.all()
+    if podmembers.filter(user = user):
+        result = False
+    
+    if user.users.userType > 0:
+        result = False
+        
+    return result
+
+
+@login_required(login_url='EnterTheFloor')
+def joinPod(request):
+    form = voteForms.JoinPodMemberForm()
+    if request.method =="POST":
+        form = voteForms.JoinPodMemberForm(request.POST or None)
+        if form.is_valid():
+            invitationCode = form.cleaned_data.get('invitationCode').upper()
+            # check if pod exist
+            pods = voteModels.Pod.objects.filter(code = invitationCode)
+            if pods.exists():
+                # check if user can join the pod
+                if pod_joining_validation(request.user, pods.first()):
+                    podMember = voteModels.PodMember.objects.create(
+                        user = request.user,
+                        pod = pods.first(),
+                        is_member = False,
+                        is_delegate = False,
+                    )
+                    podMember.save()
+                    return redirect('pod', pk = pods.first().pk)
+                else:
+                    # else of pod is active 
+                    messages.error(request, 'Pod is not accepting member anymore')
+                    return redirect('joinPod')
+            else:
+                # else of pod_obj
+                messages.error(request, 'there is not pod with this code.')
+                return redirect('joinPod')
+        else:  
+            # else of form is_valid
+            return render(request,'vote/joinPod.html', {'form':form})
+
+    return render(request,'vote/joinPod.html', {'form':form})
