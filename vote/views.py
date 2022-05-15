@@ -1,4 +1,3 @@
-from optparse import Values
 from django.shortcuts import render, HttpResponse, redirect
 from django.views.generic import DetailView
 from vote import models as voteModels
@@ -13,7 +12,6 @@ from django.core.mail import EmailMessage
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import authenticate, login,logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_list_or_404, get_object_or_404
 
 def entry_code_generator():
     """
@@ -95,7 +93,7 @@ def activate(request, uidb64, token):
     if users is not None and account_activation_token.check_token(users, token):
         users.is_active = User.objects.filter(id=uid).update(is_active=True, is_staff= True)
         login(request, users)
-        messages.success(request,"Successfully Registered and Activated.")
+        # messages.success(request,"Successfully Registered and Activated.")
         return render(request, 'vote/activationConfirmation.html',{'entry_code':users.username})
     else:
         return HttpResponse('Activation link is invalid!')
@@ -220,7 +218,7 @@ def pod_joining_validation(user,pod):
     
     if user.users.userType > 0:
         result = False
-        
+
     return result
 
 

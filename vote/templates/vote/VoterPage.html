@@ -57,7 +57,7 @@ tbody{
             
             <!-- check if userType is 0 that means that he has not yet created or joined a pod -->
             {% if user.users.userType == 0%}
-                <div class="row">
+                <div class="row text-center">
                     <div class="col-sm-12 ">
                         <a class="btn  btn-primary m-2" href="{% url 'joinPod' %}">Join a Pod</a>
                     </div>
@@ -68,7 +68,7 @@ tbody{
             {%elif user.users.userType == 1 %}
                 <!-- check if the user is a member of the pod and is delegate -->
                 {% if pod.is_delegate %}
-                    <div class="row">
+                    <div class="row text-center">
                         <div class="col-sm-12 col-md-6 col-lg-6 ">
                             <a class="btn btn-primary m-2" href="{% url 'pod' pk=pod.pod.pk %}">My pod</a>
                         </div>
@@ -84,7 +84,7 @@ tbody{
                     </div>
                 {%else%}
                     <!-- check if the user is just a member of the pod -->
-                    <div class="row">
+                    <div class="row text-center">
                         <div class=" col-sm-12 col-md-6 col-lg-6 ">
                             <a class="btn btn-primary m-2" href="{% url 'pod' pk=pod.pod.pk %}">My pod</a>
                         </div>
@@ -96,7 +96,7 @@ tbody{
 
             {%endif %}
 
-            
+
         </div>
         <!-- the third col. contains comoon links-->
         <div class="col-sm-12 col-md-6 col-lg-4 d-flex justify-content-center">
