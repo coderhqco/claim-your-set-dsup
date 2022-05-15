@@ -11,10 +11,15 @@
 <div class="container">
     <div class="row">
         <div class="col-sm-12 col-md-3"></div>
-        <div class="col-sm-12 col-md-6">
+        <div class="col-sm-12 col-md-6 mt-3">
+            <h1 class="text-center">Join a Pod</h1>
+            <div class="">
+              <h4 class="text-left">You must have an Invitation Key to join a Pod.</h4>
+              <p class="text-left">The First Delegate of a pod should send you an Invitation Key. This cannot be done via the website.</p>
+              <p class="text-left">Or you can create your own Pod and start inviting others to join it.</p>
+            </div>
 
-            <p> this is the joining to a pod page.</p>
-            <p>this is under construction now.</p>
+
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-danger" role="alert"> {{message}}</div>
@@ -30,7 +35,7 @@
             <form method="post"> {% csrf_token %}
                 <input type="hidden" name="user" value="{{user.pk}}">
                     {{form}}
-                <button class="btn btn-success mt-2"> join Now</button>
+                <button class="btn btn-success mt-2"> join the pod</button>
             </form>
 
         </div>
