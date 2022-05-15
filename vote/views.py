@@ -12,6 +12,7 @@ from django.core.mail import EmailMessage
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import authenticate, login,logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 def entry_code_generator():
     """
@@ -144,9 +145,8 @@ def voterPage(request):
     return render(request, 'vote/VoterPage.html',data)   
     
 
-
 # this the home page of a pod
-class HouseKeepingPod(DetailView):
+class HouseKeepingPod(LoginRequiredMixin,DetailView):
     model = voteModels.Pod
     template_name = 'vote/HouseKeeping.html'
 
@@ -177,9 +177,11 @@ def pod_code_generator():
 
 @login_required(login_url='EnterTheFloor')
 def CreatePod(request):
-    # check the request.user if the user can create a pod
-    # check if the user has not being a member of any kind. 
-    
+    """
+    this function creates a pod. 
+    it set the userType to 1.
+    it set the user as a delegate pod member
+    """
     # create a pod
     pod = voteModels.Pod.objects.create(code = pod_code_generator())
     pod.save()
@@ -241,6 +243,12 @@ def joinPod(request):
                         is_delegate = False,
                     )
                     podMember.save()
+
+                    # set the userType to 1 as joining a pod\
+                    user=request.user
+                    user.users.userType = 1
+                    user.save()
+
                     return redirect('pod', pk = pods.first().pk)
                 else:
                     # else of pod is active 
