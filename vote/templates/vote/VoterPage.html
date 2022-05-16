@@ -23,9 +23,15 @@ tbody{
         <div class="col">
             <!-- if the user has ir_reg-->
             {%if user.users.is_reg%}
-            <div class="alert alert-warning">
-                <p>you have got 30 days from {{user.date_joined|date:"M d Y"}} to vote. 
-                    You can not join a POD either.
+            <div class="alert alert-warning mt-3">
+                <p>
+                    You have [is_reg({{user.date_joined|date:"M d Y"}})] minus [now] to get 
+                    registered to vote in your district or your account will be deleted! Yikes! 
+                    <a href="#"> Learn More</a>. 
+                </p>
+                <p>
+                    But, if you have gotten registered since the last time you entered the floor,
+                    <a href="#"> click here</a>.  
                 </p>
             </div>
             {%endif%}

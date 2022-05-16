@@ -1,3 +1,4 @@
+from urllib import request
 from django.shortcuts import render, HttpResponse, redirect
 from django.views.generic import DetailView
 from vote import models as voteModels
@@ -60,7 +61,8 @@ def ClaimYourSeat(request):
             user.save()
             messages.success(
                 request,
-                "We've sent an email to the address you provided. Open it and click on the link to confirm and Enter the Floor.",
+                ("We've sent an email to the address you provided."
+                "Open it and click on the link to confirm and Enter the Floor."),
                 extra_tags='success' 
             )
 
@@ -94,7 +96,6 @@ def activate(request, uidb64, token):
     if users is not None and account_activation_token.check_token(users, token):
         users.is_active = User.objects.filter(id=uid).update(is_active=True, is_staff= True)
         login(request, users)
-        # messages.success(request,"Successfully Registered and Activated.")
         return render(request, 'vote/activationConfirmation.html',{'entry_code':users.username})
     else:
         return HttpResponse('Activation link is invalid!')
@@ -115,13 +116,17 @@ def EnterTheFloor(request):
 
         # authenticate if has the same district code
         if authedUser.users.district.code != district:
-            messages.error(request, 'Invalid Credential. Check if you have entered the right district code.')
+            messages.error(
+                request, 
+                'Invalid Credential. Check if you have entered the right district code.',
+                extra_tags='danger'
+            )
             return redirect('EnterTheFloor')
 
         login(request,authedUser)
         return redirect('voterPage')
     else:
-      messages.error(request,"Invalid Credential")
+      messages.error(request,"Invalid Credential", extra_tags='danger')
       return redirect('EnterTheFloor')
           
   return render(request,"vote/EnterTheFloor.html")
@@ -150,9 +155,27 @@ class HouseKeepingPod(LoginRequiredMixin,DetailView):
     model = voteModels.Pod
     template_name = 'vote/HouseKeeping.html'
 
+    def post(self,request, *args, **kwargs):
+        pod = voteModels.Pod.objects.get(code = request.POST['pod'])
+        # print("pod",pod )
+        pod.code = pod_code_generator()
+        pod.save()
+        messages.success(request, "The pod key has been updated.", extra_tags="success")
+        return redirect('pod', pk=pod.pk)
+
+        
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = "House Keeping Page"
+        # check if the user is the pod delegate
+        pod = voteModels.Pod.objects.get(pk = self.kwargs['pk'])
+        is_delegate = False
+        for member in pod.podmember_set.all():
+            if member.is_delegate and member.user == self.request.user:
+                is_delegate = True
+        print("user is delegate: ", is_delegate)
+        context['title'] = "DSU - House Keeping Page"
+        context['is_delegate'] = is_delegate
         return context
 
 
@@ -183,7 +206,7 @@ def CreatePod(request):
     it set the user as a delegate pod member
     """
     # create a pod
-    pod = voteModels.Pod.objects.create(code = pod_code_generator())
+    pod = voteModels.Pod.objects.create(code = pod_code_generator(), district = request.user.users.district)
     pod.save()
 
     # set the userType attribute of the creator to 1
@@ -248,15 +271,20 @@ def joinPod(request):
                     user=request.user
                     user.users.userType = 1
                     user.save()
-
+                    messages.success(
+                        request, 
+                        ('you must be voted by the majority of member to become a member.' 
+                        'In case of any question, Please contact the user.'),
+                        extra_tags="success"
+                    )
                     return redirect('pod', pk = pods.first().pk)
                 else:
                     # else of pod is active 
-                    messages.error(request, 'Pod is not accepting member anymore')
+                    messages.error(request, 'Pod is not accepting member anymore', extra_tags='danger')
                     return redirect('joinPod')
             else:
                 # else of pod_obj
-                messages.error(request, 'there is not pod with this code.')
+                messages.error(request, 'there is not pod with this code.',extra_tags='danger')
                 return redirect('joinPod')
         else:  
             # else of form is_valid

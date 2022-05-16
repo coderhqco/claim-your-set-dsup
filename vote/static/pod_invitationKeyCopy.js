@@ -8,12 +8,15 @@
     // copy the invitation key
     let invitation_key = document.getElementById('copy_invitation_key');
     invitation_key.addEventListener('click', function(event){
-      let key = event.target.previousSibling.previousSibling.innerText;
        /* Copy the text inside the text field */
-       copyToClipboard(key)
-          .then(() => document.getElementById('copied').innerHTML = 'copied!')
+    
+       copyToClipboard(event.target.getAttribute('key'))
+          .then(() => {
+              this.innerHTML = 'invitation key coppied!';
+              this.classList.remove("btn-primary");
+              this.classList.add('border')
+            })
           .catch(() => alert('make sure you are using https'));
-
         })
   
         // return a promise

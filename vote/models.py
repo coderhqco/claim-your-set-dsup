@@ -39,6 +39,7 @@ class Users(models.Model):
 
 class Pod(models.Model):
     code = models.CharField(max_length=5, unique=True)
+    district = models.ForeignKey(Districts, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

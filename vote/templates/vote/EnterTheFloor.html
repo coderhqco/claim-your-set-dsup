@@ -67,7 +67,7 @@
       <ul class="messages">
           {% for message in messages %}
           <div class="container-fluid p-0">
-            <div class="alert {%if message.tags == 'error' %} alert-danger {%endif%} text-center" role="alert" >
+            <div class="alert alert-{{message.extra_tags}} text-center" role="alert" >
               <p>{{ message }} </p> 
             </div>
           </div>

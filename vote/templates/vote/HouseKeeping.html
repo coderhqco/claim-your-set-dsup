@@ -4,24 +4,115 @@
 {%block content%}
 
 {%include 'vote/header.html' %}
+<div class="container">
+    <div class="row mt-3">
+        <h1 class="text-center">House Keeping</h1>
+        <h3 class="text-center">POD: {{object.district}}-{{object}} <span></span></h3>
+        {% if is_delegate%}
+        <div class="col text-center m-3">
+            <form action="" method="post"> {%csrf_token%}
+                <input type="hidden" name="pod" value="{{object}}">
+                <button class="btn btn-success mb-2">Generate New Key</button>
+            </form>
+            <button class="btn btn-primary" id="copy_invitation_key" key="{{object.code}}"> copy invitation key</button>
+        </div>
 
-<h1>this is the pod page (House Keeping). IN PROGRESS....</h1>
+        {%else%}
+        
+        <h4 class="text-center">user is the member of this pod</h4>
+        <p class="text-center">a member can see the pod member link</p>
+        
+        {%endif%}
+        {% if messages %}
+            {% for message in messages %}
+            <div class="container">
+                <div class="alert alert-{{message.extra_tags}}" role="alert">{{message}}</div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+<div class="container mt-3">
+    <div class="row" style="overflow: auto; display: block; white-space: nowrap;">
+      <table class="table table-bordered table-sm">
+        <thead>
+          <tr>
+            <th class="text-uppercase">Number</th>
+            <th class="text-uppercase">Member name </th>
+            <th class="text-uppercase">Vote in or Out </th>
+            <th class="text-uppercase">Put Farward as First-Delegate</th>
+            <th class="text-uppercase">Remove member</th>
+          </tr>
+        </thead> 
+        <tbody>
+            {%for member in object.podmember_set.all %}
+            <tr class="">
+                <td>{{forloop.counter}}</td>
+                <td>{{member.user.users.legalName}}</td>
+                <td>
+                    <button class="btn {%if member.user == user %} btn-secondary disabled {%else%} btn-success {%endif%}">IN</button>
+                    <button class="btn {%if member.user == user %} btn-secondary disabled {%else%} btn-danger {%endif%}">OUT</button>
+                </td>
+                <td>
+                    <button class="btn {%if member.user == user %} btn-secondary disabled {%else%} btn-success {%endif%}">PUT FARWARD</button>
+                </td>
+                <td>
+                    {% if member.is_delegate %} First Delegate {%endif%}
+                    {%if member.user != user %}
+                        <button class="btn btn-danger">REMOVE</button>
+                    {%else%}
+                    {%endif%}
+                </td>
+            </tr>
+            {%endfor%}
+        </tbody> 
+        {%comment%}
+        <tbody>   
+          
+          {% for users_list in stat%}    
+        <tr>  
+          {%if forloop.counter < 10%}
+          <td>{{0}}{{forloop.counter}}
+          {%endif%}
+          
+          <td>{{users_list.member.name }}</td>
+          <td class="text-center">
+            {% if  votegive == 0 and users_list.member_status == 0 %}
+              <button type="submit" class="btn btn-sm btn-success vote" name="submit"  value={{users_list.id}}>vote now</button>       
+            {% endif  %}
+          </td>
+          <td>
+            {% if  devote != 0 and  users_list.member_status == 0%}
+            <button type="submit" class="btn vote" name="devote"  value={{users_list.id}}>Remove vote</button>
+            {%endif%}
+          </td>
 
-POD: {{object}} <br>
-Date Created: {{object.created_at}}
- <br>
-<p>members:</p>
-<ul>
-    {%for member in object.podmember_set.all%}
-    <li>
-        user: {{member}}| member: {{member.is_member}} | is_delegate: {{member.is_delegate}} 
-    </li>
-    {%endfor%}
-</ul>
+          <td>
+            {% if  podlen >= 5 and users_list.member_status == 1 and evote == 0 %}
+              <button type="submit" name="elect" value={{users_list.id}}>Election</button>
+            {% endif  %}
+          </td>
+          
+          <td class="text-center">
+            {% if  users_list.member_status == 0 and owner_id == request.user.id %}
+              <button type="submit" class="btn btn-danger btn-sm delete" name="Delete" value={{users_list.id}}>Delete</button>  
+            {% endif  %}
+          </td>    
+          {%endfor%}
+
+        </tbody>
+        {%endcomment%}
+      </table>
+    </div>
+  </div>
+
 
 {%include 'vote/footer.html'%}
 
 {%endblock content%}
 
+{%block js%}
+<script src="{% static 'pod_invitationKeyCopy.js' %}"></script>
+{%endblock js%}
 
 
