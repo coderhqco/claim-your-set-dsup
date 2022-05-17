@@ -16,4 +16,7 @@ urlpatterns = [
     path('pod-join',voteViews.joinPod, name='joinPod'),
     path('pod/<int:pk>/', voteViews.HouseKeepingPod.as_view(), name='pod'),
 
+    path('pod-vote-in', voteViews.podVoteIN, name="pod_vote_in"),
+    path('pod-vote-out', voteViews.podVoteOUT, name="pod_vote_out"),
+    path('pod-remove-member', voteViews.removePodMember, name="removePodMember"),
 ]

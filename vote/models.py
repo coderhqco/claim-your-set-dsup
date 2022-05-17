@@ -56,17 +56,25 @@ class PodMember(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     pod = models.ForeignKey(Pod, on_delete=models.CASCADE)
     
-    # votes for others
-    vote_to = models.PositiveSmallIntegerField(default=0)
-
-    # being voted. all the votes user get
-    voted = models.PositiveSmallIntegerField(default=0)
     date_joined = models.DateTimeField(auto_now_add=True)
     date_left = models.DateTimeField(null=True, blank=True)
     date_updated = models.DateTimeField(auto_now=True)
     is_member = models.BooleanField(default=False)
     is_delegate = models.BooleanField(default=False)
+    member_number = models.PositiveSmallIntegerField(null=True, blank=True)
 
     def __str__(self) -> str:
         return self.user.username
-    
+
+class PodMember_vote_in(models.Model):
+    condidate = models.ForeignKey(PodMember, on_delete=models.CASCADE)
+    voter = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return str(self.voter)
+class PodMember_vote_out(models.Model):
+    condidate = models.ForeignKey(PodMember, on_delete=models.CASCADE)
+    voter = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return str(self.voter)

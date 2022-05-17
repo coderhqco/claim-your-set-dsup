@@ -1,3 +1,5 @@
+from locale import YESEXPR
+from operator import contains
 from urllib import request
 from django.shortcuts import render, HttpResponse, redirect
 from django.views.generic import DetailView
@@ -157,25 +159,55 @@ class HouseKeepingPod(LoginRequiredMixin,DetailView):
 
     def post(self,request, *args, **kwargs):
         pod = voteModels.Pod.objects.get(code = request.POST['pod'])
-        # print("pod",pod )
         pod.code = pod_code_generator()
         pod.save()
         messages.success(request, "The pod key has been updated.", extra_tags="success")
         return redirect('pod', pk=pod.pk)
 
         
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # check if the user is the pod delegate
         pod = voteModels.Pod.objects.get(pk = self.kwargs['pk'])
         is_delegate = False
+        condidate = pod.podmember_set.filter(is_member = False).first()
         for member in pod.podmember_set.all():
             if member.is_delegate and member.user == self.request.user:
                 is_delegate = True
-        print("user is delegate: ", is_delegate)
+
+        voted = False
+        userPod = pod.podmember_set.filter(user = self.request.user)
+        print("userPOD: ", userPod.count())
+        for i in userPod:
+            print("user: ", i.user)
+            print("user pod: ", i.pod)
+            print("vote count: ", i.podmember_vote_in_set.all().count())
+        # for i in userPod:
+        #     print("userPOD: ", i.user)
+        #     print("POD: ", i.pod)
+        #     print("pod vote: ", i.podmember_vote_in_set.count())
+
+        #     for a in i.podmember_vote_in_set.all():
+        #         print("codidate: ", a.condidate)
+        #         print("voter: ", a.voter)
+
+        #     for vote_in in i.podmember_vote_in_set.all():
+        #         if vote_in.voter == self.request.user:
+        #             print("voted in ")
+        #             voted = True
+
+        #     for vote_out in i.podmember_vote_out_set.all():
+        #         if vote_out.voter == self.request.user:
+        #             print("voted out")
+        #             voted = True
+
+            
+        # print("voted: ", userPod.podmember_vote_in_set.all())
+        # for vote in pod.podmember_set
         context['title'] = "DSU - House Keeping Page"
+        context['condidate'] = condidate
         context['is_delegate'] = is_delegate
+        context['voted'] = voted
         return context
 
 
@@ -219,7 +251,8 @@ def CreatePod(request):
         user = request.user, 
         pod = pod, 
         is_delegate = True,
-        is_member = True
+        is_member = True,
+        member_number = 1,
     )
     pod_member_obj.save()
 
@@ -264,17 +297,21 @@ def joinPod(request):
                         pod = pods.first(),
                         is_member = False,
                         is_delegate = False,
+                        member_number = pods.first().podmember_set.count()+1
                     )
                     podMember.save()
 
-                    # set the userType to 1 as joining a pod\
-                    user=request.user
-                    user.users.userType = 1
-                    user.save()
+                    # # set the userType to 1 as joining a pod\
+                    # user=request.user
+                    # user.users.userType = 1
+                    # user.save()
+
                     messages.success(
                         request, 
-                        ('you must be voted by the majority of member to become a member.' 
-                        'In case of any question, Please contact the user.'),
+                        ('In order to become a member of this Pod you need to be'
+                         '‘voted in’ by a majority of the existing members. ' 
+                         'You can wait and see if you are voted in, or you can contact '
+                         'your F-Del IRL and ask them to start a vote among existing members.'),
                         extra_tags="success"
                     )
                     return redirect('pod', pk = pods.first().pk)
@@ -291,3 +328,99 @@ def joinPod(request):
             return render(request,'vote/joinPod.html', {'form':form})
 
     return render(request,'vote/joinPod.html', {'form':form})
+
+
+def majorityVotes(pod, member):
+    pod_members = pod.podmember_set.all()
+    member_vote = member.podmember_vote_in_set.all()
+    print("member vote in: ", member_vote.count())
+    print("pod member: ", pod_members.count())
+    if member_vote.count() >= (pod_members.count()/2):
+        return True
+    print("returned false...")
+    return False
+
+
+# vote members in a pod (IN, OUT)
+@login_required(login_url='EnterTheFloor')
+def podVoteIN(request):
+    if request.method == "POST":
+        """vote the member in to become a member of the pod
+            check if the vote in is 50% + 1 to become the member (majority votes)
+            make sure that members can only vote in/out once"""
+        member = voteModels.PodMember.objects.get(pk = request.POST.get('member'))
+        voteIN = voteModels.PodMember_vote_in.objects.create(condidate = member, voter = request.user)
+        voteIN.save()
+        print("condidate has got a vote in. \nchecking he has the majority to be accpeted into the pod...")
+        # check if he/she has got the majority votes
+        if majorityVotes(member.pod, member):
+            member.is_member = True
+            member.save()
+            print("member has been accepted in the pod")
+            # set the member.user.users.userType to 1 as ih becomes the member in a pod.
+            userType = member.user
+            userType.users.userType = 1
+            userType.save()
+            print("userType have been udpated...",userType.users.userType)
+
+        messages.success(request,'Voted in', extra_tags='success')
+        return redirect('pod', pk = member.pod.pk)
+
+
+# check if the member shall be remove
+def removePodMember(pod, member):
+    # remove when only all the members of a pod vote_in or vote_out
+    pod_members = pod.podmember_set.all().filter(is_member= True)
+
+    vote_INs = member.podmember_vote_in_set.all()
+    vote_OUTs = member.podmember_vote_out_set.all()
+
+    if (vote_INs.count() + vote_OUTs.count()) == pod_members.count():
+        # now that we have all members voted for this member, 
+        # we have to check if the member has the majority of vote out to be removed
+        if vote_OUTs.count() >= pod_members.count()/2:
+            print("he has to be removed")
+            return True
+            
+        print("all members has voted. but the vote outs are not major.")
+    print("not valid to be removed")
+    return False
+
+@login_required(login_url='EnterTheFloor')
+def podVoteOUT(request):
+    if request.method == "POST":
+        """ vote out the member. 
+            check if the vote does not have the majority, he/she has to leave the pod
+            leaving means that that record has to be removed from podmember """
+        member = voteModels.PodMember.objects.get(pk = request.POST.get('member'))
+        voteOUT = voteModels.PodMember_vote_out.objects.create(condidate = member, voter = request.user)
+        voteOUT.save()
+        print("voted out: ", voteOUT)
+
+        if not majorityVotes(member.pod, member):
+            # remove the member
+            if removePodMember(member.pod, member):
+                # now remove the member
+                member.delete()
+                print("due to majority vote out to this member, it has been removed..")
+            
+        messages.success(request,'Voted out', extra_tags='success')
+        return redirect('pod', pk = member.pod.pk)
+
+
+@login_required(login_url= 'EnterTheFloor')
+def removePodMember(request):
+    if request.method == 'POST':
+        member = voteModels.PodMember.objects.get(pk = request.POST.get('member'))
+        member.delete()
+        print("member removed: now set the userType to 0", member)
+        
+        user = member.user
+        user.users.userType = 0
+        user.save()
+        print("userTupe: ",member.user.users.userType)
+        messages.error(request, 'removed...', extra_tags='success')
+        return redirect('pod', pk = member.pod.pk)
+
+    messages.error(request, 'something went wrong.', extra_tags='danger')
+    return redirect('home')

@@ -6,15 +6,17 @@
 {%include 'vote/header.html' %}
 <div class="container">
     <div class="row mt-3">
-        <h1 class="text-center">House Keeping</h1>
-        <h3 class="text-center">POD: {{object.district}}-{{object}} <span></span></h3>
+        <h1 class="text-center">House Keeping Page</h1>
+        <h3 class="text-center">POD: {{object.district}}-{{object}} </h3>
+        <h4 class="text-center">invitation key: {{object}} </h4>
+        <p class="text-center">pod is active: {{object.is_active}}</p>
         {% if is_delegate%}
         <div class="col text-center m-3">
             <form action="" method="post"> {%csrf_token%}
                 <input type="hidden" name="pod" value="{{object}}">
                 <button class="btn btn-success mb-2">Generate New Key</button>
             </form>
-            <button class="btn btn-primary" id="copy_invitation_key" key="{{object.code}}"> copy invitation key</button>
+            <button class="btn btn-primary" id="copy_invitation_key" key="{{object.code}}"> Copy Invitation Key</button>
         </div>
 
         {%else%}
@@ -37,34 +39,99 @@
       <table class="table table-bordered table-sm">
         <thead>
           <tr>
-            <th class="text-uppercase">Number</th>
-            <th class="text-uppercase">Member name </th>
-            <th class="text-uppercase">Vote in or Out </th>
-            <th class="text-uppercase">Put Farward as First-Delegate</th>
-            <th class="text-uppercase">Remove member</th>
+            <th class="text-uppercase ">Number</th>
+            <th class="text-uppercase ">Member </th>
+            <th class="text-uppercase ">in or Out</th>
+            <!-- show the put forward when pod has 6 members at least -->
+            {% if object.podmember_set.count >= 6 %}
+            <th class="text-uppercase ">Put Farward</th>
+            {%endif%}
+            {% if is_delegate %}
+            <th class="text-uppercase ">Action</th>
+            {%endif%}
           </tr>
         </thead> 
         <tbody>
             {%for member in object.podmember_set.all %}
-            <tr class="">
-                <td>{{forloop.counter}}</td>
-                <td>{{member.user.users.legalName}}</td>
-                <td>
-                    <button class="btn {%if member.user == user %} btn-secondary disabled {%else%} btn-success {%endif%}">IN</button>
-                    <button class="btn {%if member.user == user %} btn-secondary disabled {%else%} btn-danger {%endif%}">OUT</button>
-                </td>
-                <td>
-                    <button class="btn {%if member.user == user %} btn-secondary disabled {%else%} btn-success {%endif%}">PUT FARWARD</button>
-                </td>
-                <td>
-                    {% if member.is_delegate %} First Delegate {%endif%}
-                    {%if member.user != user %}
-                        <button class="btn btn-danger">REMOVE</button>
-                    {%else%}
-                    {%endif%}
-                </td>
-            </tr>
+                {%if member.is_member%}
+                    <tr class="">
+                        <td class="">{{member.member_number}} - {{member.is_member}} </td>
+                        <td class="">{{member.user.users.legalName}} 
+                            {% if member.is_delegate %}
+                            <span class="badge bg-success">DELEGATE</span> 
+                            {%endif%}
+                        <td class="">
+                            IN: <span class="badge bg-info text-dark">{{member.podmember_vote_in_set.count}}</span> 
+                            OUT: <span class="badge bg-info text-dark">{{member.podmember_vote_out_set.count}}</span>
+
+                            {%if member.user == user or member.is_delegate %} 
+                            <!-- <button class="mx-1 btn btn-secondary disabled">IN</button>
+                            <button class="btn btn-secondary disabled">OUT</button> -->
+                            {%endif%}
+                        </td>
+
+                        {% if object.podmember_set.count >= 6 %}
+                        <td class="">
+                            <button class="btn {%if member.user == user %} btn-secondary disabled {%else%} btn-success {%endif%}">PUT FARWARD</button>
+                        </td>
+                        {%endif%}
+                        {% if is_delegate%}
+                        <td class="">
+                            {%if member.user != user %}
+                            <form action="{% url 'removePodMember' %}" method="post"> {%csrf_token%}
+                                <input type="hidden" name="pod" value="{{object}}">
+                                <input type="hidden" name="member" value="{{member.pk}}">
+                                <button class="btn btn-danger" type="submit" name="remove">REMOVE</button>
+                            </form>
+                            {%else%}
+                                F-Del 
+                            {%endif%}
+                        
+                        </td>
+                        {%endif %}
+                    </tr>
+                {%endif%}
             {%endfor%}
+            <!-- if there is condidate -->
+            <!-- condidate shall not not itself viewing -->
+            <!-- each user shall vote once.  -->
+            {%if condidate and condidate.user != user %}
+            {% if not voted %}
+            <tr class="">
+                <td class="">{{condidate.member_number}} - {{condidate.is_member}} {{voted}} </td>
+                <td class="">{{condidate.user.users.legalName}} - {{condidate.user.users.userType}} 
+                    {{condidate.podmember_vote_in_set.count}}
+                </td>
+                <td class="">
+                    <form class="float-start mx-1" action="{% url 'pod_vote_in' %}" method="post"> {%csrf_token%}
+                        <input type="hidden" name="pod" value="{{object}}">
+                        <input type="hidden" name="member" value="{{condidate.pk}}">
+                        <button type="submit" name="IN" class="btn btn-success ">IN</button>
+                    </form>
+                    <form class="float-start mx-1 " action="{% url 'pod_vote_out' %}" method="post"> {%csrf_token%}
+                        <input type="hidden" name="pod" value="{{object}}">
+                        <input type="hidden" name="member" value="{{condidate.pk}}">
+                        <button type="submit" name="OUT" class="btn btn-danger">OUT</button>
+                    </form>
+                </td>
+                {% if is_delegate%}
+                <td class="">
+                    {%if condidate.user != user %}
+                    <form action="{% url 'removePodMember' %}" method="post"> {%csrf_token%}
+                        <input type="hidden" name="pod" value="{{object}}">
+                        <input type="hidden" name="member" value="{{condidate.pk}}">
+                        <button class="btn btn-danger" type="submit" name="remove">REMOVE</button>
+                    </form>
+                    {%else%}
+                        F-Del 
+                    {%endif%}
+                
+                </td>
+                {%endif %}
+            </tr>
+            {%endif%}
+            {%endif%}
+
         </tbody> 
         {%comment%}
         <tbody>   
