@@ -175,39 +175,26 @@ class HouseKeepingPod(LoginRequiredMixin,DetailView):
             if member.is_delegate and member.user == self.request.user:
                 is_delegate = True
 
-        voted = False
-        userPod = pod.podmember_set.filter(user = self.request.user)
-        print("userPOD: ", userPod.count())
-        for i in userPod:
-            print("user: ", i.user)
-            print("user pod: ", i.pod)
-            print("vote count: ", i.podmember_vote_in_set.all().count())
-        # for i in userPod:
-        #     print("userPOD: ", i.user)
-        #     print("POD: ", i.pod)
-        #     print("pod vote: ", i.podmember_vote_in_set.count())
+        # check the condidates vote in/out list and if the logged in user is on the list, set current_used_voted to true 
+        current_user_voted = False
+        if condidate:
+            # vote in
+            voteINs= condidate.podmember_vote_in_set.filter(voter = self.request.user)
+            for voter in voteINs:
+                if voter.voter == self.request.user:
+                    current_user_voted = True
 
-        #     for a in i.podmember_vote_in_set.all():
-        #         print("codidate: ", a.condidate)
-        #         print("voter: ", a.voter)
+            # vote out
+            voteINs= condidate.podmember_vote_out_set.filter(voter = self.request.user)
+            for voter in voteINs:
+                if voter.voter == self.request.user:
+                    current_user_voted = True
 
-        #     for vote_in in i.podmember_vote_in_set.all():
-        #         if vote_in.voter == self.request.user:
-        #             print("voted in ")
-        #             voted = True
 
-        #     for vote_out in i.podmember_vote_out_set.all():
-        #         if vote_out.voter == self.request.user:
-        #             print("voted out")
-        #             voted = True
-
-            
-        # print("voted: ", userPod.podmember_vote_in_set.all())
-        # for vote in pod.podmember_set
         context['title'] = "DSU - House Keeping Page"
         context['condidate'] = condidate
         context['is_delegate'] = is_delegate
-        context['voted'] = voted
+        context['voted'] = current_user_voted
         return context
 
 

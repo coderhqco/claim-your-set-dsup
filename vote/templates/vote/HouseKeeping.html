@@ -39,7 +39,7 @@
       <table class="table table-bordered table-sm">
         <thead>
           <tr>
-            <th class="text-uppercase ">Number</th>
+            <th class="text-uppercase ">No</th>
             <th class="text-uppercase ">Member </th>
             <th class="text-uppercase ">in or Out</th>
             <!-- show the put forward when pod has 6 members at least -->
@@ -55,15 +55,14 @@
             {%for member in object.podmember_set.all %}
                 {%if member.is_member%}
                     <tr class="">
-                        <td class="">{{member.member_number}} - {{member.is_member}} </td>
+                        <td class="">{{member.member_number}}  </td>
                         <td class="">{{member.user.users.legalName}} 
                             {% if member.is_delegate %}
                             <span class="badge bg-success">DELEGATE</span> 
                             {%endif%}
                         <td class="">
-                            IN: <span class="badge bg-info text-dark">{{member.podmember_vote_in_set.count}}</span> 
+                            IN: <span class="badge bg-info text-dark">{{member.podmember_vote_in_set.count}}</span>  &nbsp; &nbsp; 
                             OUT: <span class="badge bg-info text-dark">{{member.podmember_vote_out_set.count}}</span>
-
                             {%if member.user == user or member.is_delegate %} 
                             <!-- <button class="mx-1 btn btn-secondary disabled">IN</button>
                             <button class="btn btn-secondary disabled">OUT</button> -->
@@ -96,13 +95,12 @@
             <!-- condidate shall not not itself viewing -->
             <!-- each user shall vote once.  -->
             {%if condidate and condidate.user != user %}
-            {% if not voted %}
+  
             <tr class="">
-                <td class="">{{condidate.member_number}} - {{condidate.is_member}} {{voted}} </td>
-                <td class="">{{condidate.user.users.legalName}} - {{condidate.user.users.userType}} 
-                    {{condidate.podmember_vote_in_set.count}}
-                </td>
+                <td class="">{{condidate.member_number}}  </td>
+                <td class="">{{condidate.user.users.legalName}} </td>
                 <td class="">
+                    {%if not voted %}
                     <form class="float-start mx-1" action="{% url 'pod_vote_in' %}" method="post"> {%csrf_token%}
                         <input type="hidden" name="pod" value="{{object}}">
                         <input type="hidden" name="member" value="{{condidate.pk}}">
@@ -113,6 +111,10 @@
                         <input type="hidden" name="member" value="{{condidate.pk}}">
                         <button type="submit" name="OUT" class="btn btn-danger">OUT</button>
                     </form>
+                    {%else%}
+                    IN: <span class="badge bg-info text-dark">{{condidate.podmember_vote_in_set.count}}</span> &nbsp; &nbsp; 
+                    OUT: <span class="badge bg-info text-dark">{{condidate.podmember_vote_out_set.count}}</span>
+                    {%endif%}
                 </td>
                 {% if is_delegate%}
                 <td class="">
@@ -129,7 +131,7 @@
                 </td>
                 {%endif %}
             </tr>
-            {%endif%}
+       
             {%endif%}
 
         </tbody> 
