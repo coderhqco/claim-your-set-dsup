@@ -1,3 +1,4 @@
+from imp import load_compiled
 from locale import YESEXPR
 from operator import contains
 from urllib import request
@@ -144,10 +145,15 @@ def voterPage(request):
     # get the user if he/she is a member of a pod
     if request.user.users.userType ==1:
         podMember = voteModels.PodMember.objects.get(user = request.user)
-        
+
+    time = request.user.date_joined
+    if request.user.users.is_reg:
+        from datetime import timedelta
+        time = request.user.date_joined + timedelta(30)
     data={
         'pod': podMember,
         'title': 'Voter Page',
+        'is_reg': time
     }
     return render(request, 'vote/VoterPage.html',data)   
     
@@ -179,22 +185,29 @@ class HouseKeepingPod(LoginRequiredMixin,DetailView):
         current_user_voted = False
         if condidate:
             # vote in
-            voteINs= condidate.podmember_vote_in_set.filter(voter = self.request.user)
+            voteINs = condidate.podmember_vote_in_set.filter(voter = self.request.user)
             for voter in voteINs:
                 if voter.voter == self.request.user:
                     current_user_voted = True
 
             # vote out
-            voteINs= condidate.podmember_vote_out_set.filter(voter = self.request.user)
+            voteINs = condidate.podmember_vote_out_set.filter(voter = self.request.user)
             for voter in voteINs:
                 if voter.voter == self.request.user:
                     current_user_voted = True
 
-
+        # to check if the logged in user has voted for delegated
+        current_user_delegated = False
+        pod_delegates = voteModels.PodMember_put_farward.objects.filter(delegated__pod = pod)
+        for i in pod_delegates:
+            if i.voter == self.request.user:
+                current_user_delegated = True
+        
         context['title'] = "DSU - House Keeping Page"
         context['condidate'] = condidate
         context['is_delegate'] = is_delegate
         context['voted'] = current_user_voted
+        context['delegated'] = current_user_delegated
         return context
 
 
@@ -254,10 +267,14 @@ def pod_joining_validation(user,pod):
     It check if userType is 0
     """
     result = True
-    if not pod.is_active():
-        result = False
+    # if not pod.is_active():
+    #     print("pod is active")
+    #     result = False
 
     podmembers = pod.podmember_set.all()
+    if podmembers.count() >= 12:
+        result = False
+
     if podmembers.filter(user = user):
         result = False
     
@@ -287,11 +304,6 @@ def joinPod(request):
                         member_number = pods.first().podmember_set.count()+1
                     )
                     podMember.save()
-
-                    # # set the userType to 1 as joining a pod\
-                    # user=request.user
-                    # user.users.userType = 1
-                    # user.save()
 
                     messages.success(
                         request, 
@@ -411,3 +423,45 @@ def removePodMember(request):
 
     messages.error(request, 'something went wrong.', extra_tags='danger')
     return redirect('home')
+
+def Can_be_delegate(member):
+    """checks for member if it can be delegate.
+    first, get the highest delegated member.
+    then, check if the member has (50% + 1) votes. 
+    """
+    result = False
+    podmembers = member.pod.podmember_set.all()
+    delegated = member.podmember_put_farward_set.all()
+
+    if delegated.count() > podmembers.count()/2:
+        result = True
+
+    return result
+
+@login_required(login_url='EnterTheFloor')
+def putFarward(request):
+    if request.method == 'POST':
+        print(request.POST)
+        member = voteModels.PodMember.objects.get(pk = request.POST.get('member'))
+    
+        print("pod:", member.pod)
+        print("member:", member)
+
+        # save one record in put_farward and 
+        delegated = voteModels.PodMember_put_farward.objects.create(delegated = member, voter = request.user)
+        delegated.save()
+        # check if the member is eligible to be delegate
+
+        if Can_be_delegate(member):
+            # now make the delegated member the delegate
+            pod = member.pod
+            prev_delegate = pod.podmember_set.filter(is_delegate = True).first()
+            prev_delegate.is_delegate = False
+            prev_delegate.save()
+            
+            member.is_delegate = True
+            member.save()
+            print("member has been choosen as delegate")
+        
+        messages.success(request,"successfully voted", extra_tags='success')
+        return redirect('pod', pk = member.pod.pk)

@@ -48,7 +48,8 @@ class Pod(models.Model):
 
     def is_active(self):
         # check if the member <= 12 and return true
-        if self.podmember_set.count() <= 12:
+        if 6 <= self.podmember_set.count() <= 12:
+            print("podmember count:", self.podm)
             return True
         return False
 
@@ -66,6 +67,9 @@ class PodMember(models.Model):
     def __str__(self) -> str:
         return self.user.username
 
+    class Meta:
+        ordering = ['-is_delegate', 'date_joined']
+
 class PodMember_vote_in(models.Model):
     condidate = models.ForeignKey(PodMember, on_delete=models.CASCADE)
     voter = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -78,3 +82,12 @@ class PodMember_vote_out(models.Model):
 
     def __str__(self) -> str:
         return str(self.voter)
+
+class PodMember_put_farward(models.Model):
+    delegated = models.ForeignKey(PodMember, on_delete=models.CASCADE)
+    voter = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return str(self.voter)
+
+

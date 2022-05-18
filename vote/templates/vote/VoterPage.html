@@ -25,7 +25,7 @@ tbody{
             {%if user.users.is_reg%}
             <div class="alert alert-warning mt-3">
                 <p>
-                    You have [is_reg({{user.date_joined|date:"M d Y"}})] minus [now] to get 
+                    You have to got until {{is_reg}} to
                     registered to vote in your district or your account will be deleted! Yikes! 
                     <a href="#"> Learn More</a>. 
                 </p>
@@ -217,4 +217,5 @@ tbody{
 </div>
 
 {%endblock content%}
+
 

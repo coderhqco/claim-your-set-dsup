@@ -9,13 +9,15 @@
         <h1 class="text-center">House Keeping Page</h1>
         <h3 class="text-center">POD: {{object.district}}-{{object}} </h3>
         <h4 class="text-center">invitation key: {{object}} </h4>
-        <p class="text-center">pod is active: {{object.is_active}}</p>
-        {% if is_delegate%}
-        <div class="col text-center m-3">
+        <p class="text-center">pod status: {% if object.is_active is True%} Active {%else%} Inactive{%endif%}</p>
+        {% if is_delegate %}
+        <div class="col text-center m-1">
+            {% if object.is_active is False %}
             <form action="" method="post"> {%csrf_token%}
                 <input type="hidden" name="pod" value="{{object}}">
                 <button class="btn btn-success mb-2">Generate New Key</button>
             </form>
+            {%endif%}
             <button class="btn btn-primary" id="copy_invitation_key" key="{{object.code}}"> Copy Invitation Key</button>
         </div>
 
@@ -71,7 +73,19 @@
 
                         {% if object.podmember_set.count >= 6 %}
                         <td class="">
-                            <button class="btn {%if member.user == user %} btn-secondary disabled {%else%} btn-success {%endif%}">PUT FARWARD</button>
+                            {%if member.user == user or member.is_delegate %}
+                            <button class="btn btn-secondary disabled ">PUT FARWARD</button>
+                            {%else%}
+                            <!-- check if the user has already voted for a member delegation -->
+                            {% if delegated %}
+                                <button class="btn btn-secondary disabled ">PUT FARWARD</button>
+                                {%else %}
+                                <form action="{%url 'putFarward' %}" method="post">  {%csrf_token%}
+                                    <input type="hidden" name="member" value="{{member.pk}}" id="">
+                                    <button class="btn btn-success ">PUT FARWARD</button>
+                                </form>
+                                {%endif %}
+                            {%endif%}
                         </td>
                         {%endif%}
                         {% if is_delegate%}
@@ -116,6 +130,9 @@
                     OUT: <span class="badge bg-info text-dark">{{condidate.podmember_vote_out_set.count}}</span>
                     {%endif%}
                 </td>
+                {% if object.podmember_set.count >= 6 %}
+                <td></td>
+                {%endif%}
                 {% if is_delegate%}
                 <td class="">
                     {%if condidate.user != user %}
