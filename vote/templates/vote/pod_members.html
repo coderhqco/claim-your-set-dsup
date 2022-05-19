@@ -1,0 +1,56 @@
+{% extends 'vote/base.html'%}
+{%load static%}
+
+{%block css%}
+<style>
+
+</style>
+{%endblock css%}
+
+
+{% block content%}
+{%include 'vote/header.html' %}
+
+<div class="container">
+    <div class="row">
+        <h1 class="text-center">House Keeping Page</h1>
+        <h3 class="text-center">POD: {{object.district}}-{{object}} </h3>
+        <h4 class="text-center">invitation key: {{object}} </h4>
+        <p class="text-center">pod status: {% if object.is_active %} Active {%else%} Inactive{%endif%}</p>
+        {% if messages %}
+            {% for message in messages %}
+            <div class="container">
+                <div class="alert alert-{{message.extra_tags}}" role="alert">{{message}}</div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="row">
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>name</th>
+                    <th>entry code</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in object.podmember_set.all%}
+                <tr>
+                    <td>{{forloop.counter}}</td>
+                    <td>{{member.user.users.legalName}}</td>
+                    <td>{{member}}</td>
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+{%include 'vote/footer.html' %}
+{% endblock content%}
+
+
+{% block js%}
+{% endblock js%}

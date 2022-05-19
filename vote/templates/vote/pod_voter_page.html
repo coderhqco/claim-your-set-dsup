@@ -1,0 +1,28 @@
+
+<!-- check if the user is a member of the pod and is delegate -->
+ {% if pod.is_delegate %}
+ <div class="row text-center">
+     <div class="col-sm-12 col-md-6 col-lg-6 ">
+         <a class="btn btn-primary m-2" href="{% url 'pod' pk=pod.pod.pk %}">My pod</a>
+     </div>
+     <div class=" col-sm-12 col-md-6 col-lg-6">
+         <a class="btn btn-primary m-2" href="#">Join First Link</a>
+     </div>
+     <div class=" col-sm-12 col-md-6 col-lg-6 ">
+         <a class="btn btn-primary m-2" href="#">Create First Link</a>
+     </div>
+     <div class=" col-sm-12 col-md-6 col-lg-6  ">
+         <a class="btn btn-primary m-2" href="/home">Back-and-Forth</a>
+     </div>
+ </div>
+{%else%}
+ <!-- check if the user is just a member of the pod -->
+ <div class="row text-center">
+     <div class=" col-sm-12 col-md-6 col-lg-6 ">
+         <a class="btn btn-primary m-2" href="{% url 'pod' pk=pod.pod.pk %}">My pod</a>
+     </div>
+     <div class=" col-sm-12 col-md-6 col-lg-6  ">
+         <a class="btn btn-primary m-2" href="#">Back-and-Forth</a>
+     </div>
+ </div>
+{%endif%}

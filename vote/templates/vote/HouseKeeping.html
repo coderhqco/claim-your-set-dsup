@@ -9,7 +9,7 @@
         <h1 class="text-center">House Keeping Page</h1>
         <h3 class="text-center">POD: {{object.district}}-{{object}} </h3>
         <h4 class="text-center">invitation key: {{object}} </h4>
-        <p class="text-center">pod status: {% if object.is_active is True%} Active {%else%} Inactive{%endif%}</p>
+        <p class="text-center">pod status: {% if object.is_active %} Active {%else%} Inactive{%endif%}</p>
         {% if is_delegate %}
         <div class="col text-center m-1">
             {% if object.is_active is False %}
@@ -27,6 +27,9 @@
         <p class="text-center">a member can see the pod member link</p>
         
         {%endif%}
+        <div class="col-sm-12 text-center my-1">
+          <a href="{%url 'podMember' pk=object.pk %}" class="text-center btn btn-primary">member page</a>
+        </div>
         {% if messages %}
             {% for message in messages %}
             <div class="container">
@@ -57,7 +60,7 @@
             {%for member in object.podmember_set.all %}
                 {%if member.is_member%}
                     <tr class="">
-                        <td class="">{{member.member_number}}  </td>
+                        <td class="">{{forloop.counter}}  </td>
                         <td class="">{{member.user.users.legalName}} 
                             {% if member.is_delegate %}
                             <span class="badge bg-success">DELEGATE</span> 

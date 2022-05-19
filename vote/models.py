@@ -49,7 +49,6 @@ class Pod(models.Model):
     def is_active(self):
         # check if the member <= 12 and return true
         if 6 <= self.podmember_set.count() <= 12:
-            print("podmember count:", self.podm)
             return True
         return False
 
@@ -89,5 +88,6 @@ class PodMember_put_farward(models.Model):
 
     def __str__(self) -> str:
         return str(self.voter)
+
 
 

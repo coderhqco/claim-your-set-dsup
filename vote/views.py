@@ -1,7 +1,4 @@
-from imp import load_compiled
-from locale import YESEXPR
-from operator import contains
-from urllib import request
+from collections import UserList
 from django.shortcuts import render, HttpResponse, redirect
 from django.views.generic import DetailView
 from vote import models as voteModels
@@ -332,11 +329,8 @@ def joinPod(request):
 def majorityVotes(pod, member):
     pod_members = pod.podmember_set.all()
     member_vote = member.podmember_vote_in_set.all()
-    print("member vote in: ", member_vote.count())
-    print("pod member: ", pod_members.count())
     if member_vote.count() >= (pod_members.count()/2):
         return True
-    print("returned false...")
     return False
 
 
@@ -350,17 +344,14 @@ def podVoteIN(request):
         member = voteModels.PodMember.objects.get(pk = request.POST.get('member'))
         voteIN = voteModels.PodMember_vote_in.objects.create(condidate = member, voter = request.user)
         voteIN.save()
-        print("condidate has got a vote in. \nchecking he has the majority to be accpeted into the pod...")
         # check if he/she has got the majority votes
         if majorityVotes(member.pod, member):
             member.is_member = True
             member.save()
-            print("member has been accepted in the pod")
             # set the member.user.users.userType to 1 as ih becomes the member in a pod.
             userType = member.user
             userType.users.userType = 1
             userType.save()
-            print("userType have been udpated...",userType.users.userType)
 
         messages.success(request,'Voted in', extra_tags='success')
         return redirect('pod', pk = member.pod.pk)
@@ -378,11 +369,8 @@ def removePodMember(pod, member):
         # now that we have all members voted for this member, 
         # we have to check if the member has the majority of vote out to be removed
         if vote_OUTs.count() >= pod_members.count()/2:
-            print("he has to be removed")
             return True
             
-        print("all members has voted. but the vote outs are not major.")
-    print("not valid to be removed")
     return False
 
 @login_required(login_url='EnterTheFloor')
@@ -394,14 +382,12 @@ def podVoteOUT(request):
         member = voteModels.PodMember.objects.get(pk = request.POST.get('member'))
         voteOUT = voteModels.PodMember_vote_out.objects.create(condidate = member, voter = request.user)
         voteOUT.save()
-        print("voted out: ", voteOUT)
 
         if not majorityVotes(member.pod, member):
             # remove the member
             if removePodMember(member.pod, member):
                 # now remove the member
                 member.delete()
-                print("due to majority vote out to this member, it has been removed..")
             
         messages.success(request,'Voted out', extra_tags='success')
         return redirect('pod', pk = member.pod.pk)
@@ -412,12 +398,10 @@ def removePodMember(request):
     if request.method == 'POST':
         member = voteModels.PodMember.objects.get(pk = request.POST.get('member'))
         member.delete()
-        print("member removed: now set the userType to 0", member)
         
         user = member.user
         user.users.userType = 0
         user.save()
-        print("userTupe: ",member.user.users.userType)
         messages.error(request, 'removed...', extra_tags='success')
         return redirect('pod', pk = member.pod.pk)
 
@@ -441,12 +425,7 @@ def Can_be_delegate(member):
 @login_required(login_url='EnterTheFloor')
 def putFarward(request):
     if request.method == 'POST':
-        print(request.POST)
         member = voteModels.PodMember.objects.get(pk = request.POST.get('member'))
-    
-        print("pod:", member.pod)
-        print("member:", member)
-
         # save one record in put_farward and 
         delegated = voteModels.PodMember_put_farward.objects.create(delegated = member, voter = request.user)
         delegated.save()
@@ -458,10 +437,42 @@ def putFarward(request):
             prev_delegate = pod.podmember_set.filter(is_delegate = True).first()
             prev_delegate.is_delegate = False
             prev_delegate.save()
-            
+
             member.is_delegate = True
             member.save()
-            print("member has been choosen as delegate")
         
         messages.success(request,"successfully voted", extra_tags='success')
         return redirect('pod', pk = member.pod.pk)
+
+
+class Pod_members(LoginRequiredMixin, DetailView):
+    model = voteModels.Pod
+    template_name = 'vote/pod_members.html'
+
+
+
+
+# this is for testing.
+
+def creating():
+    users_list = ('a','b','c','d','e','f','g','h','i','j','k','l','ab','ac','ae','ad',
+    'ad','gd','fg','ge','dv','df','bg','hr','tf','vd','vd','dt','yu','nv','ze',
+    'm','n','o','p','q','r','s','t','u','v','t','x','y','z')
+    usersnames = []
+    district = voteModels.Districts.objects.get(code = 'NY01')
+    for i in users_list:
+        # create user objects: legalName = i, entry_code = entry_code_generator, district = ny01
+        user = User.objects.create(username = entry_code_generator())
+        user.set_password('A123123a')
+        user.save()
+        user.users.legalName = i
+        user.users.district = district
+        user.save()
+        usersnames.append(user.username)
+    # export the usernames into a text files
+
+    with open('usernames.txt', 'w') as fp:
+        for i in usersnames:
+            print(i)
+            fp.writelines(i+"\n")
+    print("done.....")
