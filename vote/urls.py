@@ -21,4 +21,6 @@ urlpatterns = [
     path('pod-remove-member', voteViews.removePodMember, name="removePodMember"),
     path('pod-put-farward', voteViews.putFarward, name="putFarward"),
     path('pod-members/<int:pk>', voteViews.Pod_members.as_view(), name="podMember"),
+    path('pod-remove/<int:pk>', voteViews.Delete_POD.as_view(), name="podRemove"),
+
 ]

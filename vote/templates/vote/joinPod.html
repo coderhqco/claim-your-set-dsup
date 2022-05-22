@@ -17,6 +17,7 @@
               <h4 class="text-left">You must have an Invitation Key to join a Pod.</h4>
               <p class="text-left">The First Delegate of a pod should send you an Invitation Key. This cannot be done via the website.</p>
               <p class="text-left">Or you can create your own Pod and start inviting others to join it.</p>
+              <a class="btn btn-primary btn-sm mb-3" href="{% url 'createPod' %}">Create a Pod</a>
             </div>
 
             {% if messages %}
@@ -34,7 +35,7 @@
             <form method="post"> {% csrf_token %}
                 <input type="hidden" name="user" value="{{user.pk}}">
                     {{form}}
-                <button class="btn btn-success mt-2"> join the pod</button>
+                <button class="btn btn-success mt-2"> Join the Pod</button>
             </form>
 
         </div>

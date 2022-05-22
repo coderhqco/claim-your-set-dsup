@@ -1,6 +1,6 @@
 from collections import UserList
 from django.shortcuts import render, HttpResponse, redirect
-from django.views.generic import DetailView
+from django.views.generic import DetailView, DeleteView
 from vote import models as voteModels
 from vote import forms as voteForms
 from django.contrib.auth.models import User
@@ -13,7 +13,7 @@ from django.core.mail import EmailMessage
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import authenticate, login,logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 def entry_code_generator():
     """
@@ -193,6 +193,7 @@ class HouseKeepingPod(LoginRequiredMixin,DetailView):
                 if voter.voter == self.request.user:
                     current_user_voted = True
 
+        # if user is_member 
         # to check if the logged in user has voted for delegated
         current_user_delegated = False
         pod_delegates = voteModels.PodMember_put_farward.objects.filter(delegated__pod = pod)
@@ -476,3 +477,15 @@ def creating():
             print(i)
             fp.writelines(i+"\n")
     print("done.....")
+
+
+class Delete_POD(LoginRequiredMixin, DeleteView):
+    model = voteModels.Pod
+    template_name = "vote/pod_remove.html"
+    success_url = '/home'
+
+    def get_context_data(self, *args, **kwargs):
+        data = super(Delete_POD, self).get_context_data(*args, **kwargs)
+        data['page_title'] = 'Voter Page'
+        return data
+    

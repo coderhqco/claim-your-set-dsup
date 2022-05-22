@@ -7,9 +7,14 @@
 <div class="container">
     <div class="row mt-3">
         <h1 class="text-center">House Keeping Page</h1>
-        <h3 class="text-center">POD: {{object.district}}-{{object}} </h3>
-        <h4 class="text-center">invitation key: {{object}} </h4>
-        <p class="text-center">pod status: {% if object.is_active %} Active {%else%} Inactive{%endif%}</p>
+        <h3 class="text-center">Pod: {{object.district}}-{{object}} </h3>
+        <h4 class="text-center">Invitation Key: {{object}} </h4>
+        <p class="text-center">Pod Status: 
+          {% if object.is_active %} 
+            Active 
+          {%else%} 
+            This Pod will become Active once it has six Members.
+           {%endif%}</p>
         {% if is_delegate %}
         <div class="col text-center m-1">
             {% if object.is_active is False %}
@@ -22,13 +27,11 @@
         </div>
 
         {%else%}
-        
-        <h4 class="text-center">user is the member of this pod</h4>
-        <p class="text-center">a member can see the pod member link</p>
-        
+        <!-- this the pod memeber -->
+
         {%endif%}
         <div class="col-sm-12 text-center my-1">
-          <a href="{%url 'podMember' pk=object.pk %}" class="text-center btn btn-primary">member page</a>
+          <a href="{%url 'podMember' pk=object.pk %}" class="text-center btn btn-primary">Member Page</a>
         </div>
         {% if messages %}
             {% for message in messages %}
@@ -58,6 +61,7 @@
         </thead> 
         <tbody>
             {%for member in object.podmember_set.all %}
+          
                 {%if member.is_member%}
                     <tr class="">
                         <td class="">{{forloop.counter}}  </td>
@@ -82,7 +86,7 @@
                             <!-- check if the user has already voted for a member delegation -->
                             {% if delegated %}
                                 <button class="btn btn-secondary disabled ">PUT FARWARD</button>
-                                {%else %}
+                                {% else %}
                                 <form action="{%url 'putFarward' %}" method="post">  {%csrf_token%}
                                     <input type="hidden" name="member" value="{{member.pk}}" id="">
                                     <button class="btn btn-success ">PUT FARWARD</button>
@@ -100,7 +104,11 @@
                                 <button class="btn btn-danger" type="submit" name="remove">REMOVE</button>
                             </form>
                             {%else%}
-                                F-Del 
+                                {% if object.podmember_set.count == 1 %}
+                                <a href="{% url 'podRemove' pk=object.pk %}" class="btn btn-danger">Dissolve Pod</a>
+                                {%else%}
+                                F-Del
+                              {%endif%}
                             {%endif%}
                         
                         </td>

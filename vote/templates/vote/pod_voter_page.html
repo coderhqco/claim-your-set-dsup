@@ -1,28 +1,48 @@
-
-<!-- check if the user is a member of the pod and is delegate -->
- {% if pod.is_delegate %}
- <div class="row text-center">
-     <div class="col-sm-12 col-md-6 col-lg-6 ">
-         <a class="btn btn-primary m-2" href="{% url 'pod' pk=pod.pod.pk %}">My pod</a>
-     </div>
-     <div class=" col-sm-12 col-md-6 col-lg-6">
-         <a class="btn btn-primary m-2" href="#">Join First Link</a>
-     </div>
-     <div class=" col-sm-12 col-md-6 col-lg-6 ">
-         <a class="btn btn-primary m-2" href="#">Create First Link</a>
-     </div>
-     <div class=" col-sm-12 col-md-6 col-lg-6  ">
-         <a class="btn btn-primary m-2" href="/home">Back-and-Forth</a>
-     </div>
- </div>
-{%else%}
- <!-- check if the user is just a member of the pod -->
- <div class="row text-center">
-     <div class=" col-sm-12 col-md-6 col-lg-6 ">
-         <a class="btn btn-primary m-2" href="{% url 'pod' pk=pod.pod.pk %}">My pod</a>
-     </div>
-     <div class=" col-sm-12 col-md-6 col-lg-6  ">
-         <a class="btn btn-primary m-2" href="#">Back-and-Forth</a>
-     </div>
- </div>
-{%endif%}
+<!-- the first col. contains common links -->
+<div class="col-sm-12 col-md-4 col-lg-4 d-flex justify-content-center"> 
+    <ul class="a">
+        <li><a href="#">List of Delegates</a></li>
+        <li><a href="#">Back-and-Forth</a></li>
+        <li><a href="#">Member Contact Page</a></li>
+        <li><a href="#">Pod Housekeeping Page</a></li>
+    </ul>
+</div>
+<!-- the second col. contains users varous buttons-->
+<div class="col-sm-12 col-md-4 col-lg-4 d-flex justify-content-center">
+    <!-- check if the user is a member of the pod and is delegate -->
+    {% if pod.is_delegate %}
+    <div class="row text-center">
+        <div class="col-sm-12 col-md-6 col-lg-6">
+            <a class="btn btn-primary m-2" href="{% url 'pod' pk=pod.pod.pk %}">My pod</a>
+        </div>
+        <div class="col-sm-12 col-md-6 col-lg-6">
+            <a class="btn btn-primary m-2" href="#">Join First Link</a>
+        </div>
+        <div class="col-sm-12 col-md-6 col-lg-6">
+            <a class="btn btn-primary m-2" href="#">Create First Link</a>
+        </div>
+        <div class="col-sm-12 col-md-6 col-lg-6">
+            <a class="btn btn-primary m-2" href="#">Back-and-Forth</a>
+        </div>
+    </div>
+    {%else%}
+    <!-- check if the user is just a member of the pod -->
+    <div class="row text-center">
+        <div class="col-sm-12 col-md-6 col-lg-6">
+            <a class="btn btn-primary m-2" href="{% url 'pod' pk=pod.pod.pk %}">My pod</a>
+        </div>
+        <div class="col-sm-12 col-md-6 col-lg-6">
+            <a class="btn btn-primary m-2" href="#">Back-and-Forth</a>
+        </div>
+    </div>
+    {%endif%}
+</div>
+<!-- the third col. contains comoon links-->
+<div class="col-sm-12 col-md-6 col-lg-4 d-flex justify-content-center">
+    <ul class="a">
+        <li><a href="#">First Link Meeting Schedule</a></li>
+        <li><a href="#">Meeting Minutes Log</a></li>
+        <li><a href="#">Bill Metrics</a></li>
+        <li><a href="#">Voter Settings</a></li>
+    </ul>
+</div>
