@@ -109,7 +109,7 @@ class UsersForm(forms.ModelForm):
 class JoinPodMemberForm(forms.ModelForm):
     # is_delegate false, is_member false, user and pod
     invitationCode = forms.CharField(
-        max_length=5,
+        max_length=10,
         label='Invitation Code',
         widget=forms.TextInput(
             attrs={

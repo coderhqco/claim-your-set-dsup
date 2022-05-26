@@ -36,12 +36,13 @@ class Users(models.Model):
     def __str__(self) -> str:
         return self.user.username
     
-
+import random
 class Pod(models.Model):
     code = models.CharField(max_length=5, unique=True)
     district = models.ForeignKey(Districts, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    inivitation_code = models.CharField(max_length=10)
 
     def __str__(self) -> str:
         return str(self.code)

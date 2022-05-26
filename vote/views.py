@@ -162,7 +162,7 @@ class HouseKeepingPod(LoginRequiredMixin,DetailView):
 
     def post(self,request, *args, **kwargs):
         pod = voteModels.Pod.objects.get(code = request.POST['pod'])
-        pod.code = pod_code_generator()
+        pod.inivitation_code = pod_invitation_generator()
         pod.save()
         messages.success(request, "The pod key has been updated.", extra_tags="success")
         return redirect('pod', pk=pod.pk)
@@ -208,6 +208,18 @@ class HouseKeepingPod(LoginRequiredMixin,DetailView):
         context['delegated'] = current_user_delegated
         return context
 
+def pod_invitation_generator():
+    """
+    this is the pod code generator. 
+    It uses random and checks for the database. 
+    return the code if it's not taken
+    """
+    import random
+    code = str(random.randint(0,9999999999))
+    is_exist = voteModels.Pod.objects.filter(inivitation_code = code).exists()
+    if is_exist:
+        pod_invitation_generator()
+    return code
 
 def pod_code_generator():
     """
@@ -216,12 +228,7 @@ def pod_code_generator():
     return the code if it's not taken
     """
     import random
-    code  = str(random.choice('abcdefghijklmnpqrstuvwxyz'))
-    code += str(random.randint(1,9))
-    code += str(random.choice('abcdefghijklmnpqrstuvwxyz'))
-    code += str(random.randint(1,9))
-    code += str(random.choice('abcdefghijklmnpqrstuvwxyz'))
-    code = code.upper()
+    code = str(random.randint(1,99999))
     is_exist = voteModels.Pod.objects.filter(code = code).exists()
     
     if is_exist:
@@ -236,7 +243,11 @@ def CreatePod(request):
     it set the user as a delegate pod member
     """
     # create a pod
-    pod = voteModels.Pod.objects.create(code = pod_code_generator(), district = request.user.users.district)
+    pod = voteModels.Pod.objects.create(
+        code = pod_code_generator(), 
+        district = request.user.users.district,
+        inivitation_code = pod_invitation_generator()
+    )
     pod.save()
 
     # set the userType attribute of the creator to 1
@@ -290,7 +301,7 @@ def joinPod(request):
         if form.is_valid():
             invitationCode = form.cleaned_data.get('invitationCode').upper()
             # check if pod exist
-            pods = voteModels.Pod.objects.filter(code = invitationCode)
+            pods = voteModels.Pod.objects.filter(inivitation_code = invitationCode)
             if pods.exists():
                 # check if user can join the pod
                 if pod_joining_validation(request.user, pods.first()):
