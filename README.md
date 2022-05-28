@@ -1,12 +1,11 @@
-This is the Description of the DSU project. 
-Mr. Morgan Please update the description of this project. 
+# Democracy Straight-Up Project
 
-how to set up the project on you local machine:
+### how to set up the project on you local machine:
 1. make a directory anywhere in your machine
 2. inside the directory, create python virtualenv and activate it.
 3. clode this repo inside the directory
 4. install all the requirements inside the requirements.txt file
-    - for installing the packages; user `pip install > requirements.txt`
+    - for installing the packages; user `pip install -r requirements.txt`
 5. setup the env file for setting config files
     - email config
     - database 
