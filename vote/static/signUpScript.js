@@ -5,7 +5,7 @@ var district = document.querySelector("input[name='district']");
 district.addEventListener('change', (event) => {
   let district_code = event.target.value;
   $.ajax({
-    url:'apidistricts/',
+    url:'api/districts/',
     method:'get',
     success:function(res){
       for(let i=0; i<res.length; i++){

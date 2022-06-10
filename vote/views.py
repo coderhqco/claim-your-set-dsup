@@ -439,7 +439,7 @@ def putFarward(request):
     if request.method == 'POST':
         member = voteModels.PodMember.objects.get(pk = request.POST.get('member'))
         # save one record in put_farward and 
-        delegated = voteModels.PodMember_put_farward.objects.create(delegated = member, voter = request.user)
+        delegated = voteModels.PodMember_put_farward.objects.create(recipient = member, voter = request.user)
         delegated.save()
         # check if the member is eligible to be delegate
 
