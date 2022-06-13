@@ -1,4 +1,3 @@
-from collections import UserList
 from django.shortcuts import render, HttpResponse, redirect
 from django.views.generic import DetailView, DeleteView
 from vote import models as voteModels

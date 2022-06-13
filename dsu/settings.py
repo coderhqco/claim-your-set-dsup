@@ -29,7 +29,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.0.115','dsup-voting-portal.herokuapp.com','127.0.0.1']
+ALLOWED_HOSTS = ['192.168.0.115','dsup-voting-portal.herokuapp.com','127.0.0.1', '192.168.0.101']
 
 # Application definition
 INSTALLED_APPS = [
@@ -168,7 +168,6 @@ EMAIL_USE_TLS       = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework_simplejwt.authentication.JWTAuthentication',),
-    'DEFAULT_PERMISSION_CLASSES' : ('rest_framework.permissions.IsAuthenticated',)
 }
 
 from datetime import timedelta
