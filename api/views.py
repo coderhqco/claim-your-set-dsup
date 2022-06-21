@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from vote.models import Districts
+from vote import models as voteModels
 from api import serializers as apiSerializers
 # from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from django.contrib.auth.models import User
@@ -13,10 +13,9 @@ from django.http import JsonResponse
 
 
 class DistrictsViewSet(viewsets.ModelViewSet):
-    queryset = Districts.objects.all()
+    queryset = voteModels.Districts.objects.all()
     serializer_class = apiSerializers.DistrictsSerializer
     
-
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     # permission_classes = (AllowAny,)
@@ -36,3 +35,12 @@ def activate(request, uidb64, token):
         return JsonResponse({'entry_code':users.username},safe=False)
     else:
         return JsonResponse({'error':'Activation link is invalid!'},safe=False)
+
+
+class UserPageView(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = apiSerializers.UserSerializer
+
+class VoterPageView(viewsets.ModelViewSet):
+    queryset = voteModels.Users.objects.all()
+    serializer_class = apiSerializers.VoterPageSerializer

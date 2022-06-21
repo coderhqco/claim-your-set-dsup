@@ -16,8 +16,6 @@ class DistrictsSerializer(serializers.ModelSerializer):
         model = Districts
         fields = [ 'name', 'code']
     
-
-
 def entry_code_generator():
     """
     this is the entry code generator. 
@@ -105,3 +103,18 @@ class RegisterSerializer(serializers.ModelSerializer):
         email.send()
 
         return user
+
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
+        depth=2
+
+
+from vote import models as voteModels
+class VoterPageSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = voteModels.Users
+        fields = "__all__"
+        depth=1
+      
