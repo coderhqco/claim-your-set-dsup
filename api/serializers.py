@@ -1,3 +1,4 @@
+from dataclasses import fields
 from rest_framework import serializers
 from vote.models import Districts
 from django.contrib.auth.models import User
@@ -104,6 +105,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         return user
 
+
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
@@ -117,4 +119,6 @@ class VoterPageSerializer(serializers.HyperlinkedModelSerializer):
         model = voteModels.Users
         fields = "__all__"
         depth=1
-      
+
+
+
