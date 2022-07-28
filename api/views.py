@@ -1,3 +1,5 @@
+from curses.ascii import NUL
+from gettext import NullTranslations
 from rest_framework import viewsets
 from vote import models as voteModels
 from api import serializers as apiSerializers
@@ -83,8 +85,169 @@ class LoginPageView(APIView):
                 'verificationScore': authedUser.users.verificationScore, 
                 'is_reg':authedUser.users.is_reg, 
                 'district': authedUser.users.district.code,
+                'date_joined': authedUser.date_joined,
             }
             return JsonResponse(data)
         else:
             messages="Invalid Credential"
             return Response({"status":messages}, status=status.HTTP_400_BAD_REQUEST)
+
+def pod_invitation_generator():
+    """
+    this is the pod code generator. 
+    It uses random and checks for the database. 
+    return the code if it's not taken
+    """
+    import random
+    code = str(random.randint(0,9999999999))
+    is_exist = voteModels.Pod.objects.filter(invitation_code = code).exists()
+    if is_exist:
+        pod_invitation_generator()
+    return code
+
+def pod_code_generator():
+    """
+    this is the pod code generator. 
+    It uses random and checks for the database. 
+    return the code if it's not taken
+    """
+    import random
+    code = str(random.randint(1,99999))
+    is_exist = voteModels.Pod.objects.filter(code = code).exists()
+    
+    if is_exist:
+        pod_code_generator()
+    return code
+
+class CreatePOD(APIView):
+    """
+    creates a pod. 
+    it set the userType to 1.
+    it set the user as a delegate pod member
+    """
+    def post(self, request):
+        try:
+            user = NUL
+            district = NUL
+            if 'user' in request.data and 'district' in request.data:
+                user = User.objects.get(username = request.data['user'])
+                district = voteModels.Districts.objects.get(code = request.data['district'])
+            else:
+                messages="User and District are required."
+                return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # check if the userType is not 0 return 
+            if user.users.userType != 0:
+                messages="Already belongs to a pod."
+                return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # create a pod
+            pod = voteModels.Pod.objects.create(
+                code = pod_code_generator(), 
+                district = district,
+                invitation_code = pod_invitation_generator()
+            )
+            pod.save()
+
+            # set the userType attribute of the creator to 1
+            user.users.userType +=1
+            user.save()
+
+            # add the user to pod member as delegate
+            pod_member_obj = voteModels.PodMember.objects.create(
+                user = user, 
+                pod = pod, 
+                is_delegate = True,
+                is_member = True,
+                member_number = 1,
+            )
+            pod_member_obj.save()
+            obj = apiSerializers.PodSerializer(pod)
+            # data = { "pod": pod.code, "invitation_code": pod.invitation_code }
+            return JsonResponse(obj.data)
+        except:
+            messages="Something Went Wrong."
+            return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
+
+class HouseKeeping(APIView):
+    def post(self, request):
+        try:
+            pod = NUL
+            if 'pod' in request.data:
+                pod = voteModels.Pod.objects.get(code = request.data['pod'])
+            else:
+                messages="POD is required."
+                return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
+
+            # get all the pod members. 
+            podMembers = pod.podmember_set.all()
+            data = {
+                "pod": apiSerializers.PodSerializer(pod).data,
+                "podMembers": apiSerializers.PodMembersSerializer(podMembers, many=True).data
+            }
+            return JsonResponse(data)
+        except:
+            messages="Something Went Wrong."
+            return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
+
+def pod_joining_validation(user,pod):
+    """
+    this function validate weather a user can enter a pod.
+    It check if pod is active.
+    It check if user is already a member
+    It check if userType is 0
+    """
+    result = True
+    # if not pod.is_active():
+    #     print("pod is active")
+    #     result = False
+
+    podmembers = pod.podmember_set.all()
+    if podmembers.count() >= 12:
+        result = False
+
+    if podmembers.filter(user = user):
+        result = False
+    
+    if user.users.userType > 0:
+        result = False
+
+    return result
+
+class JoinPOD(APIView):
+    def post(self, request):
+        try:
+            pod = NUL
+            user = NUL
+            if 'pod' in request.data and 'user' in request.data:
+                pod = voteModels.Pod.objects.get(invitation_code = request.data['pod'])
+                user = User.objects.get(username = request.data['user'])
+            else:
+                messages="POD  and user are required."
+                return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
+
+            # get the pod and add the user as the member or candidate
+            if pod:
+                # check if user can join the pod
+                if pod_joining_validation(user,pod):
+                    podMember = voteModels.PodMember.objects.create(
+                        user = user,
+                        pod = pod,
+                        is_member = False,
+                        is_delegate = False,
+                        member_number = pod.podmember_set.count()+1
+                    )
+                    podMember.save()
+                    return JsonResponse(apiSerializers.PodMembersSerializer(podMember).data)
+                else:
+                    # else of pod is active 
+                    messages ='either the pod is not accepting memebers or you are not eligible to join this pod'
+                    return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
+
+            messages ='your request did not get processed.'
+            return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
+            
+        except:
+            messages="Something Went Wrong."
+            return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
+

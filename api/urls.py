@@ -16,5 +16,9 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('register/', apiViews.RegisterView.as_view(), name='auth_register'),
     path('activate/<uidb64>/<token>/',apiViews.activate, name='activate'),
-    path('login/', apiViews.LoginPageView.as_view())
+    path('login/', apiViews.LoginPageView.as_view()),
+
+    path('create-pod/', apiViews.CreatePOD.as_view()),
+    path('house-keeping/', apiViews.HouseKeeping.as_view()),
+    path('join-pod/', apiViews.JoinPOD.as_view())
 ]

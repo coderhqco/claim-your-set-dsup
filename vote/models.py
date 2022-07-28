@@ -13,8 +13,8 @@ class Districts(models.Model):
         ordering = ['code']
         pass
 
-    def __str__(self) -> str:
-        return self.code
+    def __str__(self):
+        return str(self.code)
 
 
 #  the django user model has the follow feilds and i only need to add to it.
@@ -33,8 +33,8 @@ class Users(models.Model):
     userType    = models.PositiveSmallIntegerField(default=0)
     voterID     = models.IntegerField(null=True, blank=True)
 
-    def __str__(self) -> str:
-        return self.user.username
+    def __str__(self):
+        return str(self.user.username)
     
 import random
 class Pod(models.Model):
@@ -42,9 +42,9 @@ class Pod(models.Model):
     district        = models.ForeignKey(Districts, on_delete=models.CASCADE)
     created_at      = models.DateTimeField(auto_now_add=True)
     updated_at      = models.DateTimeField(auto_now=True)
-    inivitation_code = models.CharField(max_length=10)
+    invitation_code = models.CharField(max_length=10)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return str(self.code)
 
     def is_active(self):
@@ -62,8 +62,8 @@ class PodMember(models.Model):
     is_delegate     = models.BooleanField(default=False)
     member_number   = models.PositiveSmallIntegerField(null=True, blank=True)
 
-    def __str__(self) -> str:
-        return self.user.username
+    def __str__(self):
+        return str(self.user.username)
 
     class Meta:
         ordering = ['-is_delegate', 'date_joined']
@@ -72,7 +72,7 @@ class PodMember_vote_in(models.Model):
     condidate   = models.ForeignKey(PodMember, on_delete=models.CASCADE) #
     voter       = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return str(self.voter)
 
 
@@ -80,14 +80,14 @@ class PodMember_vote_out(models.Model):
     condidate   = models.ForeignKey(PodMember, on_delete=models.CASCADE)
     voter       = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return str(self.voter)
 
 class PodMember_put_farward(models.Model):
     recipient   = models.ForeignKey(PodMember, on_delete=models.CASCADE) # recipient 
     voter       = models.ForeignKey(User, on_delete=models.CASCADE)  # 
 
-    def __str__(self) -> str:
+    def __str__(self):
         return str(self.voter)
 
 

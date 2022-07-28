@@ -11,6 +11,7 @@ from django.core.mail import EmailMessage
 
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
+from vote import models as voteModels
 
 class DistrictsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -113,7 +114,6 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         depth=2
 
 
-from vote import models as voteModels
 class VoterPageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = voteModels.Users
@@ -121,4 +121,12 @@ class VoterPageSerializer(serializers.HyperlinkedModelSerializer):
         depth=1
 
 
+class PodMembersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = voteModels.PodMember
+        fields = "__all__"
 
+class PodSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = voteModels.Pod
+        fields = "__all__"

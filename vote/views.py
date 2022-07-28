@@ -161,7 +161,7 @@ class HouseKeepingPod(LoginRequiredMixin,DetailView):
 
     def post(self,request, *args, **kwargs):
         pod = voteModels.Pod.objects.get(code = request.POST['pod'])
-        pod.inivitation_code = pod_invitation_generator()
+        pod.invitation_code = pod_invitation_generator()
         pod.save()
         messages.success(request, "The pod key has been updated.", extra_tags="success")
         return redirect('pod', pk=pod.pk)
@@ -195,10 +195,10 @@ class HouseKeepingPod(LoginRequiredMixin,DetailView):
         # if user is_member 
         # to check if the logged in user has voted for delegated
         current_user_delegated = False
-        pod_delegates = voteModels.PodMember_put_farward.objects.filter(delegated__pod = pod)
-        for i in pod_delegates:
-            if i.voter == self.request.user:
-                current_user_delegated = True
+        # pod_delegates = voteModels.PodMember_put_farward.objects.filter(delegated__pod = pod)
+        # for i in pod_delegates:
+        #     if i.voter == self.request.user:
+        #         current_user_delegated = True
         
         context['title'] = "DSU - House Keeping Page"
         context['condidate'] = condidate
@@ -215,7 +215,7 @@ def pod_invitation_generator():
     """
     import random
     code = str(random.randint(0,9999999999))
-    is_exist = voteModels.Pod.objects.filter(inivitation_code = code).exists()
+    is_exist = voteModels.Pod.objects.filter(invitation_code = code).exists()
     if is_exist:
         pod_invitation_generator()
     return code
@@ -245,7 +245,7 @@ def CreatePod(request):
     pod = voteModels.Pod.objects.create(
         code = pod_code_generator(), 
         district = request.user.users.district,
-        inivitation_code = pod_invitation_generator()
+        invitation_code = pod_invitation_generator()
     )
     pod.save()
 
@@ -300,7 +300,7 @@ def joinPod(request):
         if form.is_valid():
             invitationCode = form.cleaned_data.get('invitationCode').upper()
             # check if pod exist
-            pods = voteModels.Pod.objects.filter(inivitation_code = invitationCode)
+            pods = voteModels.Pod.objects.filter(invitation_code = invitationCode)
             if pods.exists():
                 # check if user can join the pod
                 if pod_joining_validation(request.user, pods.first()):
