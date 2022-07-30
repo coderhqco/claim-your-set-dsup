@@ -8,7 +8,7 @@
     <div class="row mt-3">
         <h1 class="text-center">House Keeping Page</h1>
         <h3 class="text-center">Pod: {{object.district}}-{{object}} </h3>
-        <h4 class="text-center">Invitation Key: {{object.inivitation_code}} </h4>
+        <h4 class="text-center">Invitation Key: {{object.invitation_code}} </h4>
         <p class="text-center">Pod Status: 
           {% if object.is_active %} 
             Active 
@@ -23,7 +23,7 @@
                 <button class="btn btn-success mb-2">Generate New Key</button>
             </form>
             {%endif%}
-            <button class="btn btn-primary" id="copy_invitation_key" key="{{object.inivitation_code}}"> Copy Invitation Key</button>
+            <button class="btn btn-primary" id="copy_invitation_key" key="{{object.invitation_code}}"> Copy Invitation Key</button>
         </div>
 
         {%else%}

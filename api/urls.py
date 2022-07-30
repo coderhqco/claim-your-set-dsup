@@ -20,5 +20,6 @@ urlpatterns = [
 
     path('create-pod/', apiViews.CreatePOD.as_view()),
     path('house-keeping/', apiViews.HouseKeeping.as_view()),
-    path('join-pod/', apiViews.JoinPOD.as_view())
+    path('join-pod/', apiViews.JoinPOD.as_view()),
+    path('pod/', apiViews.PodView.as_view())
 ]

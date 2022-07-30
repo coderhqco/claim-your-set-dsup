@@ -139,7 +139,8 @@ class CreatePOD(APIView):
             # check if the userType is not 0 return 
             if user.users.userType != 0:
                 messages="Already belongs to a pod."
-                return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
+                print("already in a pod ")
+                return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
             
             # create a pod
             pod = voteModels.Pod.objects.create(
@@ -152,7 +153,11 @@ class CreatePOD(APIView):
             # set the userType attribute of the creator to 1
             user.users.userType +=1
             user.save()
+            user.users.save()
 
+            print("user: ", user)
+            print("district: ", district)
+            print("userType: ", user.users.userType)
             # add the user to pod member as delegate
             pod_member_obj = voteModels.PodMember.objects.create(
                 user = user, 
@@ -169,6 +174,21 @@ class CreatePOD(APIView):
             messages="Something Went Wrong."
             return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
 
+class PodView(APIView):
+    def post(self, request):
+        try:
+            user = NUL
+            if 'user' in request.data:
+                user = User.objects.get(username = request.data['user'])
+            else:
+                messages="user is required."
+                return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
+
+            return JsonResponse(apiSerializers.PodSerializer(user.podmember_set.first().pod).data)
+        except:
+            messages="Something Went Wrong."
+            return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
+
 class HouseKeeping(APIView):
     def post(self, request):
         try:
@@ -177,18 +197,19 @@ class HouseKeeping(APIView):
                 pod = voteModels.Pod.objects.get(code = request.data['pod'])
             else:
                 messages="POD is required."
-                return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
 
             # get all the pod members. 
             podMembers = pod.podmember_set.all()
+            
             data = {
                 "pod": apiSerializers.PodSerializer(pod).data,
-                "podMembers": apiSerializers.PodMembersSerializer(podMembers, many=True).data
+                "podMembers": apiSerializers.PODMemberSer(podMembers, many=True).data
             }
             return JsonResponse(data)
         except:
             messages="Something Went Wrong."
-            return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
 
 def pod_joining_validation(user,pod):
     """
@@ -224,7 +245,7 @@ class JoinPOD(APIView):
                 user = User.objects.get(username = request.data['user'])
             else:
                 messages="POD  and user are required."
-                return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
 
             # get the pod and add the user as the member or candidate
             if pod:
@@ -238,16 +259,16 @@ class JoinPOD(APIView):
                         member_number = pod.podmember_set.count()+1
                     )
                     podMember.save()
-                    return JsonResponse(apiSerializers.PodMembersSerializer(podMember).data)
+                    return JsonResponse(apiSerializers.PodSerializer(pod).data)
                 else:
                     # else of pod is active 
                     messages ='either the pod is not accepting memebers or you are not eligible to join this pod'
-                    return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
 
             messages ='your request did not get processed.'
-            return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
             
         except:
             messages="Something Went Wrong."
-            return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
 

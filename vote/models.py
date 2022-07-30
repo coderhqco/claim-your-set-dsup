@@ -75,7 +75,6 @@ class PodMember_vote_in(models.Model):
     def __str__(self):
         return str(self.voter)
 
-
 class PodMember_vote_out(models.Model):
     condidate   = models.ForeignKey(PodMember, on_delete=models.CASCADE)
     voter       = models.ForeignKey(User, on_delete=models.CASCADE)

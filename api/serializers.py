@@ -106,27 +106,37 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         return user
 
+class Userializer(serializers.ModelSerializer):
+    class Meta:
+        model = voteModels.Users
+        fields = ["legalName", "district", "is_reg","verificationScore","address","userType","voterID"]
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
+    users = Userializer()
     class Meta:
-        model = User
-        fields = '__all__'
-        depth=2
+        model  = User
+        fields = ["username","email","is_staff","is_active","is_superuser","users"]
+        depth  = 1
 
+class PODMemberSer(serializers.ModelSerializer):
+    user = UserSerializer()
+    class Meta:
+        model  = voteModels.PodMember
+        fields =["is_delegate","member_number","id","pod","user","is_member"]
+        depth  = 3
 
 class VoterPageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = voteModels.Users
+        model  = voteModels.Users
         fields = "__all__"
-        depth=1
-
+        depth  = 1
 
 class PodMembersSerializer(serializers.ModelSerializer):
     class Meta:
-        model = voteModels.PodMember
+        model  = voteModels.PodMember
         fields = "__all__"
 
 class PodSerializer(serializers.ModelSerializer):
     class Meta:
-        model = voteModels.Pod
+        model  = voteModels.Pod
         fields = "__all__"
