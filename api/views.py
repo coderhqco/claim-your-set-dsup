@@ -272,3 +272,47 @@ class JoinPOD(APIView):
             messages="Something Went Wrong."
             return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
 
+def pod_desolve_check(user, pod):
+    members = pod.podmember_set.filter(is_member = True)
+    if members.first().user.username  != user.username:
+        return False
+    
+    if not members.first().is_delegate:
+        return False
+
+    if members.count() > 1:
+        return False
+    
+    return True
+    
+class DesolvePod(APIView):
+    def post(self,request):
+        
+        try:
+            pod = NUL
+            user = NUL
+            if 'pod' in request.data and 'user' in request.data:
+                pod = voteModels.Pod.objects.get(code = request.data['pod'])
+                user = User.objects.get(username = request.data['user'])
+            else:
+                messages="Pod  and user are required."
+                return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
+
+            print(pod, user)
+            # get the pod and check weather the pod is eligible to be desolved!
+            if pod:
+                # check if user can join the pod
+                if pod_desolve_check(user,pod):
+                    print("this is desolving: ")
+                    pod.delete()
+                    user.users.userType = 0
+                    user.users.save()
+                    # the user automatically sets back to userType = 0
+                    return JsonResponse({"status": "desolved"})
+                else:
+                    # else of pod is active 
+                    messages ='can not desolve the pod at the moment.'
+                    return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            messages="Something Went Wrong."
+            return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)

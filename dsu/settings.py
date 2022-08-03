@@ -29,10 +29,11 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.0.115','dsup-voting-portal.herokuapp.com','127.0.0.1', '192.168.0.101']
+ALLOWED_HOSTS = ['192.168.0.130','dsup-voting-portal.herokuapp.com','127.0.0.1', '192.168.0.101']
 
 # Application definition
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,7 +44,8 @@ INSTALLED_APPS = [
     'vote.apps.VoteConfig',
     'rest_framework',
     'rest_framework_simplejwt',
-    'corsheaders'
+    'corsheaders',
+    'live.apps.LiveConfig',
 
 ]
 
@@ -78,7 +80,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'dsu.wsgi.application'
+ASGI_APPLICATION = "dsu.asgi.application"
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases

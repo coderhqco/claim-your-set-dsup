@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>live</title>
+</head>
+<body>
+    <form id="form">
+        <input type="text" name="message">
+    </form>
+    <div id="msg">
+
+    </div>
+    <script type="text/javascript">
+        const pod  = '45022'
+        const user = 'A1B1C'
+        let url = `ws://${window.location.host}/ws/pod/${pod}/${user}/`
+        console.log(url)
+        const liveSocket = new WebSocket(url);
+        
+        liveSocket.onmessage = function(e){
+            let data = JSON.parse(e.data);
+            console.log("DATA: ",data)
+        }
+
+        let form = document.getElementById("form");
+        form.addEventListener('submit', (e)=>{
+            e.preventDefault()
+            let message = e.target.message.value
+            liveSocket.send(JSON.stringify({
+                "message":message
+            }))
+            form.reset()
+        })
+    </script>
+</body>
+</html>
