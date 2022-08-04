@@ -137,6 +137,7 @@ class PodMembersSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class PodSerializer(serializers.ModelSerializer):
+    district = DistrictsSerializer()
     class Meta:
         model  = voteModels.Pod
         fields = "__all__"
