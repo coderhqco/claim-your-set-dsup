@@ -174,7 +174,7 @@ class CreatePOD(APIView):
             messages="Something Went Wrong."
             return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
 
-class PodView(APIView):
+class UserView(APIView):
     def post(self, request):
         try:
             user = NUL
@@ -183,8 +183,19 @@ class PodView(APIView):
             else:
                 messages="user is required."
                 return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # if user.users.userstype is 1 then send the pod info as well.
+            if user.users.userType ==1:
+                return JsonResponse({
+                    "pod": apiSerializers.PodSerializer(user.podmember_set.first().pod).data,
+                    "user": apiSerializers.UserSerializer(user).data,
+                })
 
-            return JsonResponse(apiSerializers.PodSerializer(user.podmember_set.first().pod).data)
+            return JsonResponse({
+                # "pod": apiSerializers.PodSerializer(user.podmember_set.first().pod).data,
+                "user": apiSerializers.UserSerializer(user).data,
+            })
+            
         except:
             messages="Something Went Wrong."
             return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)

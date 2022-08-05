@@ -107,6 +107,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 class Userializer(serializers.ModelSerializer):
+    district = DistrictsSerializer()
     class Meta:
         model = voteModels.Users
         fields = ["legalName", "district", "is_reg","verificationScore","address","userType","voterID"]
@@ -115,7 +116,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     users = Userializer()
     class Meta:
         model  = User
-        fields = ["username","email","is_staff","is_active","is_superuser","users"]
+        fields = ["username","email","is_staff","is_active","users","date_joined"]
         depth  = 1
 
 class PODMemberSer(serializers.ModelSerializer):

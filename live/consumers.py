@@ -50,6 +50,11 @@ class HouseKeepingConsumer(WebsocketConsumer):
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
         # Send message to room group
+        self.send(text_data=json.dumps({
+            'type':'podmember',
+            'data': "lovelove"
+        }))
+
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
@@ -94,6 +99,7 @@ def switch(text_data_json):
                 return {
                     'type':text_data_json['type'], 
                     'done': False,
+                    'voter': user.username,
                     'data':'you have already voted in for thie condidate.'
                     }
 
@@ -111,15 +117,15 @@ def switch(text_data_json):
                 return {
                     'type': text_data_json['type'],
                     'done': True,
+                    'voter': user.username,
                     'is_member':condidate.is_member, 
                     'data':apiSerializers.PODMemberSer(podMembers, many=True).data
                     }
 
-            return {'type': text_data_json['type'], 'data':"voted in"}
+            return {'type': text_data_json['type'],'done':True, 'voter':user.username,'data':"voted in"}
 
         case 'voteOut':
-            """ currently there is no vote out functionality"""
-            print("vote in: ", text_data_json)
+            """currently there is no vote out functionality"""
             return {'type': text_data_json['type'], 'data':"voted out"}
 
         case 'desolvePod':
