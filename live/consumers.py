@@ -50,11 +50,7 @@ class HouseKeepingConsumer(WebsocketConsumer):
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
         # Send message to room group
-        self.send(text_data=json.dumps({
-            'type':'podmember',
-            'data': "lovelove"
-        }))
-
+    
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
@@ -85,6 +81,9 @@ def switch(text_data_json):
             pod.invitation_code = apiView.pod_invitation_generator()
             pod.save()
             return {'type':text_data_json['type'], 'data':apiSerializers.PodSerializer(pod).data}
+        case 'joined':
+            pod = voteModels.Pod.objects.get(code = text_data_json['pod'])
+            return {'type':text_data_json['type'], 'data':apiSerializers.PODMemberSer(pod.podmember_set.all(), many=True).data}
 
         case 'voteIn':
             """vote on condidate in and check if the condidate has 50+1 vote to become members.
