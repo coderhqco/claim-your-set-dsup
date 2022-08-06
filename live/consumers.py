@@ -99,6 +99,7 @@ def switch(text_data_json):
                     'type':text_data_json['type'], 
                     'done': False,
                     'voter': user.username,
+                    'condidate': condidate.user.username,
                     'data':'you have already voted in for thie condidate.'
                     }
 
@@ -117,11 +118,18 @@ def switch(text_data_json):
                     'type': text_data_json['type'],
                     'done': True,
                     'voter': user.username,
+                    'condidate': condidate.user.username,
                     'is_member':condidate.is_member, 
                     'data':apiSerializers.PODMemberSer(podMembers, many=True).data
                     }
 
-            return {'type': text_data_json['type'],'done':True, 'voter':user.username,'data':"voted in"}
+            return {
+                'type': text_data_json['type'],
+                'done':True,
+                'condidate': condidate.user.username, 
+                'voter':user.username,
+                'data':"voted in"
+                }
 
         case 'voteOut':
             """currently there is no vote out functionality"""
