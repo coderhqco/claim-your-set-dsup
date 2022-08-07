@@ -123,7 +123,7 @@ else:
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
-                "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
+                "hosts": [os.environ.get('REDIS_URL')],
             },
             # "ROUTING": "chat.routing.channel_routing",
         },
@@ -172,20 +172,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_HOST_USER = 'democracy.straight.up+s@gmail.com'
-# EMAIL_HOST_PASSWORD = 'zdlybdgqqrchgyfd'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-
 EMAIL_BACKEND       = os.environ.get('EMAIL_BACKEND')
 EMAIL_HOST          = os.environ.get('EMAIL_HOST')
 EMAIL_HOST_USER     = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_PORT          = os.environ.get('EMAIL_PORT')
 EMAIL_USE_TLS       = True
-
 
 
 REST_FRAMEWORK = {
@@ -203,17 +195,9 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
 }
 
-
 # this is for  the backend jwt auth. 
 JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
-
 CORS_ALLOW_ALL_ORIGINS = True # If this is used then `CORS_ALLOWED_ORIGINS` will not have any effect
 CORS_ALLOW_CREDENTIALS = True
-
-# CORS_ALLOWED_ORIGINS = [
-#     'http://localhost:3030',
-# ] 
-# # If this is used, then not need to use `CORS_ALLOW_ALL_ORIGINS = True`
-# CORS_ALLOWED_ORIGIN_REGEXES = [
-#     'http://localhost:3030',
-# ]
+#CORS_ALLOW_HEADERS = ['*']
+CORS_ORIGIN_WHITELIST = ('http://localhost:8080','http://192.168.0.130:8080')
