@@ -20,7 +20,7 @@ import live.routing
 django.setup()
 
 application = ProtocolTypeRouter({
-  "http": get_asgi_application(),
+  "https": get_asgi_application(),
   'websocket': AuthMiddlewareStack(
     URLRouter(
       live.routing.websocket_urlpatterns
