@@ -82,11 +82,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'dsu.wsgi.application'
 ASGI_APPLICATION = "dsu.asgi.application"
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
-}
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -101,6 +96,13 @@ if json.loads(os.environ.get('PRODUCTION').lower()):
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+    print("REDIS_URL: ",os.environ.get('REDIS_URL'))
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
+        }
+    }
+
 else:
     print("runnig the app with main database")
     DATABASES = {
@@ -116,6 +118,16 @@ else:
                 }
             }
         }
+    print("REDIS_URL: ",os.environ.get('REDIS_URL'))
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "asgi_redis.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
+            },
+            # "ROUTING": "chat.routing.channel_routing",
+        },
+    }
 
 
 # Password validation
@@ -197,6 +209,7 @@ JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 
 CORS_ALLOW_ALL_ORIGINS = True # If this is used then `CORS_ALLOWED_ORIGINS` will not have any effect
 CORS_ALLOW_CREDENTIALS = True
+
 # CORS_ALLOWED_ORIGINS = [
 #     'http://localhost:3030',
 # ] 
