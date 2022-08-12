@@ -201,3 +201,4 @@ CORS_ALLOW_ALL_ORIGINS = True # If this is used then `CORS_ALLOWED_ORIGINS` will
 CORS_ALLOW_CREDENTIALS = True
 #CORS_ALLOW_HEADERS = ['*']
 CORS_ORIGIN_WHITELIST = ('http://localhost:8080','http://192.168.0.130:8080')
+CSRF_TRUSTED_ORIGINS = ['https://dsup.herokuapp.com', 'http://dsup.herokuapp.com']
