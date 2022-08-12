@@ -46,7 +46,8 @@ class Pod(models.Model):
 
     def __str__(self):
         return str(self.code)
-
+        
+    @property
     def is_active(self):
         # check if the member <= 12 and return true
         if 6 <= self.podmember_set.count() <= 12:

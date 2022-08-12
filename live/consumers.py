@@ -50,7 +50,6 @@ class HouseKeepingConsumer(WebsocketConsumer):
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
         # Send message to room group
-    
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
@@ -80,6 +79,7 @@ def switch(text_data_json):
             pod = voteModels.Pod.objects.get(code = text_data_json['pod'])
             pod.invitation_code = apiView.pod_invitation_generator()
             pod.save()
+            print("pod ser: ", apiSerializers.PodSerializer(pod).data)
             return {'type':text_data_json['type'], 'data':apiSerializers.PodSerializer(pod).data}
         case 'joined':
             pod = voteModels.Pod.objects.get(code = text_data_json['pod'])
@@ -150,6 +150,20 @@ def switch(text_data_json):
                     return {'type': text_data_json['type'],'done':True, 'data':"removed the pod"}
 
             return {'type': text_data_json['type'],'done':False, 'data':"unable to remove"}
+
+        case 'removemember':
+            """ this case removes the condidate or member"""
+            pod = voteModels.Pod.objects.get(code = text_data_json['pod'])
+            member = voteModels.PodMember.objects.get(pk = text_data_json['member'])
+            member.delete()
+            # set the userType back to zero
+            member.user.users.userType = 0
+            member.user.users.save()
+            return {
+                'type':text_data_json['type'], 
+                'done': member.user.username,
+                'data':apiSerializers.PODMemberSer(pod.podmember_set.all(), many=True).data
+                }
 
         case default:
             return {'type': 'notype', 'data':'no action to preferm'}

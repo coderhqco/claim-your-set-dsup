@@ -27,7 +27,6 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = apiSerializers.RegisterSerializer
 
-
 def activate(request, uidb64, token):
     """after the claiming your seat, this function handles the activation of user via email"""
     try:
@@ -35,12 +34,13 @@ def activate(request, uidb64, token):
         users = User.objects.get(id=uid)
     except(TypeError, ValueError, OverflowError, User.DoesNotExist):
         users = None
+        return Response({"status":'exception!'}, status=status.HTTP_400_BAD_REQUEST)
     if users is not None and account_activation_token.check_token(users, token):
         users.is_active = User.objects.filter(id=uid).update(is_active=True, is_staff= True)
-        
         return JsonResponse({'entry_code':users.username},safe=False)
     else:
-        return JsonResponse({'error':'Activation link is invalid!'},safe=False)
+        return Response({"status":'Activation link is invalid!'}, status=status.HTTP_400_BAD_REQUEST)
+        
 
 
 class UserPageView(viewsets.ModelViewSet):
@@ -270,6 +270,9 @@ class JoinPOD(APIView):
                         member_number = pod.podmember_set.count()+1
                     )
                     podMember.save()
+                    # set the userType of the member to 1 
+                    podMember.user.users.userType = 1
+                    podMember.user.users.save()
                     return JsonResponse(apiSerializers.PodSerializer(pod).data)
                 else:
                     # else of pod is active 

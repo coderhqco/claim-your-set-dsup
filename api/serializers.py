@@ -1,4 +1,3 @@
-from dataclasses import fields
 from rest_framework import serializers
 from vote.models import Districts
 from django.contrib.auth.models import User
@@ -12,7 +11,7 @@ from django.core.mail import EmailMessage
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from vote import models as voteModels
-
+import os
 class DistrictsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Districts
@@ -96,7 +95,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         mail_subject = 'Activate your account.'
         message = render_to_string('api/accountActiveEmail.html', {
             'user': user,
-            'domain': current_site.domain,
+            'domain': os.environ.get('DOMAIN'),
+            # 'domain': current_site.domain,
             'uid':urlsafe_base64_encode(force_bytes(user.pk)),
             'token':account_activation_token.make_token(user),
         })
@@ -139,6 +139,10 @@ class PodMembersSerializer(serializers.ModelSerializer):
 
 class PodSerializer(serializers.ModelSerializer):
     district = DistrictsSerializer()
+    # is_active is a property defined on the model
+    is_active = serializers.ReadOnlyField()
     class Meta:
         model  = voteModels.Pod
         fields = "__all__"
+
+
