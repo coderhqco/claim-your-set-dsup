@@ -1,5 +1,4 @@
 from curses.ascii import NUL
-from gettext import NullTranslations
 from rest_framework import viewsets
 from vote import models as voteModels
 from api import serializers as apiSerializers
@@ -174,6 +173,14 @@ class CreatePOD(APIView):
             messages="Something Went Wrong."
             return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
 
+class PodMem(APIView):
+    def post(self,request):
+        try:
+            pod = voteModels.PodMember.objects.all()
+            return Response(apiSerializers.PODMemberSer(pod, many=True).data, status=status.HTTP_200_OK)
+        except:
+            return JsonResponse({False: True})
+
 class UserView(APIView):
     def post(self, request):
         try:
@@ -330,3 +337,4 @@ class DesolvePod(APIView):
         except:
             messages="Something Went Wrong."
             return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
+

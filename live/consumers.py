@@ -1,4 +1,5 @@
 import json
+from os import pread
 from channels.generic.websocket import WebsocketConsumer
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import async_to_sync
@@ -66,10 +67,18 @@ class HouseKeepingConsumer(WebsocketConsumer):
         }))
 
 
-def majorityVotes(pod, condidate):
-    pod_members = pod.podmember_set.all()
-    member_vote = condidate.podmember_vote_in_set.all()
-    if member_vote.count() >= (pod_members.count()/2):
+def majorityputFarward(recipient):
+    if recipient.putFarward.all().count() >= (recipient.pod.podmember_set.all().count()/2):
+        return True
+    return False
+
+def majorityVotes(condidate):
+    if condidate.voteIns.all().count() >= (condidate.pod.podmember_set.all().count()/2):
+        return True
+    return False
+
+def majorityVotesOut(member):
+    if member.voteOuts.all().count() >= (member.pod.podmember_set.all().count()/2):
         return True
     return False
 
@@ -106,23 +115,28 @@ def switch(text_data_json):
             voteIN = voteModels.PodMember_vote_in.objects.create(condidate = condidate, voter = user)
             voteIN.save()
             # check if condidate has got the majority votes
-            if majorityVotes(condidate.pod, condidate):
+            if majorityVotes(condidate):
                 condidate.is_member = True
                 condidate.save()
                 # set the member.user.users.userType to 1 as it becomes the member in a pod.
                 userType = condidate.user
                 userType.users.userType = 1
                 userType.save()
+                # remove all votes in for this members
+                votedIn = voteModels.PodMember_vote_in.objects.filter(condidate = condidate).delete()
                 podMembers = condidate.pod.podmember_set.all()
+                data = {
+                    'pod':apiSerializers.PodSerializer(condidate.pod).data,
+                    'podmembers':apiSerializers.PODMemberSer(podMembers, many=True).data
+                }
                 return {
                     'type': text_data_json['type'],
                     'done': True,
                     'voter': user.username,
                     'condidate': condidate.user.username,
                     'is_member':condidate.is_member, 
-                    'data':apiSerializers.PODMemberSer(podMembers, many=True).data
+                    'data':data
                     }
-
             return {
                 'type': text_data_json['type'],
                 'done':True,
@@ -132,8 +146,79 @@ def switch(text_data_json):
                 }
 
         case 'voteOut':
-            """currently there is no vote out functionality"""
-            return {'type': text_data_json['type'], 'data':"voted out"}
+            """this is for voting out a member while the pod is active"""
+            user = User.objects.get(username = text_data_json['voter'])
+            member =voteModels.PodMember.objects.get(pk = text_data_json['member'])
+            # check if the voter is already in the vote out:
+            votedOut = voteModels.PodMember_vote_out.objects.filter(voter = user, condidate = member).exists()
+            if votedOut:
+                return {
+                    'type':text_data_json['type'], 
+                    'done': False,
+                    'voter': user.username,
+                    'condidate': member.user.username,
+                    'data':'you have already voted out for this member.'
+                    }
+
+            voteOut = voteModels.PodMember_vote_out.objects.create(condidate = member, voter = user)
+            voteOut.save()
+            podMembers = member.pod.podmember_set.all()
+            return {
+                'type': text_data_json['type'],
+                'done': True,
+                'voter': user.username,
+                'member': member.user.username,
+                'data':apiSerializers.PODMemberSer(podMembers, many=True).data
+                }
+
+        case 'delegate':
+            """this functionality choose for delegation"""
+            #  pod: the pod id coming from client
+            # F_delFor: the person chosen as delegate
+            # voter: the member who voted
+            user = User.objects.get(username = text_data_json['voter'])
+            recipient = voteModels.PodMember.objects.get(pk = text_data_json['recipient'])
+            delegated = voteModels.PodMember_put_farward.objects.filter(voter = user, recipient = recipient).exists()
+            if delegated:
+                return {
+                    'type':text_data_json['type'], 
+                    'done': False,
+                    'voter': user.username,
+                    'recipient': recipient.user.username,
+                    'data':'you have already delegated for this member.'
+                    }
+            putFrwd = voteModels.PodMember_put_farward.objects.create(recipient = recipient, voter = user)
+            putFrwd.save()
+            if majorityputFarward(recipient):
+                # revoke the prev delegate to member
+                prevDel = recipient.pod.podmember_set.get(is_delegate = True)
+
+                recipient.is_delegate = True
+                recipient.save()
+
+                prevDel.is_delegate = False
+                prevDel.save()
+                # remove all the pufarward votes of prevDel
+                recipient.putFarward.all().delete()
+
+                return {
+                    'type': text_data_json['type'],
+                    'done': True,
+                    'voter': user.username,
+                    'recipient': recipient.user.username,
+                    'is_delegate':recipient.is_delegate, 
+                    'data':apiSerializers.PODMemberSer(recipient.pod.podmember_set.all(), many=True).data
+                    }
+
+            return {
+                'type': text_data_json['type'],
+                'done': True,
+                'voter': user.username,
+                'recipient': recipient.user.username,
+                'is_delegate':recipient.is_delegate,
+                'data':apiSerializers.PODMemberSer(recipient.pod.podmember_set.all(), many=True).data
+                }
+            
 
         case 'desolvePod':
             """check if the pod has one member only and he/she is delegate. 
@@ -159,10 +244,14 @@ def switch(text_data_json):
             # set the userType back to zero
             member.user.users.userType = 0
             member.user.users.save()
+            data = {
+                "pod": apiSerializers.PodSerializer(pod).data,
+                "podMembers": apiSerializers.PODMemberSer(pod.podmember_set.all(), many=True).data
+            }
             return {
                 'type':text_data_json['type'], 
                 'done': member.user.username,
-                'data':apiSerializers.PODMemberSer(pod.podmember_set.all(), many=True).data
+                'data':data
                 }
 
         case default:

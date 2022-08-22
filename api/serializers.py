@@ -1,3 +1,4 @@
+from dataclasses import fields
 from rest_framework import serializers
 from vote.models import Districts
 from django.contrib.auth.models import User
@@ -119,24 +120,6 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ["username","email","is_staff","is_active","users","date_joined"]
         depth  = 1
 
-class PODMemberSer(serializers.ModelSerializer):
-    user = UserSerializer()
-    class Meta:
-        model  = voteModels.PodMember
-        fields =["is_delegate","member_number","id","pod","user","is_member"]
-        depth  = 3
-
-class VoterPageSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model  = voteModels.Users
-        fields = "__all__"
-        depth  = 1
-
-class PodMembersSerializer(serializers.ModelSerializer):
-    class Meta:
-        model  = voteModels.PodMember
-        fields = "__all__"
-
 class PodSerializer(serializers.ModelSerializer):
     district = DistrictsSerializer()
     # is_active is a property defined on the model
@@ -145,4 +128,40 @@ class PodSerializer(serializers.ModelSerializer):
         model  = voteModels.Pod
         fields = "__all__"
 
+class PodMember_VoteInSer(serializers.ModelSerializer):
+    class Meta:
+        model = voteModels.PodMember_vote_in
+        fields = '__all__'
 
+class PodMember_VoteOutSer(serializers.ModelSerializer):
+    class Meta:
+        model = voteModels.PodMember_vote_out
+        fields = '__all__'
+
+class PODMemberSer(serializers.ModelSerializer):
+    user = UserSerializer()
+    pod = PodSerializer()
+    voteIns = serializers.StringRelatedField(many=True)
+    voteOuts = serializers.StringRelatedField(many=True)
+    putFarward = serializers.StringRelatedField(many=True)
+
+    class Meta:
+        model  = voteModels.PodMember
+        fields =["is_delegate","member_number","id",'user','pod',"is_member", 'voteIns','voteOuts','putFarward']
+        
+
+class VoterPageSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model  = voteModels.Users
+        fields = "__all__"
+        depth  = 1
+
+
+
+
+
+
+# class PodMembersSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model  = voteModels.PodMember
+#         fields = "__all__"

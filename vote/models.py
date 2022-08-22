@@ -50,7 +50,7 @@ class Pod(models.Model):
     @property
     def is_active(self):
         # check if the member <= 12 and return true
-        if 6 <= self.podmember_set.count() <= 12:
+        if 6 <= self.podmember_set.filter(is_member = True).count() <= 12:
             return True
         return False
 
@@ -70,25 +70,25 @@ class PodMember(models.Model):
         ordering = ['-is_delegate', 'date_joined']
 
 class PodMember_vote_in(models.Model):
-    condidate   = models.ForeignKey(PodMember, on_delete=models.CASCADE) #
+    condidate   = models.ForeignKey(PodMember,related_name='voteIns', on_delete=models.CASCADE) #
     voter       = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.voter)
+        return str(self.voter) + '-'+ str(self.condidate)
 
 class PodMember_vote_out(models.Model):
-    condidate   = models.ForeignKey(PodMember, on_delete=models.CASCADE)
+    condidate   = models.ForeignKey(PodMember, related_name='voteOuts', on_delete=models.CASCADE)
     voter       = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.voter)
+        return str(self.voter) + '-'+str(self.condidate)
 
 class PodMember_put_farward(models.Model):
-    recipient   = models.ForeignKey(PodMember, on_delete=models.CASCADE) # recipient 
+    recipient   = models.ForeignKey(PodMember,related_name='putFarward', on_delete=models.CASCADE) # recipient 
     voter       = models.ForeignKey(User, on_delete=models.CASCADE)  # 
 
     def __str__(self):
-        return str(self.voter)
+        return str(self.voter) + '-'+str(self.recipient)
 
 
 

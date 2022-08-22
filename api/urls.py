@@ -17,11 +17,11 @@ urlpatterns = [
     path('register/', apiViews.RegisterView.as_view(), name='auth_register'),
     path('activate/<uidb64>/<token>/',apiViews.activate, name='activate'),
     path('login/', apiViews.LoginPageView.as_view()),
-
     path('create-pod/', apiViews.CreatePOD.as_view()),
     path('house-keeping/', apiViews.HouseKeeping.as_view()),
     path('join-pod/', apiViews.JoinPOD.as_view()),
     path('userinfo/', apiViews.UserView.as_view()),
     path('pod-desolve/', apiViews.DesolvePod.as_view()),
+    path('podmember/', apiViews.PodMem.as_view()),
 
 ]
