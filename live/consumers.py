@@ -142,7 +142,7 @@ def switch(text_data_json):
                 'done':True,
                 'condidate': condidate.user.username, 
                 'voter':user.username,
-                'data':"voted in"
+                'data':apiSerializers.PODMemberSer(condidate.pod.podmember_set.all(), many=True).data
                 }
 
         case 'voteOut':
