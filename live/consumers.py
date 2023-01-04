@@ -88,7 +88,6 @@ def switch(text_data_json):
             pod = voteModels.Pod.objects.get(code = text_data_json['pod'])
             pod.invitation_code = apiView.pod_invitation_generator()
             pod.save()
-            print("pod ser: ", apiSerializers.PodSerializer(pod).data)
             return {'type':text_data_json['type'], 'data':apiSerializers.PodSerializer(pod).data}
         case 'joined':
             pod = voteModels.Pod.objects.get(code = text_data_json['pod'])
@@ -201,6 +200,10 @@ def switch(text_data_json):
                 # remove all the pufarward votes of prevDel
                 recipient.putFarward.all().delete()
 
+                
+                # here you have to update the FDel field of the pod as true 
+                # indicating that the pod had it's first election 
+
                 return {
                     'type': text_data_json['type'],
                     'done': True,
@@ -219,7 +222,6 @@ def switch(text_data_json):
                 'data':apiSerializers.PODMemberSer(recipient.pod.podmember_set.all(), many=True).data
                 }
             
-
         case 'desolvePod':
             """check if the pod has one member only and he/she is delegate. 
             in case of removing, return pod removed done else return not aligible to remove """
