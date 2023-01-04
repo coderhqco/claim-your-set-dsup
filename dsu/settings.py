@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['192.168.0.130','192.168.0.132','dsup-voting-portal.herokuapp.c
 
 # Application definition
 INSTALLED_APPS = [
+    'corsheaders',
     'channels',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -44,7 +45,6 @@ INSTALLED_APPS = [
     'vote.apps.VoteConfig',
     'rest_framework',
     'rest_framework_simplejwt',
-    'corsheaders',
     'live.apps.LiveConfig',
 
 ]
