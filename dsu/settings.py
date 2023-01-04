@@ -199,6 +199,6 @@ SIMPLE_JWT = {
 JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 CORS_ALLOW_ALL_ORIGINS = True # If this is used then `CORS_ALLOWED_ORIGINS` will not have any effect
 CORS_ALLOW_CREDENTIALS = True
-#CORS_ALLOW_HEADERS = ['*']
+CORS_ALLOW_HEADERS = ['*']
 CORS_ORIGIN_WHITELIST = ('http://localhost:8080','http://192.168.0.130:8080')
 CSRF_TRUSTED_ORIGINS = ['https://dsup.herokuapp.com', 'http://dsup.herokuapp.com']
