@@ -200,9 +200,9 @@ JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 CORS_ALLOW_ALL_ORIGINS = True # If this is used then `CORS_ALLOWED_ORIGINS` will not have any effect
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = ['*']
-CORS_ORIGIN_WHITELIST = ('http://localhost:8080','http://192.168.0.130:8080')
+CORS_ORIGIN_WHITELIST = ['http://localhost:8080','http://192.168.0.130:8080']
+
 CSRF_TRUSTED_ORIGINS = ['http://dsup-voting-portal.herokuapp.com',
                         'https://dsup-voting-portal.herokuapp.com',
-                        'dsu-front.herokuapp.com',
                         'https://dsu-front.herokuapp.com',
                         'http://dsu-front.herokuapp.com']
