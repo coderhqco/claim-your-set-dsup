@@ -13,6 +13,7 @@ from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from vote import models as voteModels
 import os
+
 class DistrictsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Districts
@@ -96,12 +97,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         mail_subject = 'Activate your account.'
         message = render_to_string('api/accountActiveEmail.html', {
             'user': user,
-            'domain': os.environ.get('DOMAIN'),
+            'domain': os.environ.get('APP_DOMAIN'),
             # 'domain': current_site.domain,
             'uid':urlsafe_base64_encode(force_bytes(user.pk)),
             'token':account_activation_token.make_token(user),
         })
         to_email = user.email
+        print("domain statis: ", os.environ.get("APP_DOMAIN"))
         email = EmailMessage( mail_subject,  message,  to=[to_email] )
         email.send()
 
