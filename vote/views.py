@@ -13,6 +13,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import authenticate, login,logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+import os
 
 def entry_code_generator():
     """
@@ -70,7 +71,8 @@ def ClaimYourSeat(request):
             mail_subject = 'Activate your account.'
             message = render_to_string('vote/accountActiveEmail.html', {
                 'user': user,
-                'domain': current_site.domain,
+                # 'domain': current_site.domain,
+                'domain': os.environ.get('APP_DOMAIN'),
                 'uid':urlsafe_base64_encode(force_bytes(user.pk)),
                 'token':account_activation_token.make_token(user),
             })
