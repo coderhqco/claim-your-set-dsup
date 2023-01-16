@@ -75,7 +75,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         # set the user profile instance
-        user.users.legalName = validated_data['legalName']
+        user.users.legalName = validated_data['legalName'].upper()
+        
         user.users.address=validated_data['address']
 
         # add user district
@@ -91,7 +92,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             user.users.is_reg = True
 
         user.save()
-
         # send email and get url and encode 
         current_site = get_current_site(self.context['request'])
         mail_subject = 'Activate your account.'
@@ -103,7 +103,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             'token':account_activation_token.make_token(user),
         })
         to_email = user.email
-        print("domain statis: ", os.environ.get("APP_DOMAIN"))
         email = EmailMessage( mail_subject,  message,  to=[to_email] )
         email.send()
 

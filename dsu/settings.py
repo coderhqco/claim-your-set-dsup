@@ -82,7 +82,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'dsu.wsgi.application'
 ASGI_APPLICATION = "dsu.asgi.application"
 
-print("app domain: ", os.environ.get("APP_DOMAIN"))
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
