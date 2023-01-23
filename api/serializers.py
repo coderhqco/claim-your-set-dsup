@@ -159,6 +159,10 @@ class VoterPageSerializer(serializers.HyperlinkedModelSerializer):
 
 
 
+class PodBackNForthSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = voteModels.PodBackNForth
+        fields = "__all__"
 
 
 

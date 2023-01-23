@@ -23,5 +23,6 @@ urlpatterns = [
     path('userinfo/', apiViews.UserView.as_view()),
     path('pod-desolve/', apiViews.DesolvePod.as_view()),
     path('podmember/', apiViews.PodMem.as_view()),
-
+    path('backnforth/<pod>/', apiViews.PodBackNForth.as_view()),
+    path('backnforth/<pod>/add', apiViews.PodBackNForthAdd.as_view()),
 ]

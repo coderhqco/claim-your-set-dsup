@@ -338,3 +338,22 @@ class DesolvePod(APIView):
             messages="Something Went Wrong."
             return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class PodBackNForth(APIView):
+    
+    # list all the messsages to that Pod
+    def post(self,request, pod):
+        try:
+            chats = voteModels.PodBackNForth.objects.all()
+            return Response(apiSerializers.PodBackNForthSerializer(chats, many=True).data, status=status.HTTP_200_OK)
+        except:
+            return JsonResponse({False: pod})
+
+class PodBackNForthAdd(APIView):
+    
+    # add a message to Pod Back and Forth 
+    def post(self,request, pod):
+        try:
+            return Response({"date": "added one message to the pod: "+ pod}, status=status.HTTP_200_OK)
+        except:
+            return JsonResponse({False: pod})
