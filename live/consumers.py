@@ -67,6 +67,20 @@ class HouseKeepingConsumer(WebsocketConsumer):
         }))
 
 
+class Testing(WebsocketConsumer):
+    def connect(self):
+        print("connected...")
+        self.username = "Anonymous"
+        self.accept()
+        self.send(text_data="[Welcome %s!]" % self.username)
+    def receive(self,*,text_data):
+        print("got:", text_data)
+        print(dir(self))
+        pass
+    def disconnect(self,message):
+        print(str(message) + " disconnected...")
+        
+
 def majorityputFarward(recipient):
     if recipient.putFarward.all().count() >= (recipient.pod.podmember_set.all().count()/2):
         return True

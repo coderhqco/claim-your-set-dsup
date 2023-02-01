@@ -8,6 +8,8 @@ from django.contrib.auth.models import User
 
 class PodBackNForth(WebsocketConsumer):
     def connect(self):
+        print("connected", self.scope['url_route']['kwargs']['pod_name'])
+
         self.pod_name = self.scope['url_route']['kwargs']['pod_name']
         self.user_name = self.scope['url_route']['kwargs']['user_name']
         self.room_group_name = 'chat_%s' % self.pod_name
@@ -39,6 +41,7 @@ class PodBackNForth(WebsocketConsumer):
         }))
         
     def disconnect(self, close_code):
+        print("disconnected: ",self.channel_name)
         # Leave room group
         self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
@@ -46,6 +49,7 @@ class PodBackNForth(WebsocketConsumer):
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
         # Send message to room group
+        print("received: ", text_data)
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name, {
                 'type': 'chat',
