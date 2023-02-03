@@ -2,11 +2,15 @@ import json
 from os import pread
 from channels.generic.websocket import WebsocketConsumer
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
+
 from asgiref.sync import async_to_sync
 from vote import models as voteModels
 from api import serializers as apiSerializers 
 import api.views as apiView
 from django.contrib.auth.models import User
+from api.serializers import UserSerializer
+
 
 class HouseKeepingConsumer(WebsocketConsumer):
     def connect(self):
@@ -67,19 +71,50 @@ class HouseKeepingConsumer(WebsocketConsumer):
         }))
 
 
-class Testing(WebsocketConsumer):
-    def connect(self):
-        print("connected...")
-        self.username = "Anonymous"
-        self.accept()
-        self.send(text_data="[Welcome %s!]" % self.username)
-    def receive(self,*,text_data):
-        print("got:", text_data)
-        print(dir(self))
-        pass
-    def disconnect(self,message):
-        print(str(message) + " disconnected...")
+class PodBackNForth(AsyncWebsocketConsumer):
+    async def connect(self):
+        # get the pod name and username
+        self.podName = self.scope['url_route']['kwargs']['podName']
+        self.userName = self.scope['url_route']['kwargs']['userName']
+        self.room_group_name = self.podName
+        self.username = self.userName
+
+        # connect to db and retraive old messages of that pod
+        self.usrs = await database_sync_to_async(self.get_messages)()
         
+        print(f"{self.userName} has connected to ", self.podName)
+
+        # add the user to the pod room
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+        await self.accept()
+        # send message to that web socket request only. not to the group members
+        await self.send(text_data=json.dumps({"message": self.usrs}))
+        
+        
+    def get_messages(self):
+        pod = voteModels.Pod.objects.first()
+        objects = UserSerializer(voteModels.PodBackNForth.objects.filter(pod=pod), many=True).data
+        return objects
+        
+
+    # Receive message from WebSocket
+    async def receive(self, text_data):
+        await self.channel_layer.group_send(
+            self.room_group_name, {"type": "podChat", "message": text_data}
+        )
+    
+    # handling function for sending all the messages to room members
+    async def podChat(self, event):
+        await self.send(text_data=json.dumps({"message": event['message']}))
+
+    # when a member of the room leaves the room 
+    async def disconnect(self,message):
+        print(f"{self.userName} has disconnected from {self.podName}")
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+    
+
+
+
 
 def majorityputFarward(recipient):
     if recipient.putFarward.all().count() >= (recipient.pod.podmember_set.all().count()/2):
