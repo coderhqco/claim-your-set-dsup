@@ -90,13 +90,13 @@ class PodBackNForth(AsyncWebsocketConsumer):
         # send message to that web socket request only. not to the group members
         await self.send(text_data=json.dumps({"message": self.usrs}))
         
-        
     def get_messages(self):
+        # here or in serializer class, implement paginations. 
+        # limit the number of messages that gets retrived on connect
         pod = voteModels.Pod.objects.first()
-        objects = UserSerializer(voteModels.PodBackNForth.objects.filter(pod=pod), many=True).data
+        objects = apiSerializers.PodBackNForthSerializer(voteModels.PodBackNForth.objects.filter(pod=pod), many=True).data
         return objects
         
-
     # Receive message from WebSocket
     async def receive(self, text_data):
         await self.channel_layer.group_send(
@@ -105,16 +105,26 @@ class PodBackNForth(AsyncWebsocketConsumer):
     
     # handling function for sending all the messages to room members
     async def podChat(self, event):
+        # save the incoming messages into DB here.
+        self.usrs = await database_sync_to_async(self.save_message)(event['message'])
         await self.send(text_data=json.dumps({"message": event['message']}))
+
+    def save_message(self,msg):
+        # get pod and user instance
+        pod = voteModels.Pod.objects.get(code = self.podName)
+        usr = User.objects.get(username = self.userName)
+
+        # here validate if the user is a member of the pod and create a message instance to save into DB
+        objects = voteModels.PodBackNForth.objects.create(pod = pod, sender= usr,message = ""+msg)
+        objects.save()
+        return objects
+        
 
     # when a member of the room leaves the room 
     async def disconnect(self,message):
         print(f"{self.userName} has disconnected from {self.podName}")
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
     
-
-
-
 
 def majorityputFarward(recipient):
     if recipient.putFarward.all().count() >= (recipient.pod.podmember_set.all().count()/2):
