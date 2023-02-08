@@ -88,7 +88,7 @@ class PodBackNForth(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
         # send message to that web socket request only. not to the group members
-        await self.send(text_data=json.dumps({"message": self.usrs}))
+        await self.send(text_data=json.dumps(self.usrs))
         
     def get_messages(self):
         # here or in serializer class, implement paginations. 
@@ -107,17 +107,10 @@ class PodBackNForth(AsyncWebsocketConsumer):
     async def podChat(self, event):
         # save the incoming messages into DB here.
         self.usrs = await database_sync_to_async(self.save_message)(event['message'])
-        await self.send(text_data=json.dumps({"message": event['message']}))
 
-    def save_message(self,msg):
-        # get pod and user instance
-        pod = voteModels.Pod.objects.get(code = self.podName)
-        usr = User.objects.get(username = self.userName)
-
-        # here validate if the user is a member of the pod and create a message instance to save into DB
-        objects = voteModels.PodBackNForth.objects.create(pod = pod, sender= usr,message = ""+msg)
-        objects.save()
-        return objects
+        # get the message instance to send back to the front.
+        message = await database_sync_to_async(self.get_message)()
+        await self.send(text_data=json.dumps(message))
         
 
     # when a member of the room leaves the room 
@@ -125,6 +118,28 @@ class PodBackNForth(AsyncWebsocketConsumer):
         print(f"{self.userName} has disconnected from {self.podName}")
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
     
+
+    #  get the last message instance when user send a message
+    def get_message(self):
+        # get the last message instance when a member sends a message and to send it back.
+        pod = voteModels.Pod.objects.first()
+        objects = apiSerializers.PodBackNForthSerializer(
+            voteModels.PodBackNForth.objects.filter(pod=pod).filter(
+                sender__username = self.userName).last()
+                ).data
+        return objects
+
+    
+    # get all the messages, once a user join
+    def save_message(self,msg):
+        # get pod and user instance
+        pod = voteModels.Pod.objects.get(code = self.podName)
+        usr = User.objects.get(username = self.userName)
+        # here validate if the user is a member of the pod and create a message instance to save into DB
+        objects = voteModels.PodBackNForth.objects.create(pod = pod, sender= usr,message = ""+msg)
+        objects.save()
+        return objects
+
 
 def majorityputFarward(recipient):
     if recipient.putFarward.all().count() >= (recipient.pod.podmember_set.all().count()/2):
