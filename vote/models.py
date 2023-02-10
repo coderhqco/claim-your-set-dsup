@@ -92,12 +92,6 @@ class PodMember_put_farward(models.Model):
         return str(self.voter) + '-'+str(self.recipient)
 
 
-# pod Back and Forth (chat) model
-# sender
-# Pod
-# date
-# message
-
 class PodBackNForth(models.Model):
     pod = models.ForeignKey(Pod, on_delete=models.CASCADE)
     sender = models.ForeignKey(User, on_delete=models.CASCADE)

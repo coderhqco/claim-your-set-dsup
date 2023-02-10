@@ -160,10 +160,10 @@ class VoterPageSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class PodBackNForthSerializer(serializers.ModelSerializer):
+    sender = UserSerializer()
     class Meta:
-        model = voteModels.PodBackNForth
-        fields = "__all__"
-
+        model   = voteModels.PodBackNForth
+        fields  = ["id", "sender","message", "pod", 'date']
 
 
 # class PodMembersSerializer(serializers.ModelSerializer):

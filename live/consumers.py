@@ -78,7 +78,7 @@ class PodBackNForth(AsyncWebsocketConsumer):
         self.userName = self.scope['url_route']['kwargs']['userName']
         self.room_group_name = self.podName
         self.username = self.userName
-
+        self.request = self.scope.get('request')
         # connect to db and retraive old messages of that pod
         self.usrs = await database_sync_to_async(self.get_messages)()
         
@@ -93,9 +93,13 @@ class PodBackNForth(AsyncWebsocketConsumer):
     def get_messages(self):
         # here or in serializer class, implement paginations. 
         # limit the number of messages that gets retrived on connect
-        pod = voteModels.Pod.objects.first()
-        objects = apiSerializers.PodBackNForthSerializer(voteModels.PodBackNForth.objects.filter(pod=pod), many=True).data
-        return objects
+        pod = voteModels.Pod.objects.get(code = self.podName)
+        if pod:
+            objects = apiSerializers.PodBackNForthSerializer(
+                voteModels.PodBackNForth.objects.filter(pod=pod), 
+                many=True).data
+            return objects
+        return 0
         
     # Receive message from WebSocket
     async def receive(self, text_data):
