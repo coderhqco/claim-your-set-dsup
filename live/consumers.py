@@ -93,7 +93,7 @@ class PodBackNForth(AsyncWebsocketConsumer):
         # send message to that web socket request only. not to the group members
         await self.send(text_data=json.dumps(self.usrs))
 
-    async def get_messages(self):
+    def get_messages(self):
         # here or in serializer class, implement paginations. 
         # limit the number of messages that gets retrived on connect
         pod = voteModels.Pod.objects.get(code = self.podName)
@@ -109,7 +109,7 @@ class PodBackNForth(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             self.room_group_name, {"type": "podChat", "message": text_data}
         )
-        return 
+        
 
     # handling function for sending all the messages to room members
     async def podChat(self, event):
@@ -120,7 +120,7 @@ class PodBackNForth(AsyncWebsocketConsumer):
         message = await database_sync_to_async(self.get_message)()
         print("mesage: ", message)
         await self.send(text_data=json.dumps(message))
-        return 
+        
 
     # when a member of the room leaves the room 
     async def disconnect(self,message):
