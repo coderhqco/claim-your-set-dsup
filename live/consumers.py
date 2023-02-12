@@ -3,6 +3,7 @@ from os import pread
 from channels.generic.websocket import WebsocketConsumer
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+from channels.exceptions import StopConsumer
 
 from asgiref.sync import async_to_sync
 from vote import models as voteModels
@@ -50,6 +51,7 @@ class HouseKeepingConsumer(WebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
+        raise StopConsumer()
 
     # Receive message from WebSocket
     def receive(self, text_data):
@@ -79,6 +81,7 @@ class PodBackNForth(AsyncWebsocketConsumer):
         self.room_group_name = self.podName
         self.username = self.userName
         self.request = self.scope.get('request')
+
         # connect to db and retraive old messages of that pod
         self.usrs = await database_sync_to_async(self.get_messages)()
         
@@ -89,8 +92,8 @@ class PodBackNForth(AsyncWebsocketConsumer):
         await self.accept()
         # send message to that web socket request only. not to the group members
         await self.send(text_data=json.dumps(self.usrs))
-        
-    def get_messages(self):
+
+    async def get_messages(self):
         # here or in serializer class, implement paginations. 
         # limit the number of messages that gets retrived on connect
         pod = voteModels.Pod.objects.get(code = self.podName)
@@ -106,7 +109,8 @@ class PodBackNForth(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             self.room_group_name, {"type": "podChat", "message": text_data}
         )
-    
+        return 
+
     # handling function for sending all the messages to room members
     async def podChat(self, event):
         # save the incoming messages into DB here.
@@ -114,16 +118,19 @@ class PodBackNForth(AsyncWebsocketConsumer):
 
         # get the message instance to send back to the front.
         message = await database_sync_to_async(self.get_message)()
+        print("mesage: ", message)
         await self.send(text_data=json.dumps(message))
-        
+        return 
 
     # when a member of the room leaves the room 
     async def disconnect(self,message):
         print(f"{self.userName} has disconnected from {self.podName}")
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-    
+        self.close()
+
 
     #  get the last message instance when user send a message
+   
     def get_message(self):
         # get the last message instance when a member sends a message and to send it back.
         pod = voteModels.Pod.objects.first()
@@ -135,6 +142,7 @@ class PodBackNForth(AsyncWebsocketConsumer):
 
     
     # get all the messages, once a user join
+  
     def save_message(self,msg):
         # get pod and user instance
         pod = voteModels.Pod.objects.get(code = self.podName)
@@ -142,6 +150,7 @@ class PodBackNForth(AsyncWebsocketConsumer):
         # here validate if the user is a member of the pod and create a message instance to save into DB
         objects = voteModels.PodBackNForth.objects.create(pod = pod, sender= usr,message = ""+msg)
         objects.save()
+        print("saved obj: ", objects)
         return objects
 
 
