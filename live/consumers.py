@@ -113,20 +113,14 @@ class PodBackNForth(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             self.room_group_name, {"type": "podChat", "message": text_data}
         )
-        
-    @sync_to_async
-    def serialize_data(data):
-        serializer = apiSerializers.PodBackNForthSerializer(data)
-        return serializer.data
 
     # handling function for sending all the messages to room members
     async def podChat(self, event):
         # save the incoming messages into DB here.
         self.usrs = await database_sync_to_async(self.save_message)(event['message'])
-
         # # retrive that message and send to the front
         # message = await database_sync_to_async(self.get_message)()
-        
+    
             # this python manual dict is to construct an alternative response. 
             # as there is not way to serialize it
         obj = {
@@ -142,13 +136,10 @@ class PodBackNForth(AsyncWebsocketConsumer):
                 "username":     self.usrs.sender.username,
             },
         }
-
-        print("dict: ", obj)
         await self.send(text_data=json.dumps(obj))
 
     # when a member of the room leaves the room 
     async def disconnect(self,message):
-        print(f"{self.userName} has disconnected from {self.podName}")
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
         self.close()
     #  get the last message instance when user send a message
@@ -172,7 +163,6 @@ class PodBackNForth(AsyncWebsocketConsumer):
         # here validate if the user is a member of the pod and create a message instance to save into DB
         objects = voteModels.PodBackNForth.objects.create(pod = pod, sender= usr,message = ""+msg)
         objects.save()
-        print("saved obj: ", objects)
         return objects
 
 
