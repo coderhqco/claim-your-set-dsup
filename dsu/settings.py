@@ -89,21 +89,13 @@ ASGI_APPLICATION = "dsu.asgi.application"
 import json
 if json.loads(os.environ.get('PRODUCTION').lower()):
     # production 
-    print("running in production with main database")
-    # print("runnig the app with main database")
+    print("running in production")
     DATABASES = {
         'default': {
-                'ENGINE': os.environ.get('DB_ENGINE'),
-                'NAME':  os.environ.get('DB_NAME'),
-                'USER': os.environ.get('DB_USER'),
-                'PASSWORD': os.environ.get('DB_PASSWORD'),
-                'HOST': os.environ.get('DB_HOST'),
-                'PORT': os.environ.get('DB_PORT'),
-                'OPTIONS': {
-                'init_command': 'SET sql_mode="STRICT_TRANS_TABLES"',    
-                }
-            }
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
+    }
     print("REDIS_URL: ",os.environ.get('REDIS_URL'))
     CHANNEL_LAYERS = {
         "default": {

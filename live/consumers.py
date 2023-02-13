@@ -11,7 +11,7 @@ from api import serializers as apiSerializers
 import api.views as apiView
 from django.contrib.auth.models import User
 from api.serializers import UserSerializer
-
+from asyncio import wait_for
 
 class HouseKeepingConsumer(WebsocketConsumer):
     def connect(self):
@@ -116,10 +116,14 @@ class PodBackNForth(AsyncWebsocketConsumer):
         # save the incoming messages into DB here.
         self.usrs = await database_sync_to_async(self.save_message)(event['message'])
 
-        # get the message instance to send back to the front.
-        message = await database_sync_to_async(self.get_message)()
-        print("mesage: ", message)
-        await self.send(text_data=json.dumps(message))
+        try:
+            # get the message instance to send back to the front.
+            message = await wait_for(database_sync_to_async(self.get_message)(), timeout=10.0)
+            # data = await wait_for(self.get_message(), timeout=10.0)
+            print("mesage: ", message)
+            await self.send(text_data=json.dumps(message))
+        except:
+            print("timeout error")
         
 
     # when a member of the room leaves the room 
