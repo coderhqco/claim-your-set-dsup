@@ -4,7 +4,7 @@ from channels.generic.websocket import WebsocketConsumer
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from channels.exceptions import StopConsumer
-
+from asgiref.sync import sync_to_async
 from asgiref.sync import async_to_sync
 from vote import models as voteModels
 from api import serializers as apiSerializers 
@@ -12,6 +12,10 @@ import api.views as apiView
 from django.contrib.auth.models import User
 from api.serializers import UserSerializer
 from asyncio import wait_for
+from django.core import serializers
+from django.forms.models import model_to_dict
+import asyncio
+
 
 class HouseKeepingConsumer(WebsocketConsumer):
     def connect(self):
@@ -110,29 +114,43 @@ class PodBackNForth(AsyncWebsocketConsumer):
             self.room_group_name, {"type": "podChat", "message": text_data}
         )
         
+    @sync_to_async
+    def serialize_data(data):
+        serializer = apiSerializers.PodBackNForthSerializer(data)
+        return serializer.data
 
     # handling function for sending all the messages to room members
     async def podChat(self, event):
         # save the incoming messages into DB here.
         self.usrs = await database_sync_to_async(self.save_message)(event['message'])
 
-        try:
-            # get the message instance to send back to the front.
-            message = await wait_for(database_sync_to_async(self.get_message)(), timeout=10.0)
-            # data = await wait_for(self.get_message(), timeout=10.0)
-            print("mesage: ", message)
-            await self.send(text_data=json.dumps(message))
-        except:
-            print("timeout error")
+        # # retrive that message and send to the front
+        # message = await database_sync_to_async(self.get_message)()
         
+            # this python manual dict is to construct an alternative response. 
+            # as there is not way to serialize it
+        obj = {
+            "id":       self.usrs.id,
+            "date":     self.usrs.date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "message":  self.usrs.message,
+            "pod":      self.usrs.pod.id,
+            "sender":{
+                "date_joined":  self.usrs.sender.date_joined.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "email":        self.usrs.sender.email,
+                "is_active":    self.usrs.sender.is_active,
+                "is_staff":     self.usrs.sender.is_staff,
+                "username":     self.usrs.sender.username,
+            },
+        }
+
+        print("dict: ", obj)
+        await self.send(text_data=json.dumps(obj))
 
     # when a member of the room leaves the room 
     async def disconnect(self,message):
         print(f"{self.userName} has disconnected from {self.podName}")
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
         self.close()
-
-
     #  get the last message instance when user send a message
    
     def get_message(self):
