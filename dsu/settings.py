@@ -89,7 +89,7 @@ ASGI_APPLICATION = "dsu.asgi.application"
 import json
 if json.loads(os.environ.get('PRODUCTION').lower()):
     # production 
-    print("running in production")
+    print("running in dev")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -104,7 +104,7 @@ if json.loads(os.environ.get('PRODUCTION').lower()):
     }
 
 else:
-    print("runnig the app with main database")
+    print("runnig the app in production with main database")
     DATABASES = {
         'default': {
                 'ENGINE': os.environ.get('DB_ENGINE'),

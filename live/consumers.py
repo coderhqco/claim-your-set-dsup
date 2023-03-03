@@ -15,7 +15,7 @@ from asyncio import wait_for
 from django.core import serializers
 from django.forms.models import model_to_dict
 import asyncio
-
+from django.core.paginator import Paginator
 
 class HouseKeepingConsumer(WebsocketConsumer):
     def connect(self):
@@ -85,12 +85,14 @@ class PodBackNForth(AsyncWebsocketConsumer):
         self.room_group_name = self.podName
         self.username = self.userName
         self.request = self.scope.get('request')
-
+        self.pageNum = 1
+        self.paginator = 10
+        self.queryset_init = None
         # connect to db and retraive old messages of that pod
         self.usrs = await database_sync_to_async(self.get_messages)()
         
         print(f"{self.userName} has connected to ", self.podName)
-
+   
         # add the user to the pod room
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
@@ -98,21 +100,36 @@ class PodBackNForth(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(self.usrs))
 
     def get_messages(self):
-        # here or in serializer class, implement paginations. 
-        # limit the number of messages that gets retrived on connect
         pod = voteModels.Pod.objects.get(code = self.podName)
         if pod:
             objects = apiSerializers.PodBackNForthSerializer(
-                voteModels.PodBackNForth.objects.filter(pod=pod), 
-                many=True).data
-            return objects
+                voteModels.PodBackNForth.objects.filter(pod=pod).order_by('-date'), many=True
+                ).data
+            self.queryset_init = objects
+           
+            paginator = Paginator(objects, self.paginator)  # Paginate queryset with 5 items per page
+            page = paginator.get_page(self.pageNum)
+            
+            return list(page)
         return 0
-        
+
     # Receive message from WebSocket
     async def receive(self, text_data):
-        await self.channel_layer.group_send(
-            self.room_group_name, {"type": "podChat", "message": text_data}
-        )
+        if "page_number" in text_data:
+            page_number = text_data.split(",")[1]
+            # here send the next page of the paginated queryset
+            # send only to that user
+            self.pageNum = page_number
+            paginator = Paginator(self.queryset_init, self.paginator)  # Paginate queryset with 5 items per page
+            page = paginator.get_page(self.pageNum)
+            
+            items = list(page)
+            await self.send(text_data=json.dumps(items))
+
+        else:
+            await self.channel_layer.group_send(
+                self.room_group_name, {"type": "podChat", "message": text_data}
+            )
 
     # handling function for sending all the messages to room members
     async def podChat(self, event):
@@ -120,9 +137,9 @@ class PodBackNForth(AsyncWebsocketConsumer):
         self.usrs = await database_sync_to_async(self.save_message)(event['message'])
         # # retrive that message and send to the front
         # message = await database_sync_to_async(self.get_message)()
-    
-            # this python manual dict is to construct an alternative response. 
-            # as there is not way to serialize it
+        # this python manual dict is to construct an alternative response. 
+        # as there is not way to serialize it
+
         obj = {
             "id":       self.usrs.id,
             "date":     self.usrs.date.strftime("%Y-%m-%dT%H:%M:%SZ"),
