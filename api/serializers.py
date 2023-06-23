@@ -158,7 +158,6 @@ class VoterPageSerializer(serializers.HyperlinkedModelSerializer):
         depth  = 1
 
 
-
 class PodBackNForthSerializer(serializers.ModelSerializer):
     sender = UserSerializer()
     class Meta:
