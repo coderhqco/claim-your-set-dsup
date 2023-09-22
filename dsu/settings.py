@@ -87,16 +87,15 @@ ASGI_APPLICATION = "dsu.asgi.application"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 import json
-if json.loads(os.environ.get('PRODUCTION').lower()):
+if not json.loads(os.environ.get('PRODUCTION').lower()):
     # production 
-    print("running in dev")
+    print("running in dev. using sqlit3 and channels in memory layer")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-    print("REDIS_URL: ",os.environ.get('REDIS_URL'))
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels.layers.InMemoryChannelLayer"
