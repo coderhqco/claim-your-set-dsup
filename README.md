@@ -1,5 +1,6 @@
 # Democracy Straight-Up Project
 
+
 ### how to set up the project on you local machine:
 1. make a directory anywhere in your machine.
 2. inside the directory, create python virtualenv and activate it.
