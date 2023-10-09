@@ -463,8 +463,6 @@ class Pod_members(LoginRequiredMixin, DetailView):
     template_name = 'vote/pod_members.html'
 
 
-
-
 # this is for testing.
 
 def creating():
