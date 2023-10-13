@@ -1,18 +1,17 @@
-from dataclasses import fields
 from rest_framework import serializers
 from vote.models import Districts
 from django.contrib.auth.models import User
-from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes,force_str
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.http import urlsafe_base64_encode
 from vote.token import account_activation_token
-from django.core.mail import EmailMessage
-
+from django.core.mail import send_mail
+from django.conf import settings
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from vote import models as voteModels
 import os
+
 
 class DistrictsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -93,19 +92,15 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         user.save()
         # send email and get url and encode 
-        current_site = get_current_site(self.context['request'])
         mail_subject = 'Activate your account.'
         message = render_to_string('api/accountActiveEmail.html', {
             'user': user,
             'domain': os.environ.get('APP_DOMAIN'),
-            # 'domain': current_site.domain,
+            'protocol': 'https' if self.context['request'].is_secure() else 'http',
             'uid':urlsafe_base64_encode(force_bytes(user.pk)),
             'token':account_activation_token.make_token(user),
         })
-        to_email = user.email
-        email = EmailMessage( mail_subject,  message,  to=[to_email] )
-        email.send()
-
+        send_mail( mail_subject, message, settings.EMAIL_HOST_USER, [user.email] )
         return user
 
 class Userializer(serializers.ModelSerializer):
