@@ -88,7 +88,7 @@ This repo is a prototype of the Democracy Straight-Up Project.
     ```shell
     # .env
     SECRET_KEY = 'django-insecure-psh2t@r(#p1@qb)&po8e=mn$0$i@97y)if3626^udnv87li-56'
-    PRODUCTION = True
+    PRODUCTION = False
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = 'http://smtp.gmail.com'
     EMAIL_HOST_USER = 'mailto:democracy.straight.up+s@gmail.com'
