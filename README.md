@@ -80,30 +80,11 @@ This repo is a prototype of the Democracy Straight-Up Project.
    
    By default it will run on local host  http://127.0.0.1:8000
 
-7. setup the env file to set config variables. 
+7. to load data into district tables, run the loaddata command for fixture 
+   `python3 manage.py loaddata district_data.json`
+
+8. setup the env file to set config variables. 
     - email config
     - database 
         - DSU uses db.sqlite file database for production
 
-    ```shell
-    # .env
-    SECRET_KEY = 'django-insecure-psh2t@r(#p1@qb)&po8e=mn$0$i@97y)if3626^udnv87li-56'
-    PRODUCTION = False
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'http://smtp.gmail.com'
-    EMAIL_HOST_USER = 'mailto:democracy.straight.up+s@gmail.com'
-    EMAIL_HOST_PASSWORD = 'zdlybdgqqrchgyfd'
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    REDIS_URL = 'redis://:pe66856e8cf7f352510bae5d9244bed471f34d0a1291e11829d98fd97d42aad9e@ec2-3-221-204-142.compute-1.amazonaws.com:17749'
-
-    DB_ENGINE= 'django.db.backends.mysql'
-    DB_USER= 'DSUAdmin'
-    DB_NAME= 'dsu'
-    DB_PASSWORD= 'DSU123123dsu'
-    DB_HOST='http://dsu.cffk64f7wmk9.us-east-1.rds.amazonaws.com'
-    DB_PORT= '3306'
-
-    DOMAIN = '192.168.0.130:8080'
-    APP_DOMAIN = "http://dsu-front.herokuapp.com"`
-    ```
