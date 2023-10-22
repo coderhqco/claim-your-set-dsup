@@ -84,20 +84,29 @@ class PodBackNForth(AsyncWebsocketConsumer):
         self.userName = self.scope['url_route']['kwargs']['userName']
         self.room_group_name = self.podName
         self.username = self.userName
+        self.handle = self.username
         self.request = self.scope.get('request')
         self.pageNum = 1
         self.paginator = 10
         self.queryset_init = None
         # connect to db and retraive old messages of that pod
+        await database_sync_to_async(self.get_handle)()
         self.usrs = await database_sync_to_async(self.get_messages)()
         
-        print(f"{self.userName} has connected to ", self.podName)
+        print(f"{self.handle} has connected to ", self.podName)
    
         # add the user to the pod room
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
         # send message to that web socket request only. not to the group members
         await self.send(text_data=json.dumps(self.usrs))
+    
+    def get_handle(self):
+        pod = voteModels.Pod.objects.get(code = self.podName)
+        if pod:
+            hand = apiSerializers.HandleSerializer(voteModels.BFhandle.objects.filter(pod=self.podName, sender=self.username), many=True).data
+            if len(hand) > 0 :
+                self.handle = hand[0]['hndl']
 
     def get_messages(self):
         pod = voteModels.Pod.objects.get(code = self.podName)
@@ -145,6 +154,7 @@ class PodBackNForth(AsyncWebsocketConsumer):
             "date":     self.usrs.date.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "message":  self.usrs.message,
             "pod":      self.usrs.pod.id,
+            "handle":   self.handle,
             "sender":{
                 "date_joined":  self.usrs.sender.date_joined.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "email":        self.usrs.sender.email,
@@ -178,7 +188,7 @@ class PodBackNForth(AsyncWebsocketConsumer):
         pod = voteModels.Pod.objects.get(code = self.podName)
         usr = User.objects.get(username = self.userName)
         # here validate if the user is a member of the pod and create a message instance to save into DB
-        objects = voteModels.PodBackNForth.objects.create(pod = pod, sender= usr,message = ""+msg)
+        objects = voteModels.PodBackNForth.objects.create(pod = pod, sender= usr,message = ""+msg, handle = self.handle)
         objects.save()
         return objects
 
