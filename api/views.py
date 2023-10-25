@@ -359,22 +359,10 @@ class PodBackNForthAdd(APIView):
             return JsonResponse({False: pod})
 
 
-class PodBackNForthHandle(APIView):
-    #create a handle for Pod Back and Forth
-    def post(self,request,pod):
-        try:
-            # check if handle is already exist
-            user = request.user
-            handle = voteModels.BFhandle.objects.filter(pod=pod.code, sender=user.username).first()
-            if handle:
-                handle.hndl = request.POST['handle']
-                handle.save(['hndl'])               
-            else:
-                # handle hasn't been created 
-                handle = voteModels.BFhandle.objects.create(pod=pod.code, sender=user.username, hndl=request.POST['handle'])
-                handle.save()
-                    
-        except:
-            messages="Something Went Wrong."
-            return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
+class PodBackNForthHandle(generics.CreateAPIView):
+
+    queryset = voteModels.BFhandle.objects.all()
+    permission_classes = (AllowAny,)
+    serializer_class = apiSerializers.HandleSerializer
+
 

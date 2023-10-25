@@ -25,4 +25,5 @@ urlpatterns = [
     path('podmember/', apiViews.PodMem.as_view()),
     path('backnforth/<pod>/', apiViews.PodBackNForth.as_view()),
     path('backnforth/<pod>/add', apiViews.PodBackNForthAdd.as_view()),
+    path('create-handle/', apiViews.PodBackNForthHandle.as_view()),
 ]
