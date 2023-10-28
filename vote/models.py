@@ -93,18 +93,27 @@ class PodMember_put_farward(models.Model):
 
 class BFhandle(models.Model):
     pod = models.ForeignKey(Pod, to_field = 'code', on_delete=models.CASCADE)
-    sender = models.ForeignKey(User, to_field = 'username', on_delete=models.CASCADE)
-    hndl = models.CharField(max_length=20, default = "ducal")
+    voter = models.ForeignKey(User, to_field = 'username', on_delete=models.CASCADE)
+    handle = models.CharField(max_length=20, default='')
+
+    def save(self, *args, **kwargs):
+        # Set the default value of 'handle' to the username of the User, if not present in request
+        if not self.handle:
+            self.handle = self.voter.users.legalName
+
+        super(BFhandle, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return str(self.sender.username) + " - " + str(self.pod.code)
+        return str(self.voter.username) + " - " + str(self.pod.code)
 
 class PodBackNForth(models.Model):
     pod = models.ForeignKey(Pod, on_delete=models.CASCADE)
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_created=True, auto_now_add=True)
     message = models.TextField(max_length=5000)
-    handle = models.CharField(max_length=20, default = "ducal")
+
+    # Do we use this field? @Joe?
+    # handle = models.CharField(max_length=20, default = "ducal")
 
     def __str__(self) -> str:
         return str(self.sender.username) + " - " + str(self.pod.code)
