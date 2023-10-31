@@ -339,8 +339,8 @@ class DesolvePod(APIView):
             return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
 
 
+# do we use this view ?
 class PodBackNForth(APIView):
-    
     # list all the messsages to that Pod
     def post(self,request, pod):
         try:
@@ -349,11 +349,37 @@ class PodBackNForth(APIView):
         except:
             return JsonResponse({False: pod})
 
+# do we use this view as well ? 
 class PodBackNForthAdd(APIView):
-    
     # add a message to Pod Back and Forth 
     def post(self,request, pod):
         try:
             return Response({"date": "added one message to the pod: "+ pod}, status=status.HTTP_200_OK)
         except:
             return JsonResponse({False: pod})
+
+
+class PodBackNForthHandle(generics.CreateAPIView):
+    queryset = voteModels.BFhandle.objects.all()
+    permission_classes = (AllowAny,)
+    serializer_class = apiSerializers.HandleSerializer
+
+    def create_update(self, serializer):
+        pod = self.request.data.get('pod')
+        voter = self.request.data.get('voter')
+
+        # Check if a record with the given pod and voter combination exists
+        existing_record = voteModels.BFhandle.objects.filter(pod=pod, voter=voter).first()
+        if existing_record:
+            # Update the existing record
+            serializer.update(existing_record, serializer.validated_data)
+        else:
+            # Create a new record
+            serializer.save()
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.create_update(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
