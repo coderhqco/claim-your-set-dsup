@@ -79,51 +79,68 @@ class HouseKeepingConsumer(WebsocketConsumer):
 
 class PodBackNForth(AsyncWebsocketConsumer):
     async def connect(self):
-        # get the pod name and username
+        # get pod and username
         self.podName = self.scope['url_route']['kwargs']['podName']
         self.userName = self.scope['url_route']['kwargs']['userName']
+
+        # create room with podname
         self.room_group_name = self.podName
         self.username = self.userName
+
+        # init the handle with username
         self.handle = self.username
         self.request = self.scope.get('request')
         self.pageNum = 1
         self.paginator = 10
+
+        # construct B&F entries 
         self.queryset_init = None
+
         # connect to db and retraive old messages of that pod
         await database_sync_to_async(self.get_handle)()
         self.usrs = await database_sync_to_async(self.get_messages)()
         
-        print(f"{self.handle} has connected to ", self.podName)
    
-        # add the user to the pod room
+        # add user to pod room
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
+
         # send message to that web socket request only. not to the group members
         await self.send(text_data=json.dumps(self.usrs))
     
+    # check the handle via pod and user
     def get_handle(self):
+        """ based on pod, user, check if there is handle and update the self.handle instance
+        """
         pod = voteModels.Pod.objects.get(code = self.podName)
         if pod:
-            hand = apiSerializers.HandleSerializer(voteModels.BFhandle.objects.filter(pod=self.podName, sender=self.username), many=True).data
+            hand = apiSerializers.HandleSerializer(
+                voteModels.BFhandle.objects.filter(
+                    pod=self.podName, voter=self.username), many=True).data
             if len(hand) > 0 :
-                self.handle = hand[0]['hndl']
+                self.handle = hand[-1]
 
     def get_messages(self):
+        """ Get the B&f entries and paginate them in 10 entries per page. 
+        The entries are sorted from the latest to the oldest.
+        """
         pod = voteModels.Pod.objects.get(code = self.podName)
         if pod:
             objects = apiSerializers.PodBackNForthSerializer(
                 voteModels.PodBackNForth.objects.filter(pod=pod).order_by('-date'), many=True
                 ).data
             self.queryset_init = objects
-           
+
             paginator = Paginator(objects, self.paginator)  # Paginate queryset with 5 items per page
             page = paginator.get_page(self.pageNum)
-            
             return list(page)
         return 0
 
     # Receive message from WebSocket
     async def receive(self, text_data):
+        """Check if the page_number is in the message. 
+        If so, it means to load more messages. Else, forward the new entry to the room
+        """
         if "page_number" in text_data:
             page_number = text_data.split(",")[1]
             # here send the next page of the paginated queryset
@@ -134,7 +151,6 @@ class PodBackNForth(AsyncWebsocketConsumer):
             
             items = list(page)
             await self.send(text_data=json.dumps(items))
-
         else:
             await self.channel_layer.group_send(
                 self.room_group_name, {"type": "podChat", "message": text_data}
@@ -147,21 +163,15 @@ class PodBackNForth(AsyncWebsocketConsumer):
         # # retrive that message and send to the front
         # message = await database_sync_to_async(self.get_message)()
         # this python manual dict is to construct an alternative response. 
-        # as there is not way to serialize it
 
+        # construct a message object
         obj = {
             "id":       self.usrs.id,
             "date":     self.usrs.date.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "message":  self.usrs.message,
             "pod":      self.usrs.pod.id,
             "handle":   self.handle,
-            "sender":{
-                "date_joined":  self.usrs.sender.date_joined.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "email":        self.usrs.sender.email,
-                "is_active":    self.usrs.sender.is_active,
-                "is_staff":     self.usrs.sender.is_staff,
-                "username":     self.usrs.sender.username,
-            },
+            "sender":   self.usrs.sender.username,
         }
         await self.send(text_data=json.dumps(obj))
 
@@ -187,8 +197,9 @@ class PodBackNForth(AsyncWebsocketConsumer):
         # get pod and user instance
         pod = voteModels.Pod.objects.get(code = self.podName)
         usr = User.objects.get(username = self.userName)
+        handle = voteModels.BFhandle.objects.get(pod = pod, voter = usr)
         # here validate if the user is a member of the pod and create a message instance to save into DB
-        objects = voteModels.PodBackNForth.objects.create(pod = pod, sender= usr,message = ""+msg, handle = self.handle)
+        objects = voteModels.PodBackNForth.objects.create( pod = pod, sender= usr, message = ""+msg, handle = handle)
         objects.save()
         return objects
 

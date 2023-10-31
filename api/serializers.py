@@ -159,8 +159,9 @@ class HandleSerializer(serializers.ModelSerializer):
 
 class PodBackNForthSerializer(serializers.ModelSerializer):
     sender = UserSerializer()
+    handle = HandleSerializer()
     class Meta:
         model   = voteModels.PodBackNForth
-        fields  = ["id", "sender","message", "pod", 'date',]
+        fields  = ["id", "sender","message", "pod", 'date','handle']
 
         

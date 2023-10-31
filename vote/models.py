@@ -111,9 +111,7 @@ class PodBackNForth(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_created=True, auto_now_add=True)
     message = models.TextField(max_length=5000)
-
-    # Do we use this field? @Joe?
-    # handle = models.CharField(max_length=20, default = "ducal")
+    handle = models.ForeignKey(BFhandle, null=True, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
         return str(self.sender.username) + " - " + str(self.pod.code)
