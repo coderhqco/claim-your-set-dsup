@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics
+from rest_framework.decorators import api_view
 
 from django.utils.encoding import force_bytes,force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -383,3 +384,18 @@ class PodBackNForthHandle(generics.CreateAPIView):
         self.create_update(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
+
+# This function send back the handle of the Circle Member. 
+@api_view(['POST'])
+def get_handle(request):
+    pod_code = request.POST.get('pod')
+    voter_username = request.POST.get('user')
+
+    handle = voteModels.BFhandle.objects.filter(pod = pod_code).filter(voter = voter_username).last()
+    if handle:
+        return Response({"id": handle.pk, 
+                         "pod": handle.pod.code, 
+                         "voter":handle.voter.username, 
+                         "handle": handle.handle }, status=200)
+    else:
+        return Response({"message": "Handle Not Found."}, status=404)
