@@ -384,18 +384,3 @@ class PodBackNForthHandle(generics.CreateAPIView):
         self.create_update(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
-
-# This function send back the handle of the Circle Member. 
-@api_view(['POST'])
-def get_handle(request):
-    pod_code = request.POST.get('pod')
-    voter_username = request.POST.get('user')
-
-    handle = voteModels.BFhandle.objects.filter(pod = pod_code).filter(voter = voter_username).last()
-    if handle:
-        return Response({"id": handle.pk, 
-                         "pod": handle.pod.code, 
-                         "voter":handle.voter.username, 
-                         "handle": handle.handle }, status=200)
-    else:
-        return Response({"message": "Handle Not Found."}, status=404)

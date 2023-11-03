@@ -197,9 +197,12 @@ class PodBackNForth(AsyncWebsocketConsumer):
         # get pod and user instance
         pod = voteModels.Pod.objects.get(code = self.podName)
         usr = User.objects.get(username = self.userName)
-        handle = voteModels.BFhandle.objects.get(pod = pod, voter = usr)
+        handle = voteModels.BFhandle.objects.filter(pod = pod, voter = usr).last()
+        if not handle:
+            handle = voteModels.BFhandle.objects.create(pod = pod, voter = usr, handle = usr.users.legalName)
+        handle.save()
         # here validate if the user is a member of the pod and create a message instance to save into DB
-        objects = voteModels.PodBackNForth.objects.create( pod = pod, sender= usr, message = ""+msg, handle = handle or None)
+        objects = voteModels.PodBackNForth.objects.create( pod = pod, sender= usr, message = ""+msg, handle = handle)
         objects.save()
         return objects
 

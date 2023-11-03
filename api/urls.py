@@ -28,7 +28,4 @@ urlpatterns = [
     path('backnforth/<pod>/', apiViews.PodBackNForth.as_view()),
     path('backnforth/<pod>/add', apiViews.PodBackNForthAdd.as_view()),
     path('create-handle/', apiViews.PodBackNForthHandle.as_view()),
-
-    # the url endpoint for getting pod member's handle. It takes two GET's params: pod and user
-    path('get-handle/', apiViews.get_handle),
 ]
