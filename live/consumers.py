@@ -86,9 +86,6 @@ class PodBackNForth(AsyncWebsocketConsumer):
         # create room with podname
         self.room_group_name = self.podName
         self.username = self.userName
-
-        # init the handle with username
-        self.handle = self.username
         self.request = self.scope.get('request')
         self.pageNum = 1
         self.paginator = 10
@@ -97,7 +94,6 @@ class PodBackNForth(AsyncWebsocketConsumer):
         self.queryset_init = None
 
         # connect to db and retraive old messages of that pod
-        await database_sync_to_async(self.get_handle)()
         self.usrs = await database_sync_to_async(self.get_messages)()
         
    
@@ -107,18 +103,7 @@ class PodBackNForth(AsyncWebsocketConsumer):
 
         # send message to that web socket request only. not to the group members
         await self.send(text_data=json.dumps(self.usrs))
-    
-    # check the handle via pod and user
-    def get_handle(self):
-        """ based on pod, user, check if there is handle and update the self.handle instance
-        """
-        pod = voteModels.Pod.objects.get(code = self.podName)
-        if pod:
-            hand = apiSerializers.HandleSerializer(
-                voteModels.BFhandle.objects.filter(
-                    pod=self.podName, voter=self.username), many=True).data
-            if len(hand) > 0 :
-                self.handle = hand[-1]
+
 
     def get_messages(self):
         """ Get the B&f entries and paginate them in 10 entries per page. 
@@ -170,7 +155,6 @@ class PodBackNForth(AsyncWebsocketConsumer):
             "date":     self.usrs.date.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "message":  self.usrs.message,
             "pod":      self.usrs.pod.id,
-            "handle":   self.handle,
             "sender":   self.usrs.sender.username,
         }
         await self.send(text_data=json.dumps(obj))
@@ -197,12 +181,8 @@ class PodBackNForth(AsyncWebsocketConsumer):
         # get pod and user instance
         pod = voteModels.Pod.objects.get(code = self.podName)
         usr = User.objects.get(username = self.userName)
-        handle = voteModels.BFhandle.objects.filter(pod = pod, voter = usr).last()
-        if not handle:
-            handle = voteModels.BFhandle.objects.create(pod = pod, voter = usr, handle = usr.users.legalName)
-        handle.save()
         # here validate if the user is a member of the pod and create a message instance to save into DB
-        objects = voteModels.PodBackNForth.objects.create( pod = pod, sender= usr, message = ""+msg, handle = handle)
+        objects = voteModels.PodBackNForth.objects.create( pod = pod, sender= usr, message = ""+msg,)
         objects.save()
         return objects
 
@@ -234,7 +214,7 @@ def switch(text_data_json):
             return {'type':text_data_json['type'], 'data':apiSerializers.PODMemberSer(pod.podmember_set.all(), many=True).data}
 
         case 'voteIn':
-            """vote on condidate in and check if the condidate has 50+1 vote to become members.
+            """vote a condidate in and check if the condidate has 50+1 vote to become members or circle.
             if so, return the podmembers. else return that the vote in has been done only.
             also check if the user already voted in for him/her
             """

@@ -11,5 +11,5 @@ admin.site.register(models.PodMember)
 admin.site.register(models.PodMember_vote_in)
 admin.site.register(models.PodMember_vote_out)
 admin.site.register(models.PodMember_put_farward)
-admin.site.register(models.BFhandle)
+
 admin.site.register(models.PodBackNForth)
