@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'live.apps.LiveConfig',
+    'bills.apps.BillsConfig',
 
 ]
 

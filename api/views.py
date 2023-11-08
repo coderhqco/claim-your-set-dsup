@@ -1,6 +1,7 @@
 from curses.ascii import NUL
 from rest_framework import viewsets
 from vote import models as voteModels
+from bills import models as billModels
 from api import serializers as apiSerializers
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from django.contrib.auth.models import User
@@ -359,3 +360,39 @@ class PodBackNForthAdd(APIView):
         except:
             return JsonResponse({False: pod})
 
+
+class BillUpdate(generics.CreateAPIView):
+    queryset = billModels.Bill.objects.all()
+    permission_classes = (AllowAny,)
+    serializer_class = apiSerializers.BillSerializer
+    def create_update(self, serializer):
+        bill_number = self.request.data.get('number')
+        
+        existing_record = billModels.Bill.objects.filter(number=bill_number).first()
+        print(bill_number)
+        if existing_record:
+            # Update the existing record
+            
+            serializer.update(existing_record, serializer.validated_data)
+        else:
+            # Create a new record
+            serializer.save()
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.create_update(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
+
+
+class BillDelete(generics.DestroyAPIView):
+    queryset = billModels.Bill.objects.all()   
+    lookup_field = 'number'
+    permission_classes = (AllowAny,)
+
+    def delete(self, request, *args, **kwargs):
+        bill_number = request.data.get('number')
+        response = super().delete(request, *args, **kwargs)
+
+        return response
