@@ -54,23 +54,27 @@ class Bill(models.Model):
     voting_start = models.DateField(blank=True, null=True)
     voting_close = models.DateField(blank=True, null=True)
     schedule_date = models.DateField(blank=True, null=True)
-    text = models.CharField(max_length=200)
-    advice = models.CharField(max_length=200)
+    text = models.TextField()
+    advice = models.TextField()
 
     @staticmethod
     # @database_sync_to_async  
-    def update_district_tally(bill_number,vote_c,district_code):
-        path = f"dtally__{district_code}__{vote_c}"
+    def update_district_tally(bill_number,vote_c_before,vote_c_after,district_code):
+        path_after = f"dtally__{district_code}__{vote_c_after}"
+        path_before = f"dtally__{district_code}__{vote_c_before}"
         Bill.objects.filter(number=bill_number).update(
-            JSONIncrement(path, value=1)
+            JSONIncrement(path_after, value=1),
+            JSONIncrement(path_before, value=-1)
         )
 
     @staticmethod
     # @database_sync_to_async
-    def update_national_tally(bill_number,vote_c):
-        path = f"ntally__{vote_c}"
+    def update_national_tally(bill_number,vote_c_before,vote_c_after):
+        path_before = f"ntally__{vote_c_before}"
+        path_after = f"ntally__{vote_c_after}"
         Bill.objects.filter(number=bill_number).update(
-            JSONIncrement(path, value=1)
+            JSONIncrement(path_after, value=1),
+            JSONIncrement(path_before, value=-1)
         )
 
     class Meta:
