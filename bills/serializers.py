@@ -3,9 +3,26 @@ from bills import models as billModels
 from django.contrib.auth.models import User
 
 class BillSerializer(serializers.ModelSerializer):
+    yea_votes_count = serializers.SerializerMethodField()
+    nay_votes_count = serializers.SerializerMethodField()
+    present_votes_count = serializers.SerializerMethodField()
+    proxy_votes_count = serializers.SerializerMethodField()
     class Meta:
         model = billModels.Bill
         fields = "__all__" 
+    
+    def get_yea_votes_count(self, obj):
+        # Use the count_yea_votes method from your Bill model
+        return obj.count_yea_votes()  
+    
+    def get_nay_votes_count(self, obj):
+        return obj.count_nay_votes()  
+    
+    def get_present_votes_count(self, obj):
+        return obj.count_present_votes()  
+    
+    def get_proxy_votes_count(self, obj):
+        return obj.count_proxy_votes() 
 
 
 

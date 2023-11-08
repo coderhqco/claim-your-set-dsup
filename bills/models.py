@@ -23,9 +23,24 @@ class Bill(models.Model):
 
     class Meta:
         ordering = ('-created_at',)
+
     def __str__(self):
         return self.number
+    
+    # these methods (def) return numbers of votes of bill instance
 
+    def count_yea_votes(self):
+        return BillVote.objects.filter(bill=self, your_vote='Y').count()
+
+    def count_nay_votes(self):
+        return BillVote.objects.filter(bill=self, your_vote='N').count()
+    
+    def count_present_votes(self):
+        return BillVote.objects.filter(bill=self, your_vote='Pr').count()
+
+    def count_proxy_votes(self):
+        return BillVote.objects.filter(bill=self, your_vote='Px').count()
+    
 class BillVote(models.Model):
 
     VOTE_CHOICES = [
