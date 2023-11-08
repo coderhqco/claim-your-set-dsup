@@ -11,8 +11,5 @@ router.register('bill-vote', billViews.BillVoteViewSet)
 
 
 urlpatterns = [
-    path('', include(router.urls)),
-    # path('update_bill/', billViews.BillUpdate.as_view()),
-    # path('<int:number>/delete_bill/', billViews.BillDelete.as_view()),
-    
+    path('', include(router.urls)), 
 ]
