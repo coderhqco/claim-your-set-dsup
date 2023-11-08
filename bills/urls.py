@@ -1,14 +1,16 @@
 from rest_framework import routers
 from django.urls import path, include
 from bills import views as billViews
-from bills.views import get_bills
+
 
 router = routers.DefaultRouter()
 
+# the bills endpoints (get list, update via patch or put, delete methods on each bill) is being registered. 
+router.register('bills', billViews.BillViewSet)
+
 urlpatterns = [
     path('', include(router.urls)),
-    path('bills/', get_bills, name='get_bills'),
-    path('update_bill/', billViews.BillUpdate.as_view()),
-    path('<int:number>/delete_bill/', billViews.BillDelete.as_view()),
+    # path('update_bill/', billViews.BillUpdate.as_view()),
+    # path('<int:number>/delete_bill/', billViews.BillDelete.as_view()),
     
 ]
