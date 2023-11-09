@@ -8,7 +8,8 @@ from asgiref.sync import sync_to_async
 from asgiref.sync import async_to_sync
 from vote import models as voteModels
 from bills import models as billModels
-from api import serializers as apiSerializers 
+from api import serializers as apiSerializers
+from bills import serializers as billSerializers
 import api.views as apiView
 from django.contrib.auth.models import User
 from api.serializers import UserSerializer
@@ -190,119 +191,73 @@ class PodBackNForth(AsyncWebsocketConsumer):
 
 
 
-# class tallyConsumer(AsyncWebsocketConsumer):
-#     async def connect(self):
-#         # get bill number and username
-#         self.bill_number = self.scope['url_route']['kwargs']['number']
-#         self.userName = self.scope['url_route']['kwargs']['userName']
+class VoteTallyConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        # get username
+        self.userName = self.scope['url_route']['kwargs']['userName']
 
-#         # create poll with bill number
-#         self.poll_group_name = f'poll_{self.bill_number}'
-#         self.username = self.userName
-#         self.district_code = 
-#         self.request = self.scope.get('request')
+        # initialize variables
+        self.poll_group_name = 'vote_tally'
+        self.username = self.userName
+        self.userObj = User.objects.get(username=self.username)
+        self.district_code = self.userObj.users.district
+        self.request = self.scope.get('request')
 
-#         await self.channel_layer.group_add(
-#             self.poll_group_name,
-#             self.channel_name
-#         )
+        await self.channel_layer.group_add(
+            self.poll_group_name,
+            self.channel_name
+        )
+        await self.accept()
 
-#         await self.accept()
-
-#         # construct B&F entries 
-#         self.queryset_init = None
-
-#         # connect to db and retraive tallies of that pod
-#         self.usrs = await database_sync_to_async(self.get_tally)()
-        
-   
-#         # add user to pod room
-#         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-#         await self.accept()
-
-#         # send message to that web socket request only. not to the group members
-#         await self.send(text_data=json.dumps(self.usrs))
+        self.tallies = []
+        # connect to db and retrieve bill tallies
+        async for bill in billModels.Bill.objects.all().order_by('-number'):
+            tally = await self.get_tally(bill)
+            self.tallies.append(tally) 
+        # add user to room
+        await self.channel_layer.group_add(self.poll_group_name, self.channel_name)
+        await self.accept()
+        # send tallies to that web socket request only. not to the group members
+        await self.send(text_data=json.dumps(self.tallies))
 
 
-#     def get_tally(self):
-#         """ Get tally.
-#         """
-#         pod = voteModels.Pod.objects.get(code = self.podName)
-#         if pod:
-#             objects = apiSerializers.BillSerializer(
-#                 voteModels.PodBackNForth.objects.filter(pod=pod).order_by('-date'), many=True
-#                 ).data
-#             self.queryset_init = objects
+    # Receive message from WebSocket
+    async def receive(self, text_data):
+        await self.channel_layer.group_send(
+            self.poll_group_name, {"type": "billLive", "message": text_data}
+        )
 
-#             paginator = Paginator(objects, self.paginator)  # Paginate queryset with 5 items per page
-#             page = paginator.get_page(self.pageNum)
-#             return list(page)
-#         return 0
 
-#     # Receive message from WebSocket
-#     async def receive(self, text_data):
-#         """Check if the page_number is in the message. 
-#         If so, it means to load more messages. Else, forward the new entry to the room
-#         """
-#         if "page_number" in text_data:
-#             page_number = text_data.split(",")[1]
-#             # here send the next page of the paginated queryset
-#             # send only to that user
-#             self.pageNum = page_number
-#             paginator = Paginator(self.queryset_init, self.paginator)  # Paginate queryset with 5 items per page
-#             page = paginator.get_page(self.pageNum)
-            
-#             items = list(page)
-#             await self.send(text_data=json.dumps(items))
-#         else:
-#             await self.channel_layer.group_send(
-#                 self.room_group_name, {"type": "podChat", "message": text_data}
-#             )
+    # handling function for sending all the bills to room members
+    async def billLive(self, event):
+        # save the updated bills into DB here.
+        self.tallies = await self.update_vote(event['message']['number'],event['message']['choice'])
+        await self.send(text_data=json.dumps(self.tallies))
 
-#     # handling function for sending all the messages to room members
-#     async def podChat(self, event):
-#         # save the incoming messages into DB here.
-#         self.usrs = await database_sync_to_async(self.save_message)(event['message'])
-#         # # retrive that message and send to the front
-#         # message = await database_sync_to_async(self.get_message)()
-#         # this python manual dict is to construct an alternative response. 
 
-#         # construct a message object
-#         obj = {
-#             "id":       self.usrs.id,
-#             "date":     self.usrs.date.strftime("%Y-%m-%dT%H:%M:%SZ"),
-#             "message":  self.usrs.message,
-#             "pod":      self.usrs.pod.id,
-#             "sender":   self.usrs.sender.username,
-#         }
-#         await self.send(text_data=json.dumps(obj))
-
-#     # when a member of the room leaves the room 
-#     async def disconnect(self,message):
-#         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-#         self.close()
-#     #  get the last message instance when user send a message
-   
-#     def get_message(self):
-#         # get the last message instance when a member sends a message and to send it back.
-#         pod = voteModels.Pod.objects.first()
-#         objects = apiSerializers.PodBackNForthSerializer(
-#             voteModels.PodBackNForth.objects.filter(pod=pod).filter(
-#                 sender__username = self.userName).last()
-#                 ).data
-#         return objects
-
+    # when a member of the room leaves the room 
+    async def disconnect(self,message):
+        await self.channel_layer.group_discard(self.poll_group_name, self.channel_name)
+        self.close()
     
-#     # get all the messages, once a user join
-  
-#     def save_message(self,msg):
-#         # get pod and user instance
-#         pod = voteModels.Pod.objects.get(code = self.podName)
-#         usr = User.objects.get(username = self.userName)
-#         # here validate if the user is a member of the pod and create a message instance to save into DB
-#         objects = voteModels.PodBackNForth.objects.create( pod = pod, sender= usr, message = ""+msg,)
-#         objects.save()
-#         return objects
+    
+    async def update_vote(self,bill_number,vote_choice):
+        BillObj = billModels.Bill.get(number=bill_number)      
+        billModels.BillVote.filter(bill__number=bill_number,voter__username=self.userName).update(your_vote=vote_choice)
+        t = await self.get_tally(BillObj)
+        return list(t)
+
+
+    async def get_tally(self,bill):
+        bill_num = bill.number
+        Yea = await database_sync_to_async(bill.count_yea_votes)()
+        Nay = await database_sync_to_async(bill.count_nay_votes)()
+        Pr = await database_sync_to_async(bill.count_present_votes)()
+        Px = await database_sync_to_async(bill.count_proxy_votes)()
+
+        return {"number":bill_number,"Y":Yea,"N":Nay,"Pr":Pr,"Px":Px}
+
+
 
 
 

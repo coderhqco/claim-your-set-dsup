@@ -1,6 +1,5 @@
 from rest_framework import routers
 from django.urls import path, include
-# from bills.views import get_bills
 
 from api import views as apiViews
 
@@ -25,8 +24,5 @@ urlpatterns = [
     path('userinfo/', apiViews.UserView.as_view()),
     path('pod-desolve/', apiViews.DesolvePod.as_view()),
     path('podmember/', apiViews.PodMem.as_view()),
-    # path('bills/', get_bills, name='get_bills'),
-    # path('update_bill/', apiViews.BillUpdate.as_view()),
-    # path('bill/<int:number>/delete_bill/', apiViews.BillDelete.as_view()),
     
 ]
