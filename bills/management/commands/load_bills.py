@@ -8,7 +8,7 @@ from bills.models import Bill
 # load the database by running: python manage.py load_bills
 class Command(BaseCommand):
     help = 'Loads the first 100 bills from the Congress.gov API'
-
+    
     def handle(self, *args, **kwargs):
         response = requests.get('https://api.congress.gov/v3/bill?api_key=DnseTQ0IKk3LXX4UuEkN4uyZROywuYAx0fZeQeSp&limit=250')
         bills = response.json()['bills']
