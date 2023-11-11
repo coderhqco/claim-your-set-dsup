@@ -11,7 +11,4 @@ websocket_urlpatterns = [
     re_path(r'ws/(?P<podName>\w+)/(?P<userName>\w+)',
             consumers.PodBackNForth.as_asgi()
         ),
-    re_path(r'ws/bill/(?P<user_name>\w+)/$', 
-            consumers.VoteTallyConsumer.as_asgi()
-        ),
 ]
