@@ -24,6 +24,18 @@ class BillSerializer(serializers.ModelSerializer):
     def get_proxy_votes_count(self, obj):
         return obj.count_proxy_votes() 
 
+    def get_district_yea_votes_count(self, obj, district_code):
+        return obj.count_district_yea_votes(district_code)  
+
+    def get_district_nay_votes_count(self, obj, district_code):
+        return obj.count_district_nay_votes(district_code)  
+
+    def get_district_present_votes_count(self, obj, district_code):
+        return obj.count_district_present_votes(district_code)
+
+    def get_district_proxy_votes_count(self, obj, district_code):
+        return obj.count_district_proxy_votes(district_code)
+
 
 
 # create custom serializer of bill and voter for BillVoteSerializer

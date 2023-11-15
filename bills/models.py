@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from vote.models import Pod
 # Create your models here.
 
 
@@ -19,7 +20,7 @@ class Bill(models.Model):
     voting_close = models.DateField(blank=True, null=True)
     schedule_date = models.DateField(blank=True, null=True)
     text = models.TextField()
-    advice = models.TextField()
+    # advice = models.TextField()
 
     class Meta:
         ordering = ('-created_at',)
@@ -40,6 +41,18 @@ class Bill(models.Model):
 
     def count_proxy_votes(self):
         return BillVote.objects.filter(bill=self, your_vote='Px').count()
+
+    def count_district_yea_votes(self,district_code):
+        return BillVote.objects.filter(bill=self, voter__users__district=district_code,your_vote='Y').count()  
+
+    def count_district_nay_votes(self,district_code):
+        return BillVote.objects.filter(bill=self, voter__users__district=district_code,your_vote='N').count()  
+
+    def count_district_present_votes(self,district_code):
+        return BillVote.objects.filter(bill=self, voter__users__district=district_code,your_vote='Pr').count()
+
+    def count_district_proxy_votes(self,district_code):
+        return BillVote.objects.filter(bill=self, voter__users__district=district_code,your_vote='Px').count()
     
 class BillVote(models.Model):
 
@@ -56,4 +69,9 @@ class BillVote(models.Model):
     your_vote = models.CharField(max_length=2, choices=VOTE_CHOICES, default='Px')
     vote_date = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
+
+
+
+
+
 
