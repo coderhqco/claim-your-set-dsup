@@ -20,13 +20,24 @@ class BillViewTestCase(APITestCase):
         # self.bill.save()
 
     def authenticate(self):
-        user_data = {
-                "username":"K3K7N",
+        response = self.client.post(
+            '/api/register/',
+            {
+                "username":"test",
                 "password":"A123123a",
-        }
+                "password2":"A123123a",
+                "email":"testz@app.com",
+                "district":"NY01",
+                "legalName":"test",
+                "address":"test"
+            },
+        )
 
-        response = self.client.post('/api/token/',json.dumps(user_data),content_type="application/json")
-        print(response.status_code)
+        # response = self.client.post('/api/token/',{
+        #     "username":"test",
+        #     "password":"A123123a",   
+        # })
+        print(response)
         
         token = response.data['access']
         print("\n")
@@ -101,42 +112,42 @@ class BillViewTestCase(APITestCase):
         self.assertFalse(Bill.objects.filter(id=pk).exists())
 
 
-class BillVoteTestCase(APITestCase):
+# class BillVoteTestCase(APITestCase):
 
-    def setUp(self):
-        self.factory = APIRequestFactory()
-        self.view = BillVoteViewSet.as_view()
-        self.url = '/bill/bill-vote/'
-        # self.bill = Bill.objects.all().first()
-        # self.user = User.objects.get(username = 'K3K7N')
-        # self.vote_type = 'Y'
-        # self.obj = BillVote.objects.create(bill=self.bill, voter=self.user, your_vote=self.vote_type)
-        # self.obj.save()
+#     def setUp(self):
+#         self.factory = APIRequestFactory()
+#         self.view = BillVoteViewSet.as_view()
+#         self.url = '/bill/bill-vote/'
+#         # self.bill = Bill.objects.all().first()
+#         # self.user = User.objects.get(username = 'K3K7N')
+#         # self.vote_type = 'Y'
+#         # self.obj = BillVote.objects.create(bill=self.bill, voter=self.user, your_vote=self.vote_type)
+#         # self.obj.save()
 
-    def test_add_record(self):
-        self.authenticate()
-        voter = 
-        voter_id = 
-        sample_data = {
-        "bill": {
-            "id":"9",
-            "number": "6127",
-            "bill_type": "HR"
-        },
-        "voter": {
-            "id": "247",
-            "username": "V8W1B"
-        },
-        "your_vote": "Pr"
-        }
+#     def test_add_record(self):
+#         self.authenticate()
+#         voter = 
+#         voter_id = 
+#         sample_data = {
+#         "bill": {
+#             "id":"9",
+#             "number": "6127",
+#             "bill_type": "HR"
+#         },
+#         "voter": {
+#             "id": "247",
+#             "username": "V8W1B"
+#         },
+#         "your_vote": "Pr"
+#         }
         
 
-    def test_update_record(self):
-        sample_data = {
-        "your_vote": "Y"
-        }
+#     def test_update_record(self):
+#         sample_data = {
+#         "your_vote": "Y"
+#         }
 
-    def test_delete_record(self):
-        pass
+#     def test_delete_record(self):
+#         pass
 
 
