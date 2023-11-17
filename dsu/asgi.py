@@ -18,21 +18,16 @@ from channels.routing import ProtocolTypeRouter,URLRouter
 from channels.auth import AuthMiddlewareStack
 import live.routing
 import bills.routing
-
 django.setup()
 
 application = ProtocolTypeRouter({
-  # "https": get_asgi_application(),
-  "http": get_asgi_application(),
-  'websocket': AuthMiddlewareStack(
-    URLRouter(
-      live.routing.websocket_urlpatterns
+    "http":get_asgi_application(),
+    "websocket":AuthMiddlewareStack(
+      URLRouter([
+          # joins 2 lists to create the URLRouter.
+        *live.routing.websocket_urlpatterns,
+        *bills.routing.websocket_urlpatterns,
+      ])
     )
-  ),
-  
-  # the bills websocket urls here
-  'websocket': AuthMiddlewareStack(
-    URLRouter( bills.routing.websocket_urlpatterns)
-  )
-  # Just HTTP for now. (We can add other protocols later.)
 })
+
