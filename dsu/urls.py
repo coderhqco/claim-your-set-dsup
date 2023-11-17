@@ -22,5 +22,5 @@ urlpatterns = [
     path('',include('vote.urls')),
     path('api/',include('api.urls')),
     path('admin/', admin.site.urls),
-    path('live/', include("live.urls")),
+    path('bill/', include("bills.urls")),
 ]

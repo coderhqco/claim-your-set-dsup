@@ -10,6 +10,7 @@ from django.conf import settings
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from vote import models as voteModels
+from bills import models as billModels
 import os
 
 
@@ -158,5 +159,3 @@ class PodBackNForthSerializer(serializers.ModelSerializer):
     class Meta:
         model   = voteModels.PodBackNForth
         fields  = ["id", "sender","message", "pod", 'date']
-
-        

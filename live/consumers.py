@@ -7,7 +7,9 @@ from channels.exceptions import StopConsumer
 from asgiref.sync import sync_to_async
 from asgiref.sync import async_to_sync
 from vote import models as voteModels
-from api import serializers as apiSerializers 
+from bills import models as billModels
+from api import serializers as apiSerializers
+from bills import serializers as billSerializers
 import api.views as apiView
 from django.contrib.auth.models import User
 from api.serializers import UserSerializer

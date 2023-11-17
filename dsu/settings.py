@@ -29,7 +29,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.0.130','192.168.0.132','dsup-voting-portal.herokuapp.com','127.0.0.1', 'dsup.herokuapp.com']
+ALLOWED_HOSTS = ['localhost','192.168.0.130','192.168.0.132','dsup-voting-portal.herokuapp.com','127.0.0.1', 'dsup.herokuapp.com', 'localhost:8000', 'dsu-front.herokuapp.com', 'dsu-front.herokuapp.com:8000', 'dsu-front.herokuapp.com:8080', 'dsu-front.herokuapp.com:']
 
 # Application definition
 INSTALLED_APPS = [
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'live.apps.LiveConfig',
+    'bills.apps.BillsConfig',
 
 ]
 
