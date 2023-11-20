@@ -81,7 +81,7 @@ This repo is a prototype of the Democracy Straight-Up Project.
    By default it will run on local host  http://127.0.0.1:8000
 
 7. to load data into district tables, run the loaddata command for fixture 
-   `python3 manage.py loaddata district_data.json`
+   `python3 manage.py loaddata districts_data.json`
 
 8. setup the env file to set config variables. 
     - email config
