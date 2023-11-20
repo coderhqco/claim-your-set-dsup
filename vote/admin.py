@@ -1,15 +1,45 @@
 from django.contrib import admin
 from vote import models
 
-admin.site.register(models.Districts)
+class DistrictAdmin(admin.ModelAdmin):
+    list_display = ['name','code']
+    list_display_links = ["name", "code"]
+admin.site.register(models.Districts, DistrictAdmin)
 
+class UsersAdmin(admin.ModelAdmin):
+    list_display = ['user','legalName', 'district', 'is_reg', 'verificationScore', 'userType', 'voterID']
+    list_display_links = ["user", "legalName", 'district']
+    list_filter = [ 'is_reg', 'verificationScore', 'userType']
+admin.site.register(models.Users, UsersAdmin)
 
-admin.site.register(models.Users)
+class PodAdmin(admin.ModelAdmin):
+    list_display = ['code', 'invitation_code', 'district']
+    list_display_links = ["code", "invitation_code", "district"]
+    list_filter = ['district']
+admin.site.register(models.Pod, PodAdmin)
 
-admin.site.register(models.Pod)
-admin.site.register(models.PodMember)
-admin.site.register(models.PodMember_vote_in)
-admin.site.register(models.PodMember_vote_out)
-admin.site.register(models.PodMember_put_farward)
+class PodMemberAdmin(admin.ModelAdmin):
+    list_display = ['user', 'pod', 'is_member', 'is_delegate', 'member_number']
+    list_display_links = ["user", "pod", "is_member", "member_number"]
+    list_filter = ['is_member', 'is_delegate']
+admin.site.register(models.PodMember, PodMemberAdmin)
 
-admin.site.register(models.PodBackNForth)
+class PodMember_vote_inAdmin(admin.ModelAdmin):
+    list_display = ['condidate', 'voter']
+    list_display_links = ["condidate", "voter"]
+admin.site.register(models.PodMember_vote_in, PodMember_vote_inAdmin)
+
+class PodMember_vote_outAdmin(admin.ModelAdmin):
+    list_display = ['condidate', 'voter']
+    list_display_links = ["condidate", "voter"]
+admin.site.register(models.PodMember_vote_out, PodMember_vote_outAdmin)
+
+class PodMember_put_farwardAdmin(admin.ModelAdmin):
+    list_display = ['recipient', 'voter']
+    list_display_links = ["recipient", "voter"]
+admin.site.register(models.PodMember_put_farward, PodMember_put_farwardAdmin)
+
+class PodBackNForthAdmin(admin.ModelAdmin):
+    list_display = ['pod', 'sender', 'date', 'message']
+    list_display_links = ["pod", "sender", "date"]
+admin.site.register(models.PodBackNForth,PodBackNForthAdmin)

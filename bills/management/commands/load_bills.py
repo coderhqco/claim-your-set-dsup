@@ -10,10 +10,12 @@ class Command(BaseCommand):
     help = 'Loads the first 100 bills from the Congress.gov API'
     
     def handle(self, *args, **kwargs):
-        response = requests.get('https://api.congress.gov/v3/bill?api_key=DnseTQ0IKk3LXX4UuEkN4uyZROywuYAx0fZeQeSp&limit=250')
+        response = requests.get('https://api.congress.gov/v3/bill?api_key=DnseTQ0IKk3LXX4UuEkN4uyZROywuYAx0fZeQeSp&limit=150')
         bills = response.json()['bills']
 
         for bill in bills:
+            if len(bill['title']) > 190:
+                continue
             Bill.objects.create(
                 congress=bill['congress'],
                 number=bill['number'],
