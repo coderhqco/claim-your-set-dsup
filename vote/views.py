@@ -342,7 +342,7 @@ def joinPod(request):
 def majorityVotes(pod, member):
     pod_members = pod.podmember_set.filter(is_member = True)
     member_vote = member.podmember_vote_in_set.all()
-    if member_vote.count() >= (pod_members.count()/2):
+    if member_vote.count() > (pod_members.count()/2):
         return True
     return False
 

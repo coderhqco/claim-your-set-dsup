@@ -97,15 +97,14 @@ class PodBackNForth(AsyncWebsocketConsumer):
 
         # connect to db and retraive old messages of that pod
         self.usrs = await database_sync_to_async(self.get_messages)()
-        
-   
+
+    
         # add user to pod room
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
         # send message to that web socket request only. not to the group members
         await self.send(text_data=json.dumps(self.usrs))
-
 
     def get_messages(self):
         """ Get the B&f entries and paginate them in 10 entries per page. 
@@ -139,54 +138,35 @@ class PodBackNForth(AsyncWebsocketConsumer):
             items = list(page)
             await self.send(text_data=json.dumps(items))
         else:
+            # get the message from the client. change it to python json and send to group
+            text_json = json.loads(text_data)
             await self.channel_layer.group_send(
-                self.room_group_name, {"type": "podChat", "message": text_data}
+                self.room_group_name, {"type": "podChat", "message": text_json}
             )
 
     # handling function for sending all the messages to room members
     async def podChat(self, event):
         # save the incoming messages into DB here.
-        self.usrs = await database_sync_to_async(self.save_message)(event['message'])
-        # # retrive that message and send to the front
-        # message = await database_sync_to_async(self.get_message)()
-        # this python manual dict is to construct an alternative response. 
+        saved_massage = await database_sync_to_async(self.save_message)(event['message'])
+        await self.send(text_data=json.dumps(saved_massage))
 
-        # construct a message object
-        obj = {
-            "id":       self.usrs.id,
-            "date":     self.usrs.date.strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "message":  self.usrs.message,
-            "pod":      self.usrs.pod.id,
-            "sender":   self.usrs.sender.username,
-        }
-        await self.send(text_data=json.dumps(obj))
+    # Save the message into DB and return a serialized instance of the message
+    def save_message(self,msg):
+        # get pod and user instance
+        pod = voteModels.Pod.objects.get(code = self.podName)
+        usr = User.objects.get(username = msg["sender"])
+        # here validate if the user is a member of the pod and create a message instance to save into DB
+        objects = voteModels.PodBackNForth.objects.create( pod = pod, sender= usr, message = ""+msg['message'],)
+        objects.save()
+        return apiSerializers.PodBackNForthSerializer(objects).data
 
     # when a member of the room leaves the room 
     async def disconnect(self,message):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
         self.close()
-    #  get the last message instance when user send a message
-   
-    def get_message(self):
-        # get the last message instance when a member sends a message and to send it back.
-        pod = voteModels.Pod.objects.first()
-        objects = apiSerializers.PodBackNForthSerializer(
-            voteModels.PodBackNForth.objects.filter(pod=pod).filter(
-                sender__username = self.userName).last()
-                ).data
-        return objects
 
-    
-    # get all the messages, once a user join
-  
-    def save_message(self,msg):
-        # get pod and user instance
-        pod = voteModels.Pod.objects.get(code = self.podName)
-        usr = User.objects.get(username = self.userName)
-        # here validate if the user is a member of the pod and create a message instance to save into DB
-        objects = voteModels.PodBackNForth.objects.create( pod = pod, sender= usr, message = ""+msg,)
-        objects.save()
-        return objects
+# end of the B&F
+
 
 
 def majorityputFarward(recipient):
@@ -195,7 +175,7 @@ def majorityputFarward(recipient):
     return False
 
 def majorityVotes(condidate):
-    if condidate.voteIns.all().count() >= (condidate.pod.podmember_set.all().count()/2):
+    if condidate.voteIns.all().count() > (condidate.pod.podmember_set.filter(is_member=True).count()/2):
         return True
     return False
 
@@ -230,7 +210,7 @@ def switch(text_data_json):
                     'done': False,
                     'voter': user.username,
                     'condidate': condidate.user.username,
-                    'data':'you have already voted in for thie condidate.'
+                    'data':'you have already voted in for the candidate.'
                     }
 
             voteIN = voteModels.PodMember_vote_in.objects.create(condidate = condidate, voter = user)
