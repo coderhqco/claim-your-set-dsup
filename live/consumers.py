@@ -1,5 +1,4 @@
 import json
-from os import pread
 from channels.generic.websocket import WebsocketConsumer
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
@@ -7,16 +6,9 @@ from channels.exceptions import StopConsumer
 from asgiref.sync import sync_to_async
 from asgiref.sync import async_to_sync
 from vote import models as voteModels
-from bills import models as billModels
 from api import serializers as apiSerializers
-from bills import serializers as billSerializers
 import api.views as apiView
 from django.contrib.auth.models import User
-from api.serializers import UserSerializer
-from asyncio import wait_for
-from django.core import serializers
-from django.forms.models import model_to_dict
-import asyncio
 from django.core.paginator import Paginator
 
 class HouseKeepingConsumer(WebsocketConsumer):
@@ -98,7 +90,6 @@ class PodBackNForth(AsyncWebsocketConsumer):
         # connect to db and retraive old messages of that pod
         self.usrs = await database_sync_to_async(self.get_messages)()
 
-    
         # add user to pod room
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
