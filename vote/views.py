@@ -361,7 +361,7 @@ def podVoteIN(request):
         if majorityVotes(member.pod, member):
             member.is_member = True
             member.save()
-            # set the member.user.users.userType to 1 as ih becomes the member in a pod.
+            # set the member.user.users.userType to 1 as it becomes the member in a pod.
             userType = member.user
             userType.users.userType = 1
             userType.save()
