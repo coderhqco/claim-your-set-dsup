@@ -139,7 +139,6 @@ class CreatePOD(APIView):
             # check if the userType is not 0 return 
             if user.users.userType != 0:
                 messages="Already belongs to a pod."
-                print("already in a pod ")
                 return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
             
             # create a pod
@@ -155,9 +154,6 @@ class CreatePOD(APIView):
             user.save()
             user.users.save()
 
-            print("user: ", user)
-            print("district: ", district)
-            print("userType: ", user.users.userType)
             # add the user to pod member as delegate
             pod_member_obj = voteModels.PodMember.objects.create(
                 user = user, 
@@ -168,13 +164,15 @@ class CreatePOD(APIView):
             )
             pod_member_obj.save()
             obj = apiSerializers.PodSerializer(pod)
-            # data = { "pod": pod.code, "invitation_code": pod.invitation_code }
             return JsonResponse(obj.data)
         except:
             messages="Something Went Wrong."
             return Response({"message:":messages}, status=status.HTTP_400_BAD_REQUEST)
 
 class PodMem(APIView):
+    # check if this class is even being used... 
+    # It retrives all the podmembers of all pods. 
+    # something we do not want
     def post(self,request):
         try:
             pod = voteModels.PodMember.objects.all()
@@ -199,10 +197,7 @@ class UserView(APIView):
                     "user": apiSerializers.UserSerializer(user).data,
                 })
 
-            return JsonResponse({
-                # "pod": apiSerializers.PodSerializer(user.podmember_set.first().pod).data,
-                "user": apiSerializers.UserSerializer(user).data,
-            })
+            return JsonResponse({"user": apiSerializers.UserSerializer(user).data,})
             
         except:
             messages="Something Went Wrong."
@@ -236,6 +231,7 @@ def pod_joining_validation(user,pod):
     It check if pod is active.
     It check if user is already a member
     It check if userType is 0
+    It checks if the user is the same districts as pod distract
     """
     result = True
     # if not pod.is_active():
@@ -250,6 +246,9 @@ def pod_joining_validation(user,pod):
         result = False
     
     if user.users.userType > 0:
+        result = False
+
+    if user.users.district != pod.district:
         result = False
 
     return result
@@ -278,9 +277,10 @@ class JoinPOD(APIView):
                         member_number = pod.podmember_set.count()+1
                     )
                     podMember.save()
-                    # set the userType of the member to 1 
-                    podMember.user.users.userType = 1
-                    podMember.user.users.save()
+                    # set the userType of the member to 0
+                    # when the user become the member via majority votes, then the userType is set to 1 
+                    # podMember.user.users.userType = 0
+                    # podMember.user.users.save()
                     return JsonResponse(apiSerializers.PodSerializer(pod).data)
                 else:
                     # else of pod is active 
@@ -298,10 +298,8 @@ def pod_desolve_check(user, pod):
     members = pod.podmember_set.filter(is_member = True)
     if members.first().user.username  != user.username:
         return False
-    
     if not members.first().is_delegate:
         return False
-
     if members.count() > 1:
         return False
     
@@ -320,12 +318,10 @@ class DesolvePod(APIView):
                 messages="Pod  and user are required."
                 return Response({"message":messages}, status=status.HTTP_400_BAD_REQUEST)
 
-            print(pod, user)
             # get the pod and check weather the pod is eligible to be desolved!
             if pod:
                 # check if user can join the pod
                 if pod_desolve_check(user,pod):
-                    print("this is desolving: ")
                     pod.delete()
                     user.users.userType = 0
                     user.users.save()
