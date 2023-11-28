@@ -102,3 +102,13 @@ class PodBackNForth(models.Model):
     def __str__(self) -> str:
         return str(self.sender.username) + " - " + str(self.pod.code)
 
+
+class CircleStatus(models.Model):
+    message = models.TextField()
+    is_candidate = models.BooleanField(default=False)
+    is_member = models.BooleanField(default=False)
+    is_delegate = models.BooleanField(default=False)
+    is_activeCircle =  models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        return str(self.message)

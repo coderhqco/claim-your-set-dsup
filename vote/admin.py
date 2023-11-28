@@ -43,3 +43,11 @@ class PodBackNForthAdmin(admin.ModelAdmin):
     list_display = ['pod', 'sender', 'date', 'message']
     list_display_links = ["pod", "sender", "date"]
 admin.site.register(models.PodBackNForth,PodBackNForthAdmin)
+
+class CircleStatusAdmin(admin.ModelAdmin):
+    list_display = ['message', 'is_delegate', 'is_candidate', 'is_member','is_activeCircle']
+    list_display_links = ["message"]
+    list_filter = ['is_member', 'is_delegate','is_candidate','is_activeCircle']
+    search_fields = ['message']
+
+admin.site.register(models.CircleStatus,CircleStatusAdmin)
