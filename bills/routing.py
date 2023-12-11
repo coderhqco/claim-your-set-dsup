@@ -8,4 +8,5 @@ websocket_urlpatterns = [
     re_path(r'ws/bill/(?P<bill_id>\w+)/(?P<podName>\w+)/$', 
         billConsumer.AdviceConsumer.as_asgi()
     ),
+
 ]

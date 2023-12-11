@@ -6,6 +6,7 @@ from channels.db import database_sync_to_async
 from django.contrib.auth.models import User
 from vote import models as voteModels
 
+
 class BillConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.bill_id = self.scope['url_route']['kwargs']['bill_id']
