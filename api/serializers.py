@@ -147,6 +147,31 @@ class PODMemberSer(serializers.ModelSerializer):
         fields =["is_delegate","member_number","id",'user','pod',"is_member", 'voteIns','voteOuts','putFarward']
         
 
+
+# This serializer is being used in Circle consumer file for pod members
+class Userial(serializers.ModelSerializer):
+    class Meta:
+        model = voteModels.Users
+        fields = ["id","legalName", "is_reg","verificationScore","address","userType","voterID"]
+
+# this serializer is being used in Circle consumer file for pod members
+class User_Serializer(serializers.ModelSerializer):
+    users = Userial()
+    class Meta:
+        model  = User
+        fields = ["id","username","email","date_joined","users"]
+
+
+# this serializer is being used in Circle consumer file for pod members
+class PodMemberSerializer(serializers.ModelSerializer):
+    user = User_Serializer()
+    pod = PodSerializer()
+    class Meta:
+        model  = voteModels.PodMember
+        fields = ['id', 'is_member', 'is_delegate','date_joined','date_updated','pod','user']
+       
+
+        
 class VoterPageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model  = voteModels.Users

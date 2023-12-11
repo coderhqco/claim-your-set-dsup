@@ -8,11 +8,10 @@ from api import serializers
 
 class CircleConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        print("hererere....")
         self.pod_name = self.scope['url_route']['kwargs']['pod_name']
         self.user_name = self.scope['url_route']['kwargs']['user_name']
         self.room_group_name = 'chat_%s' % self.pod_name
-        print("hererere")
+    
         # Join room group
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -36,13 +35,10 @@ class CircleConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_members(self):
-        print("getting the members...")
-    
-        members = voteModels.PodMember.objects.filter(pod=self.pod_name)
-        return serializers.PODMemberSer(members).data
-    
-        # except members.DoesNotExist:
-        #     return { 'members': []}
+        MemberInstances = voteModels.PodMember.objects.filter(pod__code=self.pod_name)
+        members = serializers.PodMemberSerializer(MemberInstances, many=True)
+        return members.data
+        
 
 
     # @database_sync_to_async
