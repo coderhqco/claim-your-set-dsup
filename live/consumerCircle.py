@@ -56,12 +56,25 @@ class CircleConsumer(AsyncWebsocketConsumer):
             vote = serializers.UserSerializer(voter)
             return {"status": "error","action":"vote_in", "message": "Could not vote","user":vote.data}
     
+    @database_sync_to_async
+    def remove_candidate(self, data):
+        """ remove the candidate members from this circle
+        """
+        try:
+            remover = User.objects.get(username = data['remover'])
+            voteModels.PodMember.objects.get(pk = data['candidate']).delete()
+            # remove the podmember 
+            vote = serializers.UserSerializer(remover)
+            return {"status":"success","action":'remove_candidate', "message":"removed successfully.", "user":vote.data}
+        except:
+            vote = serializers.UserSerializer(remover)
+            return {"status": "error","action":"vote_in", "message": "Could note remove candidate.","user":vote.data}
+    
 
     async def receive(self, text_data):
         """ Check messages. If message is for voting in a candidate
         then vote the candidate.
         """
-        
         data = json.loads(text_data)
         
         match data["action"]:
@@ -82,11 +95,32 @@ class CircleConsumer(AsyncWebsocketConsumer):
                     )
                 return 
 
-            case "vote_out":
-                print("vote out:", data["payload"])
+            case "remove_candidate":
+                # remove the candidate and return the circle members
+                removed = await self.remove_candidate(data["payload"])
+                if removed['status'] == 'error':
+                    await self.channel_layer.group_send(self.room_group_name, {
+                        'type': 'send_members',
+                        'members_list': removed,
+                        }
+                    )
+                else:
+                    await self.channel_layer.group_send(self.room_group_name, {
+                        'type': 'send_members',
+                        'members_list':{'status':"success",'action': removed ,'member_list': await self.get_members()} ,
+                        }
+                    )
+                return 
                 # vote out the candidate and return the circle members
 
                 return 
+            case "vote_out":
+                
+                # vote out the candidate and return the circle members
+
+                return 
+            
+
             case _:
                 print("action not found:")
                 

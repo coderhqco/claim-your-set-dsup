@@ -365,5 +365,4 @@ class PodMemeber_voteIn(generics.ListAPIView):
         candidate_id = self.request.query_params.get('candidate')
         if candidate_id:
             self.queryset = self.queryset.filter(condidate__pk=candidate_id)
-
         return self.queryset
