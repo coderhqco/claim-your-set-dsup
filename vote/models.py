@@ -70,6 +70,13 @@ class PodMember(models.Model):
     class Meta:
         ordering = ['-is_delegate', 'date_joined']
 
+    def count_vote_in(self):
+        return PodMember_vote_in.objects.filter(condidate=self).count()
+    def count_vote_out(self):
+        return PodMember_vote_out.objects.filter(condidate=self).count()
+    def count_put_farward(self):
+        return PodMember_put_farward.objects.filter(recipient=self).count()
+
 class PodMember_vote_in(models.Model):
     condidate   = models.ForeignKey(PodMember,related_name='voteIns', on_delete=models.CASCADE) #
     voter       = models.ForeignKey(User, on_delete=models.CASCADE)

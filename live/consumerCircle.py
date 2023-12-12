@@ -11,15 +11,12 @@ class CircleConsumer(AsyncWebsocketConsumer):
         self.pod_name = self.scope['url_route']['kwargs']['pod_name']
         self.user_name = self.scope['url_route']['kwargs']['user_name']
         self.room_group_name = 'chat_%s' % self.pod_name
-    
+        self.return_func = 0
         # Join room group
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
 
         # Fetch existing pod members using database_sync_to_async
-        members = await self.get_members()
+        members = {'status':"success",'message':'listed all members.', 'member_list': await self.get_members()}
         
         # Accept the WebSocket connection
         await self.accept()
@@ -27,81 +24,80 @@ class CircleConsumer(AsyncWebsocketConsumer):
         # Send initial Circle members to the connected client
         await self.send(text_data=json.dumps(members))
 
-        # when a member of the room leaves the room 
-        async def disconnect(self):
-            await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-            self.close()
+    # when a member of the room leaves the room 
+    async def disconnect(self, close_code):
+        # Remove the client from the room (channel group)
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
+        # Your custom disconnect logic here
+        await self.send(text_data=json.dumps({"status": "disconnecting", "message": "Goodbye!"}))
+        
+        # Call the parent class disconnect method
+        await super().disconnect(close_code)
 
     @database_sync_to_async
     def get_members(self):
         MemberInstances = voteModels.PodMember.objects.filter(pod__code=self.pod_name)
         members = serializers.PodMemberSerializer(MemberInstances, many=True)
         return members.data
-        
 
-
-    # @database_sync_to_async
-    # def get_existing_vote(self, bill, username):
-    #     obj = BillVote.objects.filter(bill=bill, voter__username=username).first()
-    #     return obj
-
-    # @database_sync_to_async
-    # def update_existing_vote(self, existing_vote, vote_type):
-    #     existing_vote.your_vote = vote_type
-    #     existing_vote.save()
-
-    # @database_sync_to_async
-    # def create_new_vote(self, bill, user, vote_type):
-    #     ob = BillVote.objects.create(bill=bill, voter=user, your_vote=vote_type)
-    #     ob.save()
+    @database_sync_to_async
+    def candidate_vote(self, data):
+        """ Vote for candidate 
+        make sure to not forget about the mejority votes to make 
+        the candidate a member
+        """
+        try:
+            voter = User.objects.get(username = data['voter'])
+            candidate = voteModels.PodMember.objects.get(pk = data['candidate'])
+            voteModels.PodMember_vote_in.objects.update_or_create(voter=voter, condidate=candidate)
+            vote = serializers.UserSerializer(voter)
+            return {"status":"success", "message":"voted successfully.", "user":vote.data}
+        except:
+            vote = serializers.UserSerializer(voter)
+            return {"status": "error", "message": "Could not vote","user":vote.data}
     
-    # @database_sync_to_async
-    # def get_user_instance(self, username):
-    #     try:
-    #         u_obj = User.objects.get(username = username)
-    #         district_code = u_obj.users.district
-    #         return u_obj, district_code
-    #     except User.DoesNotExist:
-    #         return None, None
-        
+
     async def receive(self, text_data):
+        """ Check messages. If message is for voting in a candidate
+        then vote the candidate.
+        """
+        
         data = json.loads(text_data)
-        vote_type = data['vote_type']
-        username = data['username']
+        
+        match data["action"]:
+            case "vote_in":
+                # vote in the candidate and return the circle members
+                self.return_func = await self.candidate_vote(data["payload"])
 
-        # Fetch existing votes for the bill using database_sync_to_async
-        # try:
-        #     bill = await database_sync_to_async(Bill.objects.get)(number=self.bill_id)
-        # except Bill.DoesNotExist:
-        #     return
+            case "vote_out":
+                print("vote out:", data["payload"])
+                # vote out the candidate and return the circle members
+            case _:
+                print("action not found:")
+                pass
 
-        # get user instance 
-        # u, district_code = await self.get_user_instance(username)
-        # Check if the user has already voted for this bill
-        # existing_vote = await self.get_existing_vote(bill, username)
+        # if any of the functions returns error, the message being sent will be that error only to that user.
+        # otherwise, the circle members will be sent back to the room
+        if self.return_func['status'] == 'error':
+            await self.channel_layer.group_send(self.room_group_name, {
+                'type': 'send_members',
+                'members_list': self.return_func,
+                }
+            )
 
-        # if existing_vote:
-        #     # Update the existing vote using database_sync_to_async
-        #     await self.update_existing_vote(existing_vote, vote_type)
-        # else:
-        #     # Create a new vote using database_sync_to_async
-        #     await self.create_new_vote(bill, u, vote_type)
-
-        # Fetch updated votes for the bill using database_sync_to_async
-        # updated_bill_votes = await self.get_bill_votes(district_code)
-        # Send updated vote counts to the room group
-
-        await self.channel_layer.group_send(self.room_group_name, {
-                'type': 'update_vote_counts',
-                'votes': "updated_bill_votes",
-            }
-        )
+        else:
+            await self.channel_layer.group_send(self.room_group_name, {
+                    'type': 'send_members',
+                    'members_list':{'status':"success", 'member_list': await self.get_members()} ,
+                }
+            )
+            
 
     # Send to each member
-    async def update_vote_counts(self, event):
+    async def send_members(self, event):
         # Send message to WebSocket
-        await self.send(text_data=json.dumps(event['votes']))
+        await self.send(text_data=json.dumps(event['members_list']))
     
 
 

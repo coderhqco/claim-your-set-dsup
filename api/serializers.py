@@ -166,9 +166,12 @@ class User_Serializer(serializers.ModelSerializer):
 class PodMemberSerializer(serializers.ModelSerializer):
     user = User_Serializer()
     pod = PodSerializer()
+
     class Meta:
         model  = voteModels.PodMember
-        fields = ['id', 'is_member', 'is_delegate','date_joined','date_updated','pod','user']
+        fields = ['id', 'is_member', 'is_delegate',
+                  'date_joined','date_updated','pod','user','count_vote_in',
+                  'count_vote_out', 'count_put_farward']
        
 
         
