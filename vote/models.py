@@ -70,6 +70,15 @@ class PodMember(models.Model):
     class Meta:
         ordering = ['-is_delegate', 'date_joined']
 
+    def check_for_majority(self):
+        total_members = PodMember.objects.filter(pod=self.pod).filter(is_member = True).count()
+        majority_threshold = total_members // 2 + 1  # Majority is (total_members // 2 + 1)
+        if self.count_vote_in() >= majority_threshold:
+            self.is_member = True
+            self.save()
+            # Delete related PodMember_vote_in instances
+            PodMember_vote_in.objects.filter(condidate=self).delete()
+
     def count_vote_in(self):
         return PodMember_vote_in.objects.filter(condidate=self).count()
     def count_vote_out(self):
@@ -80,6 +89,11 @@ class PodMember(models.Model):
 class PodMember_vote_in(models.Model):
     condidate   = models.ForeignKey(PodMember,related_name='voteIns', on_delete=models.CASCADE) #
     voter       = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        super(PodMember_vote_in, self).save(*args, **kwargs)
+        print("saving new vote in record. and checking for mejority")
+        self.condidate.check_for_majority()
 
     def __str__(self):
         return str(self.voter) + '-'+ str(self.condidate)

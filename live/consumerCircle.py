@@ -114,13 +114,15 @@ class CircleConsumer(AsyncWebsocketConsumer):
                 # vote out the candidate and return the circle members
 
                 return 
-            case "vote_out":
-                
+            case "join":
+                print("handling the joining of the a member ")
                 # vote out the candidate and return the circle members
-
+                return 
+            case "vote_out":
+                print("handling the voting out of the a member ")
                 return 
             
-
+            
             case _:
                 print("action not found:")
                 
