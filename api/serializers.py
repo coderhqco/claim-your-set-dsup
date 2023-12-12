@@ -114,7 +114,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     users = Userializer()
     class Meta:
         model  = User
-        fields = ["username","email","is_staff","is_active","users","date_joined"]
+        fields = ["id","username","email","is_staff","is_active","users","date_joined"]
         depth  = 1
 
 class PodSerializer(serializers.ModelSerializer):

@@ -11,7 +11,6 @@ class CircleConsumer(AsyncWebsocketConsumer):
         self.pod_name = self.scope['url_route']['kwargs']['pod_name']
         self.user_name = self.scope['url_route']['kwargs']['user_name']
         self.room_group_name = 'chat_%s' % self.pod_name
-        self.return_func = 0
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
 
@@ -52,10 +51,10 @@ class CircleConsumer(AsyncWebsocketConsumer):
             candidate = voteModels.PodMember.objects.get(pk = data['candidate'])
             voteModels.PodMember_vote_in.objects.update_or_create(voter=voter, condidate=candidate)
             vote = serializers.UserSerializer(voter)
-            return {"status":"success", "message":"voted successfully.", "user":vote.data}
+            return {"status":"success","action":'vote_in', "message":"voted successfully.", "user":vote.data}
         except:
             vote = serializers.UserSerializer(voter)
-            return {"status": "error", "message": "Could not vote","user":vote.data}
+            return {"status": "error","action":"vote_in", "message": "Could not vote","user":vote.data}
     
 
     async def receive(self, text_data):
@@ -68,30 +67,33 @@ class CircleConsumer(AsyncWebsocketConsumer):
         match data["action"]:
             case "vote_in":
                 # vote in the candidate and return the circle members
-                self.return_func = await self.candidate_vote(data["payload"])
+                res = await self.candidate_vote(data["payload"])
+                if res['status'] == 'error':
+                    await self.channel_layer.group_send(self.room_group_name, {
+                        'type': 'send_members',
+                        'members_list': res,
+                        }
+                    )
+                else:
+                    await self.channel_layer.group_send(self.room_group_name, {
+                        'type': 'send_members',
+                        'members_list':{'status':"success",'action': res ,'member_list': await self.get_members()} ,
+                        }
+                    )
+                return 
 
             case "vote_out":
                 print("vote out:", data["payload"])
                 # vote out the candidate and return the circle members
+
+                return 
             case _:
                 print("action not found:")
-                pass
+                
 
         # if any of the functions returns error, the message being sent will be that error only to that user.
         # otherwise, the circle members will be sent back to the room
-        if self.return_func['status'] == 'error':
-            await self.channel_layer.group_send(self.room_group_name, {
-                'type': 'send_members',
-                'members_list': self.return_func,
-                }
-            )
-
-        else:
-            await self.channel_layer.group_send(self.room_group_name, {
-                    'type': 'send_members',
-                    'members_list':{'status':"success", 'member_list': await self.get_members()} ,
-                }
-            )
+        
             
 
     # Send to each member

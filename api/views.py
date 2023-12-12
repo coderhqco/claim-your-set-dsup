@@ -355,3 +355,15 @@ class PodBackNForthAdd(APIView):
         except:
             return JsonResponse({False: pod})
 
+
+# get the vote in for user for a circle
+class PodMemeber_voteIn(generics.ListAPIView):
+    serializer_class = apiSerializers.PodMember_VoteInSer
+    queryset = voteModels.PodMember_vote_in.objects.filter()
+    permission_classes = [AllowAny]
+    def get_queryset(self):
+        candidate_id = self.request.query_params.get('candidate')
+        if candidate_id:
+            self.queryset = self.queryset.filter(condidate__pk=candidate_id)
+
+        return self.queryset
