@@ -130,6 +130,11 @@ class PodMember_VoteInSer(serializers.ModelSerializer):
         model = voteModels.PodMember_vote_in
         fields = '__all__'
 
+class PodMember_put_farwardSer(serializers.ModelSerializer):
+    class Meta:
+        model = voteModels.PodMember_put_farward
+        fields = '__all__'
+
 class PodMember_VoteOutSer(serializers.ModelSerializer):
     class Meta:
         model = voteModels.PodMember_vote_out

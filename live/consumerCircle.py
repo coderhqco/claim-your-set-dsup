@@ -91,6 +91,20 @@ class CircleConsumer(AsyncWebsocketConsumer):
             return {"status": "error","action":"vote_in", "message": "Could note remove candidate.","user":vote.data}
     
     @database_sync_to_async
+    def put_farward(self, data):
+        """ change the circle gelegation.
+        """
+        try:
+            voter = User.objects.get(username = data['voter'])
+            member = voteModels.PodMember.objects.get(pk = data['member'])
+            voteModels.PodMember_put_farward.objects.update_or_create(voter=voter, recipient=member)
+            vote = serializers.UserSerializer(voter)
+            return {"status":"success","action":'put_farward', "message":"voted for gelegation.", "user":vote.data}
+        except:
+            vote = serializers.UserSerializer(voter)
+            return {"status": "error","action":"vote_out", "message": "Could not vote for gelegation.","user":vote.data}
+    
+    @database_sync_to_async
     def invitation_key(self):
         try:
             pod = voteModels.Pod.objects.get(code=self.pod_name)
@@ -170,8 +184,6 @@ class CircleConsumer(AsyncWebsocketConsumer):
                     )
                 return 
             
-                return 
-            
             case "invitationKey":
                 circle = await self.invitation_key()
                 await self.channel_layer.group_send(self.room_group_name, {
@@ -180,6 +192,23 @@ class CircleConsumer(AsyncWebsocketConsumer):
                         }
                     )
                 return 
+            
+            case "putFarward":
+                res = await self.put_farward(data["payload"])
+                if res['status'] == 'error':
+                    await self.channel_layer.group_send(self.room_group_name, {
+                        'type': 'send_members',
+                        'members_list': res,
+                        }
+                    )
+                else:
+                    await self.channel_layer.group_send(self.room_group_name, {
+                        'type': 'send_members',
+                        'members_list':{'status':"success",'action': res ,'member_list': await self.get_members()} ,
+                        }
+                    )
+                return 
+            
             case _:
                 print("action not found:")
                 

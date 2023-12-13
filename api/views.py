@@ -387,8 +387,20 @@ class PodMemeber_voteOut(generics.ListAPIView):
             self.queryset = self.queryset.filter(condidate__pk=member_id)
         return self.queryset
     
+# get the put farward for gelegation of a member of a circle
+class PodMemeber_putfarward(generics.ListAPIView):
+    serializer_class = apiSerializers.PodMember_put_farwardSer
+    queryset = voteModels.PodMember_put_farward.objects.filter()
+    permission_classes = [AllowAny]
+    def get_queryset(self):
+        member_id = self.request.query_params.get('member')
+        if member_id:
+            self.queryset = self.queryset.filter(recipient__pk=member_id)
+        return self.queryset
+    
 
 class CircleList(viewsets.ModelViewSet):
     serializer_class = apiSerializers.PodSerializer
     queryset = voteModels.Pod.objects.all()
     pagination_class = CustomPagination
+    permission_classes = [AllowAny]
