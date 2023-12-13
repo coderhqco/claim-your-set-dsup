@@ -70,9 +70,54 @@ class PodMember(models.Model):
     class Meta:
         ordering = ['-is_delegate', 'date_joined']
 
+    def check_for_majority(self):
+        total_members = PodMember.objects.filter(pod=self.pod).filter(is_member = True).count()
+        majority_threshold = total_members // 2 + 1  # Majority is (total_members // 2 + 1)
+        if self.count_vote_in() >= majority_threshold:
+            self.is_member = True
+            self.save()
+            # Delete related PodMember_vote_in instances
+            PodMember_vote_in.objects.filter(condidate=self).delete()
+    
+    def check_for_removing(self):
+        total_members = PodMember.objects.filter(pod=self.pod).filter(is_member = True).count()
+        majority_threshold = total_members // 2 + 1  # Majority is (total_members // 2 + 1)
+        if self.count_vote_out() >= majority_threshold:
+            self.user.users.userType = 0
+            self.user.users.save()
+            self.delete()
+            # set the deleted user.users userType to 0 
+
+    def check_put_farward(self):
+        total_members = PodMember.objects.filter(pod=self.pod).filter(is_member = True).count()
+        majority_threshold = total_members // 2 + 1  # Majority is (total_members // 2 + 1)
+        if self.count_put_farward() >= majority_threshold:
+            # find the current delegate and set is_delegate false.
+            current_delegate = PodMember.objects.filter(pod=self.pod).filter(is_delegate = True).first()
+            current_delegate.is_delegate = False
+            current_delegate.save()
+
+            # set the current member to delegate and set is_delegate true.
+            self.is_delegate = True
+            self.save()
+            
+            # Delete related PodMember_put_farward instances
+            PodMember_put_farward.objects.filter(recipient=self).delete()
+
+    def count_vote_in(self):
+        return PodMember_vote_in.objects.filter(condidate=self).count()
+    def count_vote_out(self):
+        return PodMember_vote_out.objects.filter(condidate=self).count()
+    def count_put_farward(self):
+        return PodMember_put_farward.objects.filter(recipient=self).count()
+
 class PodMember_vote_in(models.Model):
     condidate   = models.ForeignKey(PodMember,related_name='voteIns', on_delete=models.CASCADE) #
     voter       = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        super(PodMember_vote_in, self).save(*args, **kwargs)
+        self.condidate.check_for_majority()
 
     def __str__(self):
         return str(self.voter) + '-'+ str(self.condidate)
@@ -81,12 +126,20 @@ class PodMember_vote_out(models.Model):
     condidate   = models.ForeignKey(PodMember, related_name='voteOuts', on_delete=models.CASCADE)
     voter       = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    def save(self, *args, **kwargs):
+        super(PodMember_vote_out, self).save(*args, **kwargs)
+        self.condidate.check_for_removing()
+
     def __str__(self):
         return str(self.voter) + '-'+str(self.condidate)
 
 class PodMember_put_farward(models.Model):
     recipient   = models.ForeignKey(PodMember,related_name='putFarward', on_delete=models.CASCADE) # recipient 
     voter       = models.ForeignKey(User, on_delete=models.CASCADE)  # 
+
+    def save(self, *args, **kwargs):
+        super(PodMember_put_farward, self).save(*args, **kwargs)
+        self.recipient.check_put_farward()
 
     def __str__(self):
         return str(self.voter) + '-'+str(self.recipient)

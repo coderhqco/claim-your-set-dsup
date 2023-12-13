@@ -71,95 +71,6 @@ class HouseKeepingConsumer(WebsocketConsumer):
         }))
 
 
-class PodBackNForth(AsyncWebsocketConsumer):
-    async def connect(self):
-        # get pod and username
-        self.podName = self.scope['url_route']['kwargs']['podName']
-        self.userName = self.scope['url_route']['kwargs']['userName']
-
-        # create room with podname
-        self.room_group_name = self.podName
-        self.username = self.userName
-        self.request = self.scope.get('request')
-        self.pageNum = 1
-        self.paginator = 10
-
-        # construct B&F entries 
-        self.queryset_init = None
-
-        # connect to db and retraive old messages of that pod
-        self.usrs = await database_sync_to_async(self.get_messages)()
-
-        # add user to pod room
-        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-        await self.accept()
-
-        # send message to that web socket request only. not to the group members
-        await self.send(text_data=json.dumps(self.usrs))
-
-    def get_messages(self):
-        """ Get the B&f entries and paginate them in 10 entries per page. 
-        The entries are sorted from the latest to the oldest.
-        """
-        pod = voteModels.Pod.objects.get(code = self.podName)
-        if pod:
-            objects = apiSerializers.PodBackNForthSerializer(
-                voteModels.PodBackNForth.objects.filter(pod=pod).order_by('-date'), many=True
-                ).data
-            self.queryset_init = objects
-
-            paginator = Paginator(objects, self.paginator)  # Paginate queryset with 5 items per page
-            page = paginator.get_page(self.pageNum)
-            return list(page)
-        return 0
-
-    # Receive message from WebSocket
-    async def receive(self, text_data):
-        """Check if the page_number is in the message. 
-        If so, it means to load more messages. Else, forward the new entry to the room
-        """
-        if "page_number" in text_data:
-            page_number = text_data.split(",")[1]
-            # here send the next page of the paginated queryset
-            # send only to that user
-            self.pageNum = page_number
-            paginator = Paginator(self.queryset_init, self.paginator)  # Paginate queryset with 5 items per page
-            page = paginator.get_page(self.pageNum)
-            
-            items = list(page)
-            await self.send(text_data=json.dumps(items))
-        else:
-            # get the message from the client. change it to python json and send to group
-            text_json = json.loads(text_data)
-            await self.channel_layer.group_send(
-                self.room_group_name, {"type": "podChat", "message": text_json}
-            )
-
-    # handling function for sending all the messages to room members
-    async def podChat(self, event):
-        # save the incoming messages into DB here.
-        saved_massage = await database_sync_to_async(self.save_message)(event['message'])
-        await self.send(text_data=json.dumps(saved_massage))
-
-    # Save the message into DB and return a serialized instance of the message
-    def save_message(self,msg):
-        # get pod and user instance
-        pod = voteModels.Pod.objects.get(code = self.podName)
-        usr = User.objects.get(username = msg["sender"])
-        # here validate if the user is a member of the pod and create a message instance to save into DB
-        objects = voteModels.PodBackNForth.objects.create( pod = pod, sender= usr, message = ""+msg['message'],)
-        objects.save()
-        return apiSerializers.PodBackNForthSerializer(objects).data
-
-    # when a member of the room leaves the room 
-    async def disconnect(self,message):
-        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-        self.close()
-
-# end of the B&F
-
-
-
 def majorityputFarward(recipient):
     if recipient.putFarward.all().count() >= (recipient.pod.podmember_set.all().count()/2):
         return True
@@ -351,3 +262,90 @@ def switch(text_data_json):
 
         case default:
             return {'type': 'notype', 'data':'no action to preferm'}
+            
+class PodBackNForth(AsyncWebsocketConsumer):
+    async def connect(self):
+        # get pod and username
+        self.podName = self.scope['url_route']['kwargs']['podName']
+        self.userName = self.scope['url_route']['kwargs']['userName']
+
+        # create room with podname
+        self.room_group_name = self.podName
+        self.username = self.userName
+        self.request = self.scope.get('request')
+        self.pageNum = 1
+        self.paginator = 10
+
+        # construct B&F entries 
+        self.queryset_init = None
+
+        # connect to db and retraive old messages of that pod
+        self.usrs = await database_sync_to_async(self.get_messages)()
+
+        # add user to pod room
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+        await self.accept()
+
+        # send message to that web socket request only. not to the group members
+        await self.send(text_data=json.dumps(self.usrs))
+
+    def get_messages(self):
+        """ Get the B&f entries and paginate them in 10 entries per page. 
+        The entries are sorted from the latest to the oldest.
+        """
+        pod = voteModels.Pod.objects.get(code = self.podName)
+        if pod:
+            objects = apiSerializers.PodBackNForthSerializer(
+                voteModels.PodBackNForth.objects.filter(pod=pod).order_by('-date'), many=True
+                ).data
+            self.queryset_init = objects
+
+            paginator = Paginator(objects, self.paginator)  # Paginate queryset with 5 items per page
+            page = paginator.get_page(self.pageNum)
+            return list(page)
+        return 0
+
+    # Receive message from WebSocket
+    async def receive(self, text_data):
+        """Check if the page_number is in the message. 
+        If so, it means to load more messages. Else, forward the new entry to the room
+        """
+        if "page_number" in text_data:
+            page_number = text_data.split(",")[1]
+            # here send the next page of the paginated queryset
+            # send only to that user
+            self.pageNum = page_number
+            paginator = Paginator(self.queryset_init, self.paginator)  # Paginate queryset with 5 items per page
+            page = paginator.get_page(self.pageNum)
+            
+            items = list(page)
+            await self.send(text_data=json.dumps(items))
+        else:
+            # get the message from the client. change it to python json and send to group
+            text_json = json.loads(text_data)
+            await self.channel_layer.group_send(
+                self.room_group_name, {"type": "podChat", "message": text_json}
+            )
+
+    # handling function for sending all the messages to room members
+    async def podChat(self, event):
+        # save the incoming messages into DB here.
+        saved_massage = await database_sync_to_async(self.save_message)(event['message'])
+        await self.send(text_data=json.dumps(saved_massage))
+
+    # Save the message into DB and return a serialized instance of the message
+    def save_message(self,msg):
+        # get pod and user instance
+        pod = voteModels.Pod.objects.get(code = self.podName)
+        usr = User.objects.get(username = msg["sender"])
+        # here validate if the user is a member of the pod and create a message instance to save into DB
+        objects = voteModels.PodBackNForth.objects.create( pod = pod, sender= usr, message = ""+msg['message'],)
+        objects.save()
+        return apiSerializers.PodBackNForthSerializer(objects).data
+
+    # when a member of the room leaves the room 
+    async def disconnect(self,message):
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+        self.close()
+
+# end of the B&F

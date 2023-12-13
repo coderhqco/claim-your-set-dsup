@@ -114,7 +114,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     users = Userializer()
     class Meta:
         model  = User
-        fields = ["username","email","is_staff","is_active","users","date_joined"]
+        fields = ["id","username","email","is_staff","is_active","users","date_joined"]
         depth  = 1
 
 class PodSerializer(serializers.ModelSerializer):
@@ -128,6 +128,11 @@ class PodSerializer(serializers.ModelSerializer):
 class PodMember_VoteInSer(serializers.ModelSerializer):
     class Meta:
         model = voteModels.PodMember_vote_in
+        fields = '__all__'
+
+class PodMember_put_farwardSer(serializers.ModelSerializer):
+    class Meta:
+        model = voteModels.PodMember_put_farward
         fields = '__all__'
 
 class PodMember_VoteOutSer(serializers.ModelSerializer):
@@ -147,6 +152,34 @@ class PODMemberSer(serializers.ModelSerializer):
         fields =["is_delegate","member_number","id",'user','pod',"is_member", 'voteIns','voteOuts','putFarward']
         
 
+
+# This serializer is being used in Circle consumer file for pod members
+class Userial(serializers.ModelSerializer):
+    class Meta:
+        model = voteModels.Users
+        fields = ["id","legalName", "is_reg","verificationScore","address","userType","voterID"]
+
+# this serializer is being used in Circle consumer file for pod members
+class User_Serializer(serializers.ModelSerializer):
+    users = Userial()
+    class Meta:
+        model  = User
+        fields = ["id","username","email","date_joined","users"]
+
+
+# this serializer is being used in Circle consumer file for pod members
+class PodMemberSerializer(serializers.ModelSerializer):
+    user = User_Serializer()
+    pod = PodSerializer()
+
+    class Meta:
+        model  = voteModels.PodMember
+        fields = ['id', 'is_member', 'is_delegate',
+                  'date_joined','date_updated','pod','user','count_vote_in',
+                  'count_vote_out', 'count_put_farward']
+       
+
+        
 class VoterPageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model  = voteModels.Users

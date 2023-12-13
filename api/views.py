@@ -9,12 +9,21 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics
 from rest_framework.decorators import api_view
+from rest_framework.pagination import PageNumberPagination
 
 from django.utils.encoding import force_bytes,force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from vote.token import account_activation_token
 from django.http import JsonResponse
 from django.contrib.auth import authenticate,login
+
+class CustomPagination(PageNumberPagination):
+    """
+    We are creating a custome pagination 
+    to limit the query and more """
+    page_size = 10  # Number of items per page
+    page_size_query_param = 'page_size'  # Allows the client to override the page size
+    max_page_size = 100  # Maximum page size to prevent abuse
 
 
 class DistrictsViewSet(viewsets.ModelViewSet):
@@ -93,7 +102,7 @@ class LoginPageView(APIView):
             return Response({"status":messages}, status=status.HTTP_400_BAD_REQUEST)
 
 def pod_invitation_generator():
-    """
+    """ this function is being used in cnosumerCircle as well
     this is the pod code generator. 
     It uses random and checks for the database. 
     return the code if it's not taken
@@ -279,8 +288,8 @@ class JoinPOD(APIView):
                     podMember.save()
                     # set the userType of the member to 0
                     # when the user become the member via majority votes, then the userType is set to 1 
-                    # podMember.user.users.userType = 0
-                    # podMember.user.users.save()
+                    podMember.user.users.userType = 1
+                    podMember.user.users.save()
                     return JsonResponse(apiSerializers.PodSerializer(pod).data)
                 else:
                     # else of pod is active 
@@ -355,3 +364,43 @@ class PodBackNForthAdd(APIView):
         except:
             return JsonResponse({False: pod})
 
+
+# get the vote in for user for a circle
+class PodMemeber_voteIn(generics.ListAPIView):
+    serializer_class = apiSerializers.PodMember_VoteInSer
+    queryset = voteModels.PodMember_vote_in.objects.filter()
+    permission_classes = [AllowAny]
+    def get_queryset(self):
+        candidate_id = self.request.query_params.get('candidate')
+        if candidate_id:
+            self.queryset = self.queryset.filter(condidate__pk=candidate_id)
+        return self.queryset
+    
+# get the vote out for user of a circle
+class PodMemeber_voteOut(generics.ListAPIView):
+    serializer_class = apiSerializers.PodMember_VoteOutSer
+    queryset = voteModels.PodMember_vote_out.objects.filter()
+    permission_classes = [AllowAny]
+    def get_queryset(self):
+        member_id = self.request.query_params.get('member')
+        if member_id:
+            self.queryset = self.queryset.filter(condidate__pk=member_id)
+        return self.queryset
+    
+# get the put farward for gelegation of a member of a circle
+class PodMemeber_putfarward(generics.ListAPIView):
+    serializer_class = apiSerializers.PodMember_put_farwardSer
+    queryset = voteModels.PodMember_put_farward.objects.filter()
+    permission_classes = [AllowAny]
+    def get_queryset(self):
+        member_id = self.request.query_params.get('member')
+        if member_id:
+            self.queryset = self.queryset.filter(recipient__pk=member_id)
+        return self.queryset
+    
+
+class CircleList(viewsets.ModelViewSet):
+    serializer_class = apiSerializers.PodSerializer
+    queryset = voteModels.Pod.objects.all()
+    pagination_class = CustomPagination
+    permission_classes = [AllowAny]

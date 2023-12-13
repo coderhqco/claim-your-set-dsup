@@ -2,6 +2,7 @@ from bills import models as billModels
 from bills import serializers as billSerializers
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny
 
 
 class CustomPagination(PageNumberPagination):
@@ -27,6 +28,7 @@ class BillViewSet(viewsets.ModelViewSet):
     queryset = billModels.Bill.objects.all()
     serializer_class = billSerializers.BillSerializer
     pagination_class = CustomPagination 
+    permission_classes = [AllowAny]
 
 
 class BillVoteViewSet(viewsets.ModelViewSet):
@@ -44,3 +46,5 @@ class BillVoteViewSet(viewsets.ModelViewSet):
     queryset = billModels.BillVote.objects.all()
     serializer_class = billSerializers.BillVoteSerializer
     pagination_class = CustomPagination
+    permission_classes = [AllowAny]
+
