@@ -9,12 +9,21 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics
 from rest_framework.decorators import api_view
+from rest_framework.pagination import PageNumberPagination
 
 from django.utils.encoding import force_bytes,force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from vote.token import account_activation_token
 from django.http import JsonResponse
 from django.contrib.auth import authenticate,login
+
+class CustomPagination(PageNumberPagination):
+    """
+    We are creating a custome pagination 
+    to limit the query and more """
+    page_size = 10  # Number of items per page
+    page_size_query_param = 'page_size'  # Allows the client to override the page size
+    max_page_size = 100  # Maximum page size to prevent abuse
 
 
 class DistrictsViewSet(viewsets.ModelViewSet):
@@ -366,3 +375,9 @@ class PodMemeber_voteIn(generics.ListAPIView):
         if candidate_id:
             self.queryset = self.queryset.filter(condidate__pk=candidate_id)
         return self.queryset
+    
+
+class CircleList(viewsets.ModelViewSet):
+    serializer_class = apiSerializers.PodSerializer
+    queryset = voteModels.Pod.objects.all()
+    pagination_class = CustomPagination

@@ -8,6 +8,7 @@ router = routers.DefaultRouter()
 router.register('districts', apiViews.DistrictsViewSet)
 router.register('user', apiViews.UserPageView)
 router.register('voter-page', apiViews.VoterPageView)
+router.register('circle', apiViews.CircleList)
 
 from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 
