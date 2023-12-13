@@ -279,8 +279,8 @@ class JoinPOD(APIView):
                     podMember.save()
                     # set the userType of the member to 0
                     # when the user become the member via majority votes, then the userType is set to 1 
-                    # podMember.user.users.userType = 0
-                    # podMember.user.users.save()
+                    podMember.user.users.userType = 1
+                    podMember.user.users.save()
                     return JsonResponse(apiSerializers.PodSerializer(pod).data)
                 else:
                     # else of pod is active 

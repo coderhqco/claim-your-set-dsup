@@ -62,7 +62,13 @@ class CircleConsumer(AsyncWebsocketConsumer):
         """
         try:
             remover = User.objects.get(username = data['remover'])
-            voteModels.PodMember.objects.get(pk = data['candidate']).delete()
+            member = voteModels.PodMember.objects.get(pk = data['candidate'])
+            # set back the userType to 0 while removing.
+            member.user.users.userType = 0
+            member.user.users.save()
+            # remove the associated vote INS as well.
+            # voteModels.PodMember_vote_in.objects.filter(condidate=member).delete()
+            member.delete()
             # remove the podmember 
             vote = serializers.UserSerializer(remover)
             return {"status":"success","action":'remove_candidate', "message":"removed successfully.", "user":vote.data}
@@ -115,14 +121,23 @@ class CircleConsumer(AsyncWebsocketConsumer):
 
                 return 
             case "join":
-                print("handling the joining of the a member ")
-                # vote out the candidate and return the circle members
+                print("handling the joining of the a member...")
+
+                """ the candidate is already joined and only needs to update the Circle list to members"""
+                await self.channel_layer.group_send(self.room_group_name, {
+                    'type': 'send_members',
+                    'members_list':{'status':"success", 'member_list': await self.get_members()} ,
+                    }
+                )
                 return 
+                
+                # vote out the candidate and return the circle members
+              
             case "vote_out":
                 print("handling the voting out of the a member ")
                 return 
             
-            
+
             case _:
                 print("action not found:")
                 
