@@ -58,6 +58,21 @@ class CircleConsumer(AsyncWebsocketConsumer):
             return {"status": "error","action":"vote_in", "message": "Could not vote","user":vote.data}
     
     @database_sync_to_async
+    def member_vote_out(self, data):
+        """ Vote for member out. If the majority of the members agree on removing this member, 
+        she/he shall be removed.
+        """
+        try:
+            voter = User.objects.get(username = data['voter'])
+            member = voteModels.PodMember.objects.get(pk = data['member'])
+            voteModels.PodMember_vote_out.objects.update_or_create(voter=voter, condidate=member)
+            vote = serializers.UserSerializer(voter)
+            return {"status":"success","action":'vote_out', "message":"voted out successfully.", "user":vote.data}
+        except:
+            vote = serializers.UserSerializer(voter)
+            return {"status": "error","action":"vote_out", "message": "Could not vote out.","user":vote.data}
+    
+    @database_sync_to_async
     def remove_candidate(self, data):
         """ remove the candidate or members from this circle
         """
@@ -139,7 +154,22 @@ class CircleConsumer(AsyncWebsocketConsumer):
                 # vote out the candidate and return the circle members
               
             case "vote_out":
-                print("handling the voting out of the a member ")
+                 # vote in the candidate and return the circle members
+                res = await self.member_vote_out(data["payload"])
+                if res['status'] == 'error':
+                    await self.channel_layer.group_send(self.room_group_name, {
+                        'type': 'send_members',
+                        'members_list': res,
+                        }
+                    )
+                else:
+                    await self.channel_layer.group_send(self.room_group_name, {
+                        'type': 'send_members',
+                        'members_list':{'status':"success",'action': res ,'member_list': await self.get_members()} ,
+                        }
+                    )
+                return 
+            
                 return 
             
             case "invitationKey":

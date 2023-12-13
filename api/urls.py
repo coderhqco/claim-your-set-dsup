@@ -26,5 +26,6 @@ urlpatterns = [
     path('pod-desolve/', apiViews.DesolvePod.as_view()),
     path('podmember/', apiViews.PodMem.as_view()),
     path('circle-vote-in-list/',apiViews.PodMemeber_voteIn.as_view()),
+    path('circle-vote-out-list/',apiViews.PodMemeber_voteOut.as_view()),
     
 ]

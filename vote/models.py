@@ -78,6 +78,12 @@ class PodMember(models.Model):
             self.save()
             # Delete related PodMember_vote_in instances
             PodMember_vote_in.objects.filter(condidate=self).delete()
+    
+    def check_for_removing(self):
+        total_members = PodMember.objects.filter(pod=self.pod).filter(is_member = True).count()
+        majority_threshold = total_members // 2 + 1  # Majority is (total_members // 2 + 1)
+        if self.count_vote_out() >= majority_threshold:
+            self.delete()
 
     def count_vote_in(self):
         return PodMember_vote_in.objects.filter(condidate=self).count()
@@ -92,7 +98,6 @@ class PodMember_vote_in(models.Model):
 
     def save(self, *args, **kwargs):
         super(PodMember_vote_in, self).save(*args, **kwargs)
-        print("saving new vote in record. and checking for mejority")
         self.condidate.check_for_majority()
 
     def __str__(self):
@@ -101,6 +106,11 @@ class PodMember_vote_in(models.Model):
 class PodMember_vote_out(models.Model):
     condidate   = models.ForeignKey(PodMember, related_name='voteOuts', on_delete=models.CASCADE)
     voter       = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        super(PodMember_vote_out, self).save(*args, **kwargs)
+        print("trying to check if the memer should be removed....")
+        self.condidate.check_for_removing()
 
     def __str__(self):
         return str(self.voter) + '-'+str(self.condidate)

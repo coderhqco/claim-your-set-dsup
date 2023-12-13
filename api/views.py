@@ -376,6 +376,17 @@ class PodMemeber_voteIn(generics.ListAPIView):
             self.queryset = self.queryset.filter(condidate__pk=candidate_id)
         return self.queryset
     
+# get the vote out for user of a circle
+class PodMemeber_voteOut(generics.ListAPIView):
+    serializer_class = apiSerializers.PodMember_VoteOutSer
+    queryset = voteModels.PodMember_vote_out.objects.filter()
+    permission_classes = [AllowAny]
+    def get_queryset(self):
+        member_id = self.request.query_params.get('member')
+        if member_id:
+            self.queryset = self.queryset.filter(condidate__pk=member_id)
+        return self.queryset
+    
 
 class CircleList(viewsets.ModelViewSet):
     serializer_class = apiSerializers.PodSerializer
