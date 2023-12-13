@@ -93,7 +93,7 @@ class LoginPageView(APIView):
             return Response({"status":messages}, status=status.HTTP_400_BAD_REQUEST)
 
 def pod_invitation_generator():
-    """
+    """ this function is being used in cnosumerCircle as well
     this is the pod code generator. 
     It uses random and checks for the database. 
     return the code if it's not taken

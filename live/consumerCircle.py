@@ -5,6 +5,7 @@ from channels.db import database_sync_to_async
 from django.contrib.auth.models import User
 from vote import models as voteModels
 from api import serializers
+from api import views as apiViews
 
 class CircleConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -58,7 +59,7 @@ class CircleConsumer(AsyncWebsocketConsumer):
     
     @database_sync_to_async
     def remove_candidate(self, data):
-        """ remove the candidate members from this circle
+        """ remove the candidate or members from this circle
         """
         try:
             remover = User.objects.get(username = data['remover'])
@@ -66,8 +67,6 @@ class CircleConsumer(AsyncWebsocketConsumer):
             # set back the userType to 0 while removing.
             member.user.users.userType = 0
             member.user.users.save()
-            # remove the associated vote INS as well.
-            # voteModels.PodMember_vote_in.objects.filter(condidate=member).delete()
             member.delete()
             # remove the podmember 
             vote = serializers.UserSerializer(remover)
@@ -76,6 +75,16 @@ class CircleConsumer(AsyncWebsocketConsumer):
             vote = serializers.UserSerializer(remover)
             return {"status": "error","action":"vote_in", "message": "Could note remove candidate.","user":vote.data}
     
+    @database_sync_to_async
+    def invitation_key(self):
+        try:
+            pod = voteModels.Pod.objects.get(code=self.pod_name)
+            pod.invitation_code = apiViews.pod_invitation_generator()
+            pod.save()
+            serialized = serializers.PodSerializer(pod)
+            return {"status":"success","action":'invitation_key', "message":"invitation key generated successfully.", "pod":serialized.data}
+        except:
+            return {"status": "error","action":"invitation_key", "message": "Could note generate invitation key."}
 
     async def receive(self, text_data):
         """ Check messages. If message is for voting in a candidate
@@ -102,7 +111,7 @@ class CircleConsumer(AsyncWebsocketConsumer):
                 return 
 
             case "remove_candidate":
-                # remove the candidate and return the circle members
+                # remove the candidate or member and return the circle members
                 removed = await self.remove_candidate(data["payload"])
                 if removed['status'] == 'error':
                     await self.channel_layer.group_send(self.room_group_name, {
@@ -117,12 +126,8 @@ class CircleConsumer(AsyncWebsocketConsumer):
                         }
                     )
                 return 
-                # vote out the candidate and return the circle members
 
-                return 
             case "join":
-                print("handling the joining of the a member...")
-
                 """ the candidate is already joined and only needs to update the Circle list to members"""
                 await self.channel_layer.group_send(self.room_group_name, {
                     'type': 'send_members',
@@ -137,7 +142,14 @@ class CircleConsumer(AsyncWebsocketConsumer):
                 print("handling the voting out of the a member ")
                 return 
             
-
+            case "invitationKey":
+                circle = await self.invitation_key()
+                await self.channel_layer.group_send(self.room_group_name, {
+                        'type': 'send_members',
+                        'members_list': {"status": "success","action":'invitationKey', "circle":circle['pod']} 
+                        }
+                    )
+                return 
             case _:
                 print("action not found:")
                 
