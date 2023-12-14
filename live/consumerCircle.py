@@ -103,6 +103,22 @@ class CircleConsumer(AsyncWebsocketConsumer):
         except:
             vote = serializers.UserSerializer(voter)
             return {"status": "error","action":"vote_out", "message": "Could not vote for gelegation.","user":vote.data}
+   
+    @database_sync_to_async
+    def dissolveCircle(self, data):
+        """removing this Circle."""
+        try:
+            # this is the only member which is fdel as well. same as voter
+            member = voteModels.PodMember.objects.get(pk = data['member'])
+            # get the circle
+            if member.is_delegate and member.pod.podmember_set.all().count() == 1:
+                member.pod.delete()
+                # set the userType to 0
+                member.user.users.userType = 0
+                member.user.users.save()
+                return {"status":"success","action":'dissolve', "message":"Circle Dissolved."}
+        except:
+            return {"status": "error","action":"dissolve", "message": "Could not dissolve."}
     
     @database_sync_to_async
     def invitation_key(self):
@@ -209,8 +225,17 @@ class CircleConsumer(AsyncWebsocketConsumer):
                     )
                 return 
             
+            case "dissolve":
+                await self.channel_layer.group_send(self.room_group_name, {
+                    'type': 'send_members',
+                    'members_list': await self.dissolveCircle(data['payload']),
+                    }
+                )
+                return 
+
             case _:
                 print("action not found:")
+                pass
                 
 
         # if any of the functions returns error, the message being sent will be that error only to that user.
