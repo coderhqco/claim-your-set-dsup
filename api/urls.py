@@ -28,5 +28,6 @@ urlpatterns = [
     path('circle-vote-in-list/',apiViews.PodMemeber_voteIn.as_view()),
     path('circle-vote-out-list/',apiViews.PodMemeber_voteOut.as_view()),
     path('circle-put-farward-list/',apiViews.PodMemeber_putfarward.as_view()),
+    path('status/circle/',apiViews.CircleStatus.as_view()),
     
 ]
