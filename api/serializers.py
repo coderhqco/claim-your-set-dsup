@@ -192,3 +192,11 @@ class PodBackNForthSerializer(serializers.ModelSerializer):
     class Meta:
         model   = voteModels.PodBackNForth
         fields  = ["id", "sender","message", "pod", 'date']
+
+
+
+class CircleStatusSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = voteModels.CircleStatus
+        fields = "__all__"
+        

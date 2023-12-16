@@ -404,3 +404,9 @@ class CircleList(viewsets.ModelViewSet):
     queryset = voteModels.Pod.objects.all()
     pagination_class = CustomPagination
     permission_classes = [AllowAny]
+
+
+class CircleStatus(generics.ListAPIView):
+    serializer_class = apiSerializers.CircleStatusSerializer
+    queryset = voteModels.CircleStatus.objects.all()
+    permission_classes = [AllowAny]
