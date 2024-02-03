@@ -30,4 +30,5 @@ urlpatterns = [
     path('circle-put-farward-list/',apiViews.PodMemeber_putfarward.as_view()),
     path('status/circle/',apiViews.CircleStatus.as_view()),
     
+    path('testing-api/',apiViews.TestingView.as_view())
 ]
