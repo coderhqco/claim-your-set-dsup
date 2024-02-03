@@ -17,6 +17,8 @@ from vote.token import account_activation_token
 from django.http import JsonResponse
 from django.contrib.auth import authenticate,login
 
+from api import models as apiModels
+
 class CustomPagination(PageNumberPagination):
     """
     We are creating a custome pagination 
@@ -409,4 +411,9 @@ class CircleList(viewsets.ModelViewSet):
 class CircleStatus(generics.ListAPIView):
     serializer_class = apiSerializers.CircleStatusSerializer
     queryset = voteModels.CircleStatus.objects.all()
+    permission_classes = [AllowAny]
+
+class TestingView(generics.ListAPIView):
+    serializer_class = apiSerializers.TestingSerializer
+    queryset = apiModels.TestingModel.objects.all()
     permission_classes = [AllowAny]

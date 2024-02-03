@@ -13,6 +13,7 @@ from vote import models as voteModels
 from bills import models as billModels
 import os
 
+from api import models as apiModels
 
 class DistrictsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -200,3 +201,7 @@ class CircleStatusSerializer(serializers.ModelSerializer):
         model = voteModels.CircleStatus
         fields = "__all__"
         
+class TestingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = apiModels.TestingModel
+        fields = "__all__"
