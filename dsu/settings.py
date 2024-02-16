@@ -203,10 +203,12 @@ CORS_ALLOW_ALL_ORIGINS = True # If this is used then `CORS_ALLOWED_ORIGINS` will
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = ['*']
 CORS_ORIGIN_WHITELIST = ['http://localhost:8080', 'http://localhost',
-                         'https://dsu-front.herokuapp.com', 'http://dsu-front.herokuapp.com', 'claim-your-seat.herokuapp.com']
+                         'https://dsu-front.herokuapp.com', 'http://dsu-front.herokuapp.com',
+                         'http://claim-your-seat.herokuapp.com', 'https://claim-your-seat.herokuapp.com']
 
 CSRF_TRUSTED_ORIGINS = ['http://dsup-voting-portal.herokuapp.com',
                         'https://dsup-voting-portal.herokuapp.com',
                         'https://dsu-front.herokuapp.com',
                         'http://dsu-front.herokuapp.com',
-                        'claim-your-seat.herokuapp.com']
+                        'http://claim-your-seat.herokuapp.com'
+                        'https://claim-your-seat.herokuapp.com']
