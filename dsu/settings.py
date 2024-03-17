@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'live.apps.LiveConfig',
     'bills.apps.BillsConfig',
+    'django_extensions',
 
 ]
 
