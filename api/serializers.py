@@ -25,8 +25,8 @@ class DistrictsSerializer(serializers.ModelSerializer):
 
 def entry_code_generator():
     """
-    this is the entry code generator. 
-    It uses random and checks for the database. 
+    this is the entry code generator.
+    It uses random and checks for the database.
     return the code if it's not taken
     """
     import random
@@ -75,7 +75,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create(
             username=entry_code_generator(),
             email=validated_data['email'],
-            is_active=False,
+            is_active=True,  # change this to True siva
             # first_name=validated_data['first_name'],
             # last_name=validated_data['last_name']
         )
