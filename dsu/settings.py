@@ -46,10 +46,10 @@ INSTALLED_APPS = [
     'vote.apps.VoteConfig',
     'rest_framework',
     'rest_framework_simplejwt',
-    'drf_spectacular',
+    # 'drf_spectacular',
     'live.apps.LiveConfig',
     'bills.apps.BillsConfig',
-    'django_extensions',
+    # 'django_extensions',
 
 ]
 
@@ -193,7 +193,7 @@ EMAIL_HOST_PASSWORD = 'lphxoimlvsuwhynz'
 
 
 REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # 'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),

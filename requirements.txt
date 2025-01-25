@@ -4,7 +4,7 @@ async-timeout==4.0.2
 attrs==22.1.0
 autobahn==22.6.1
 Automat==20.2.0
-cffi==1.15.1
+cffi==1.15.1        # has error in installation
 channels==3.0.5
 channels-redis==3.4.1
 constantly==15.1.0

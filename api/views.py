@@ -175,9 +175,10 @@ def circle_invitation_generator():
     """
     import random
     code = str(random.randint(0, 9999999999))
-    is_exist = voteModels.Circle.objects.filter(invitation_code=code).exists()
+    is_exist = voteModels.Group.objects.filter(invitation_code=code).exists()
     if is_exist:
         circle_invitation_generator()
+    
     return code
 
 
@@ -187,12 +188,14 @@ def circle_code_generator():
     It uses random and checks for the database.
     return the code if it's not taken
     """
+
     import random
     code = str(random.randint(1, 99999))
-    is_exist = voteModels.Circle.objects.filter(code=code).exists()
+    is_exist = voteModels.Group.objects.filter(code=code).exists()
 
     if is_exist:
         circle_code_generator()
+    
     return code
 
 
@@ -207,42 +210,64 @@ class CreateCIRCLE(APIView):
         try:
             user = NUL
             district = NUL
+           
             if 'user' in request.data and 'district' in request.data:
                 user = User.objects.get(username=request.data['user'])
                 district = voteModels.Districts.objects.get(
                     code=request.data['district'])
+                print("user: ", user, "district: ", district)
             else:
+                print("could not get the user and district: ", user, district)
                 messages = "User and District are required."
                 return Response({"message:": messages}, status=status.HTTP_400_BAD_REQUEST)
 
             # check if the userType is not 0 return
+            print("got the user and district and moving to check the user type")
             if user.users.userType != 0:
                 messages = "Already belongs to a circle."
                 return Response({"message": messages}, status=status.HTTP_400_BAD_REQUEST)
 
+            print("user type is zeero and checked. moving to create a circle")
             # create a circle
+            code = circle_code_generator()
+            invite_code = circle_invitation_generator()
+            print("code: ", code, "invite_code: ", invite_code)
             circle = voteModels.Group.objects.create(
-                code=circle_code_generator(),
+                code=code,
                 district=district,
-                invitation_code=circle_invitation_generator()
+                invitation_code=invite_code,
+                group_type=0,
+                parent_group=None
             )
+            
+            print("Cirle to save: ", circle)
+            
             circle.save()
-
+            print("circle saved")
             # set the userType attribute of the creator to 1
             user.users.userType += 1
-            user.save()
+            print("user:, " , user, user.users.userType)
+            # user.save()
+            # print("after save: " , user, user.users.users.userType)
             user.users.save()
+            # print("after save sae--: " , user.users, user.users.userType)
 
             # add the user to circle member as delegate
+            print("circle member to save: ", user.username, circle.code,)
             circle_member_obj = voteModels.GroupMember.objects.create(
                 user=user,
-                circle=circle,
+                group=circle,
                 is_delegate=True,
-                is_member=True,
-                member_number=1,
+                is_member=True
             )
+            print("circle member to save: ", circle_member_obj)
             circle_member_obj.save()
+
+            print("circle member saved")
+
             obj = apiSerializers.CircleSerializer(circle)
+            print("obj: ", obj.data)
+
             return JsonResponse(obj.data)
         except:
             messages = "Something Went Wrong."
@@ -265,6 +290,7 @@ class UserView(APIView):
     def post(self, request):
         try:
             user = NUL
+            print("")
             if 'user' in request.data:
                 user = User.objects.get(username=request.data['user'])
             else:
@@ -272,11 +298,11 @@ class UserView(APIView):
                 return Response({"message": messages}, status=status.HTTP_400_BAD_REQUEST)
 
             # check if the user is a member of a circle
-            circle_members = voteModels.CircleMember.objects.filter(user_id=user.id).first()
+            circle_members = voteModels.GroupMember.objects.filter(user_id=user.id).first()
 
             if circle_members:
                 # get the circle of the user
-                circle = circle_members.circle
+                circle = circle_members.group
 
                 # check if the user is a delegate
                 if user.users.userType == 1:
@@ -299,7 +325,7 @@ class HouseKeeping(APIView):
         try:
             circle = NUL
             if 'circle' in request.data:
-                circle = voteModels.Circle.objects.get(code=request.data['circle'])
+                circle = voteModels.Group.objects.get(code=request.data['circle'])
             else:
                 messages = "CIRCLE is required."
                 return Response({"message": messages}, status=status.HTTP_400_BAD_REQUEST)
@@ -352,7 +378,7 @@ class JoinCIRCLE(APIView):
             circle = NUL
             user = NUL
             if 'circle' in request.data and 'user' in request.data:
-                circle = voteModels.Circle.objects.get(
+                circle = voteModels.Group.objects.get(
                     invitation_code=request.data['circle'])
                 user = User.objects.get(username=request.data['user'])
             else:
@@ -363,7 +389,7 @@ class JoinCIRCLE(APIView):
             if circle:
                 # check if user can join the circle
                 if circle_joining_validation(user, circle):
-                    circleMember = voteModels.CircleMember.objects.create(
+                    circleMember = voteModels.GroupMember.objects.create(
                         user=user,
                         circle=circle,
                         is_member=False,
@@ -408,7 +434,7 @@ class DesolveCircle(APIView):
             circle = NUL
             user = NUL
             if 'circle' in request.data and 'user' in request.data:
-                circle = voteModels.Circle.objects.get(code=request.data['circle'])
+                circle = voteModels.Group.objects.get(code=request.data['circle'])
                 user = User.objects.get(username=request.data['user'])
             else:
                 messages = "Circle  and user are required."

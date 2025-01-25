@@ -46,7 +46,7 @@ class Group(models.Model):
     invitation_code = models.CharField(max_length=10)
     FDel_election   =  models.BooleanField(default=False)
     group_type = models.IntegerField()
-    parent_group = models.ForeignKey('self', on_delete=models.CASCADE)
+    parent_group = models.ForeignKey('self', null=True,blank=True,  on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.code)
@@ -66,7 +66,7 @@ class GroupMember(models.Model):
     is_member       = models.BooleanField(default=False)
     date_joined     = models.DateTimeField(auto_now_add=True)
     date_updated    = models.DateTimeField(auto_now=True)
-    member_type = models.CharField(max_length=10)
+    member_type = models.CharField(max_length=10, null=True, blank=True)
     is_delegate     = models.BooleanField(default=False)
     member_number   = models.PositiveSmallIntegerField(null=True, blank=True)
 

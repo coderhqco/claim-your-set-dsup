@@ -252,13 +252,13 @@ class User_Serializer(serializers.ModelSerializer):
 # this serializer is being used in Circle consumer file for circle members
 class CircleMemberSerializer(serializers.ModelSerializer):
     user = User_Serializer()
-    circle = CircleSerializer()
+    # circle = CircleSerializer()
 
     class Meta:
         model = voteModels.GroupMember
         fields = ['id', 'is_member', 'is_delegate',
                   'date_joined', 'date_updated', 'group', 'user', 'count_vote_in',
-                  'count_vote_out', 'count_put_farward']
+                  'count_vote_out', 'count_put_forward']
 
 
 class VoterPageSerializer(serializers.HyperlinkedModelSerializer):

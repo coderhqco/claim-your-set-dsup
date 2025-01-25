@@ -20,7 +20,7 @@ class HouseKeepingConsumer(WebsocketConsumer):
         try:
             circle = ''
             if self.circle_name:
-                circle = voteModels.Circle.objects.get(code = self.circle_name)
+                circle = voteModels.Group.objects.get(code = self.circle_name)
             # get all the circle members.
             circleMembers = circle.circlemember_set.all()
 
@@ -89,12 +89,12 @@ def majorityVotesOut(member):
 def switch(text_data_json):
     match text_data_json['type']:
         case 'circleInvitationKey':
-            circle = voteModels.Circle.objects.get(code = text_data_json['circle'])
+            circle = voteModels.Group.objects.get(code = text_data_json['circle'])
             circle.invitation_code = apiView.circle_invitation_generator()
             circle.save()
             return {'type':text_data_json['type'], 'data':apiSerializers.CircleSerializer(circle).data}
         case 'joined':
-            circle = voteModels.Circle.objects.get(code = text_data_json['circle'])
+            circle = voteModels.Group.objects.get(code = text_data_json['circle'])
             return {'type':text_data_json['type'], 'data':apiSerializers.CIRCLEMemberSer(circle.circlemember_set.all(), many=True).data}
 
         case 'voteIn':
@@ -104,7 +104,7 @@ def switch(text_data_json):
             """
             # search on vote In for candidate and the user
             user = User.objects.get(username = text_data_json['voter'])
-            candidate = voteModels.CircleMember.objects.get(pk = text_data_json['candidate'])
+            candidate = voteModels.GroupMember.objects.get(pk = text_data_json['candidate'])
             votedIn = voteModels.CircleMember_vote_in.objects.filter(candidate = candidate, voter = user).exists()
             if votedIn:
                 return {
@@ -127,7 +127,7 @@ def switch(text_data_json):
                 userType.save()
                 # remove all votes in for this members
                 votedIn = voteModels.CircleMember_vote_in.objects.filter(candidate = candidate).delete()
-                circleMembers = candidate.circle.circlemember_set.all()
+                circleMembers = candidate.group.circlemember_set.all()
                 data = {
                     'circle':apiSerializers.CircleSerializer(candidate.circle).data,
                     'circlemembers':apiSerializers.CIRCLEMemberSer(circleMembers, many=True).data
@@ -145,13 +145,13 @@ def switch(text_data_json):
                 'done':True,
                 'candidate': candidate.user.username,
                 'voter':user.username,
-                'data':apiSerializers.CIRCLEMemberSer(candidate.circle.circlemember_set.all(), many=True).data
+                'data':apiSerializers.CIRCLEMemberSer(candidate.group.circlemember_set.all(), many=True).data
                 }
 
         case 'voteOut':
             """this is for voting out a member while the circle is active"""
             user = User.objects.get(username = text_data_json['voter'])
-            member =voteModels.CircleMember.objects.get(pk = text_data_json['member'])
+            member =voteModels.GroupMember.objects.get(pk = text_data_json['member'])
             # check if the voter is already in the vote out:
             votedOut = voteModels.CircleMember_vote_out.objects.filter(voter = user, candidate = member).exists()
             if votedOut:
@@ -165,7 +165,7 @@ def switch(text_data_json):
 
             voteOut = voteModels.CircleMember_vote_out.objects.create(candidate = member, voter = user)
             voteOut.save()
-            circleMembers = member.circle.circlemember_set.all()
+            circleMembers = member.group.circlemember_set.all()
             return {
                 'type': text_data_json['type'],
                 'done': True,
@@ -180,7 +180,7 @@ def switch(text_data_json):
             # F_delFor: the person chosen as delegate
             # voter: the member who voted
             user = User.objects.get(username = text_data_json['voter'])
-            recipient = voteModels.CircleMember.objects.get(pk = text_data_json['recipient'])
+            recipient = voteModels.GroupMember.objects.get(pk = text_data_json['recipient'])
             delegated = voteModels.CircleMember_put_forward.objects.filter(voter = user, recipient = recipient).exists()
             if delegated:
                 return {
@@ -194,7 +194,7 @@ def switch(text_data_json):
             putFrwd.save()
             if majorityputForward(recipient):
                 # revoke the prev delegate to member
-                prevDel = recipient.circle.circlemember_set.get(is_delegate = True)
+                prevDel = recipient.group.circlemember_set.get(is_delegate = True)
 
                 recipient.is_delegate = True
                 recipient.save()
@@ -229,7 +229,7 @@ def switch(text_data_json):
         case 'desolveCircle':
             """check if the circle has one member only and he/she is delegate.
             in case of removing, return circle removed done else return not aligible to remove """
-            circle = voteModels.Circle.objects.get(code = text_data_json['circle'])
+            circle = voteModels.Group.objects.get(code = text_data_json['circle'])
             user = User.objects.get(username = text_data_json['user'])
             # check if the circle has only one member.
             if circle.circlemember_set.all().count() <=1:
@@ -244,8 +244,8 @@ def switch(text_data_json):
 
         case 'removemember':
             """ this case removes the candidate or member"""
-            circle = voteModels.Circle.objects.get(code = text_data_json['circle'])
-            member = voteModels.CircleMember.objects.get(pk = text_data_json['member'])
+            circle = voteModels.Group.objects.get(code = text_data_json['circle'])
+            member = voteModels.GroupMember.objects.get(pk = text_data_json['member'])
             member.delete()
             # set the userType back to zero
             member.user.users.userType = 0
@@ -293,7 +293,7 @@ class CircleBackNForth(AsyncWebsocketConsumer):
         """ Get the B&f entries and paginate them in 10 entries per page.
         The entries are sorted from the latest to the oldest.
         """
-        circle = voteModels.Circle.objects.get(code = self.circleName)
+        circle = voteModels.Group.objects.get(code = self.circleName)
         if circle:
             objects = apiSerializers.CircleBackNForthSerializer(
                 voteModels.CircleBackNForth.objects.filter(circle=circle).order_by('-date'), many=True
@@ -336,7 +336,7 @@ class CircleBackNForth(AsyncWebsocketConsumer):
     # Save the message into DB and return a serialized instance of the message
     def save_message(self,msg):
         # get circle and user instance
-        circle = voteModels.Circle.objects.get(code = self.circleName)
+        circle = voteModels.Group.objects.get(code = self.circleName)
         usr = User.objects.get(username = msg["sender"])
         # here validate if the user is a member of the circle and create a message instance to save into DB
         objects = voteModels.CircleBackNForth.objects.create( circle = circle, sender= usr, message = ""+msg['message'],)
