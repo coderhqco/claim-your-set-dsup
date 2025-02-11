@@ -11,10 +11,10 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import os
 from pathlib import Path
-import pymysql
+# import pymysql
 
-pymysql.version_info = (1, 4, 13, "final", 0)
-pymysql.install_as_MySQLdb()
+# pymysql.version_info = (1, 4, 13, "final", 0)
+# pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -99,12 +99,12 @@ print("url database",os.environ.get('DB_ENGINE'),
 
 DATABASES = {
     'default': {
-            'ENGINE': os.environ.get('DB_ENGINE'),
-            'NAME':  os.environ.get('DB_NAME'),
-            'USER': os.environ.get('DB_USER'),
-            'PASSWORD': os.environ.get('DB_PASSWORD'),
-            'HOST': os.environ.get('DB_HOST'),
-            'PORT': os.environ.get('DB_PORT'),
+        'ENGINE': os.environ.get('DB_ENGINE'),
+        'NAME':  os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
         }
     }
 
