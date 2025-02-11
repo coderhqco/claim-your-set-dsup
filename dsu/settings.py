@@ -11,10 +11,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import os
 from pathlib import Path
-# import pymysql
 
-# pymysql.version_info = (1, 4, 13, "final", 0)
-# pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,9 +22,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '192.168.0.130', '192.168.0.132', 'dsup-voting-portal.herokuapp.com', '127.0.0.1', 'dsup.herokuapp.com', 'localhost:8000',
                  'dsu-front.herokuapp.com', 'dsu-front.herokuapp.com:8000', 'dsu-front.herokuapp.com:8080', 'dsu-front.herokuapp.com:', 'claim-your-seat.herokuapp.com']
@@ -87,15 +81,7 @@ WSGI_APPLICATION = 'dsu.wsgi.application'
 ASGI_APPLICATION = "dsu.asgi.application"
 
 
-# Database
-# https://docs.djangoproject.com/en/4.0/ref/settings/#databases
-
-
-print("url database",os.environ.get('DB_ENGINE'), 
-      os.environ.get('DB_NAME'), 
-      os.environ.get('DB_USER'),
-       os.environ.get('DB_HOST'),
-        os.environ.get('DB_PORT') )
+print("url database",os.environ.get('DB_NAME'))
 
 DATABASES = {
     'default': {
