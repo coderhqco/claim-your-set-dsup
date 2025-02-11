@@ -567,3 +567,18 @@ class UsernameRequestView(APIView):
             )
             return Response({"message": "Email sent."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ContactInfoViewSet(viewsets.ModelViewSet):
+    queryset = voteModels.ContactInfo.objects.all()
+    serializer_class = apiSerializers.ContactInfoSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def update(self, request, *args, **kwargs):
+        user = request.user
+        if not voteModels.GroupMember.objects.filter(user=user, is_delegate=True).exists():
+            return Response(
+                {"error": "Only delegates can modify the contact rules."},
+                status = status.HTTP_403_FORBIDDEN
+            )
+        
+        return super().update(request, *args, **kwargs)

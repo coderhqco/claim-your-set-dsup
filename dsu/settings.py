@@ -90,48 +90,34 @@ ASGI_APPLICATION = "dsu.asgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-import json
-if not json.loads(os.environ.get('PRODUCTION').lower()):
-    # production
-    print("running in dev. using sqlit3 and channels in memory layer")
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels.layers.InMemoryChannelLayer"
+
+print("url database",os.environ.get('DB_ENGINE'), 
+      os.environ.get('DB_NAME'), 
+      os.environ.get('DB_USER'),
+       os.environ.get('DB_HOST'),
+        os.environ.get('DB_PORT') )
+
+DATABASES = {
+    'default': {
+            'ENGINE': os.environ.get('DB_ENGINE'),
+            'NAME':  os.environ.get('DB_NAME'),
+            'USER': os.environ.get('DB_USER'),
+            'PASSWORD': os.environ.get('DB_PASSWORD'),
+            'HOST': os.environ.get('DB_HOST'),
+            'PORT': os.environ.get('DB_PORT'),
         }
     }
 
-else:
-    print("runnig the app in production with main database")
-    DATABASES = {
-        'default': {
-                'ENGINE': os.environ.get('DB_ENGINE'),
-                'NAME':  os.environ.get('DB_NAME'),
-                'USER': os.environ.get('DB_USER'),
-                'PASSWORD': os.environ.get('DB_PASSWORD'),
-                'HOST': os.environ.get('DB_HOST'),
-                'PORT': os.environ.get('DB_PORT'),
-                'OPTIONS': {
-                'init_command': 'SET sql_mode="STRICT_TRANS_TABLES"',
-                }
-            }
-        }
-
-    print("REDIS_URL: ",os.environ.get('REDIS_URL'))
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {
-                "hosts": [os.environ.get('REDIS_URL')],
-            },
-            # "ROUTING": "chat.routing.channel_routing",
+print("REDIS_URL: ",os.environ.get('REDIS_URL'))
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get('REDIS_URL')],
         },
-    }
+        # "ROUTING": "chat.routing.channel_routing",
+    },
+}
 
 
 # Password validation

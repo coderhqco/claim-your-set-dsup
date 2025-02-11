@@ -298,3 +298,19 @@ class UsernameRequestSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 "User with given email does not exist")
         return value
+
+class ContactInfoSerializer(serializers.ModelSerializer):
+    member = serializers.StringRelatedField()
+
+    class Meta:
+        model = voteModels.ContactInfo
+        fields = ['id', 'member', 'email', 'phone', 'address', 'contact_rules']
+
+    def validate(self, data):
+        if 'contact_rules' in data:
+            user = self.context['request'].user
+
+            if not voteModels.GroupMember.objects.filter(user=user, is_delegate=True).exists():
+                raise serializers.ValidationError("Only delegates can modify the contact rules.")
+            
+        return data
