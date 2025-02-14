@@ -51,7 +51,7 @@ class CircleConsumer(AsyncWebsocketConsumer):
         try:
             voter = User.objects.get(username = data['voter'])
             candidate = voteModels.GroupMember.objects.get(pk = data['candidate'])
-            voteModels.CircleMember_vote_in.objects.update_or_create(voter=voter, candidate=candidate)
+            voteModels.CircleMember_vote_in.objects.update_or_create(voter=voter, recipient=candidate)
             vote = serializers.UserSerializer(voter)
             return {"status":"success","action":'vote_in', "message":"voted successfully.", "user":vote.data}
         except:

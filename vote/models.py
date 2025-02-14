@@ -76,13 +76,20 @@ class GroupMember(models.Model):
         ordering = ['-is_delegate', 'date_joined']
 
     def check_for_majority(self):
+        print("checking for majrity")
         total_members = GroupMember.objects.filter(group=self.group).filter(is_member = True).count()
+
+        print("total member: ", total_members)
         majority_threshold = total_members // 2 + 1  # Majority is (total_members // 2 + 1)
+        print("majoriyt ? :", majority_threshold, self.count_vote_in())
         if self.count_vote_in() >= majority_threshold:
+            print("yeah majority....")
             self.is_member = True
+            
             self.save()
             # Delete related CircleMember_vote_in instances
-            CircleMember_vote_in.objects.filter(candidate=self).delete()
+            CircleMember_vote_in.objects.filter(recipient=self).delete()
+            print("deleted....")
 
     def check_for_removing(self):
         total_members = GroupMember.objects.filter(group=self.group).filter(is_member = True).count()
@@ -142,6 +149,7 @@ class CircleMember_vote_in(models.Model):
     updated_at  = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
+        print("saving: -- ", )
         super(CircleMember_vote_in, self).save(*args, **kwargs)
         self.recipient.check_for_majority()
 
