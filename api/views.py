@@ -5,8 +5,6 @@ from rest_framework.permissions import AllowAny
 from django.template.loader import render_to_string
 from django.conf import settings
 from curses.ascii import NUL
-import os
-from django.urls import reverse
 from rest_framework import viewsets
 from vote import models as voteModels
 from api import serializers as apiSerializers
@@ -16,14 +14,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics
-from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from vote.token import account_activation_token
 from django.http import JsonResponse
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
@@ -356,7 +353,7 @@ def circle_joining_validation(user, circle):
     #     print("circle is active")
     #     result = False
 
-    circlemembers = circle.circlemember_set.all()
+    circlemembers = circle.groupmember_set.all()
     if circlemembers.count() >= 12:
         result = False
 
@@ -375,10 +372,10 @@ def circle_joining_validation(user, circle):
 class JoinCIRCLE(APIView):
     def post(self, request):
         try:
-            circle = NUL
+            group = NUL
             user = NUL
             if 'circle' in request.data and 'user' in request.data:
-                circle = voteModels.Group.objects.get(
+                group = voteModels.Group.objects.get(
                     invitation_code=request.data['circle'])
                 user = User.objects.get(username=request.data['user'])
             else:
@@ -386,22 +383,23 @@ class JoinCIRCLE(APIView):
                 return Response({"message": messages}, status=status.HTTP_400_BAD_REQUEST)
 
             # get the circle and add the user as the member or candidate
-            if circle:
+            print("here: , ", group, user)
+            if group:
                 # check if user can join the circle
-                if circle_joining_validation(user, circle):
+                if circle_joining_validation(user, group):
                     circleMember = voteModels.GroupMember.objects.create(
                         user=user,
-                        circle=circle,
+                        group=group,
                         is_member=False,
                         is_delegate=False,
-                        member_number=circle.circlemember_set.count()+1
+                        member_number=group.groupmember_set.count()+1
                     )
                     circleMember.save()
                     # set the userType of the member to 0
                     # when the user become the member via majority votes, then the userType is set to 1
                     circleMember.user.users.userType = 1
                     circleMember.user.users.save()
-                    return JsonResponse(apiSerializers.CircleSerializer(circle).data)
+                    return JsonResponse(apiSerializers.CircleSerializer(group).data)
                 else:
                     # else of circle is active
                     messages = 'either the circle is not accepting memebers or you are not eligible to join this circle'
@@ -489,7 +487,7 @@ class CircleMemeber_voteIn(generics.ListAPIView):
     def get_queryset(self):
         candidate_id = self.request.query_params.get('candidate')
         if candidate_id:
-            self.queryset = self.queryset.filter(candidate__pk=candidate_id)
+            self.queryset = self.queryset.filter(voter__pk=candidate_id)
         return self.queryset
 
 # get the vote out for user of a circle

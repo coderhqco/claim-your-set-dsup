@@ -10,7 +10,6 @@ from django.conf import settings
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from vote import models as voteModels
-from bills import models as billModels
 import os
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 

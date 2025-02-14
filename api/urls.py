@@ -9,7 +9,7 @@ router.register('districts', apiViews.DistrictsViewSet)
 router.register('user', apiViews.UserPageView)
 router.register('voter-page', apiViews.VoterPageView)
 router.register('circle', apiViews.CircleList)
-router.register(r'contact-info', apiViews.ContactInfoViewSet, basename = 'contact-info')
+router.register('contact-info', apiViews.ContactInfoViewSet, basename = 'contact-info')
 
 from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,TokenVerifyView,)   # TokenVerifyView added by siva
 

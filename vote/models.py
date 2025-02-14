@@ -37,7 +37,6 @@ class Users(models.Model):
     def __str__(self):
         return str(self.user.username)
 
-import random
 class Group(models.Model):
     code            = models.CharField(max_length=5, unique=True)
     district        = models.ForeignKey(Districts, on_delete=models.CASCADE)
