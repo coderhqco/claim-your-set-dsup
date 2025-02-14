@@ -459,7 +459,7 @@ class DesolveCircle(APIView):
 # do we use this view ?
 class CircleBackNForth(APIView):
     # list all the messsages to that Circle
-    def post(self, request, circle):
+    def post(self, circle):
         try:
             chats = voteModels.CircleBackNForth.objects.all()
             return Response(apiSerializers.CircleBackNForthSerializer(chats, many=True).data, status=status.HTTP_200_OK)
@@ -471,7 +471,7 @@ class CircleBackNForth(APIView):
 
 class CircleBackNForthAdd(APIView):
     # add a message to Circle Back and Forth
-    def post(self, request, circle):
+    def post(self, circle):
         try:
             return Response({"date": "added one message to the circle: " + circle}, status=status.HTTP_200_OK)
         except:

@@ -299,7 +299,6 @@ class UsernameRequestSerializer(serializers.Serializer):
         return value
 
 class ContactInfoSerializer(serializers.ModelSerializer):
-    member = serializers.StringRelatedField()
 
     class Meta:
         model = voteModels.ContactInfo

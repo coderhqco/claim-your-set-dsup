@@ -195,11 +195,11 @@ class CircleStatus(models.Model):
 
 #stores required fields in the contacts table
 class ContactInfo(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="contact_info")
+    member = models.OneToOneField(GroupMember, null=True, blank=True, on_delete=models.CASCADE, related_name="contact_info")
     address = models.TextField(null=True, blank=True)
     phone = models.CharField(max_length=15, null=True, blank=True)
-    email = models.EmailField(max_length=255)
+    email = models.EmailField(max_length=255, blank=True, null=True)
     contact_rules = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return self.user.username + " - " + self.email + " - " + self.phone + " - " + self.address
+        return self.member.user.users + " - " + self.email + " - " + self.phone + " - " + self.address
