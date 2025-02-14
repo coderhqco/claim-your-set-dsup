@@ -112,8 +112,8 @@ class CircleConsumer(AsyncWebsocketConsumer):
             # this is the only member which is fdel as well. same as voter
             member = voteModels.GroupMember.objects.get(pk = data['member'])
             # get the circle
-            if member.is_delegate and member.group.circlemember_set.all().count() == 1:
-                member.circle.delete()
+            if member.is_delegate and member.group.groupmember_set.all().count() == 1:
+                member.group.delete()
                 # set the userType to 0
                 member.user.users.userType = 0
                 member.user.users.save()
