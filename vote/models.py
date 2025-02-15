@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 # District model (table) is for listing of all US districts
 class Districts(models.Model):
@@ -75,7 +76,7 @@ class GroupMember(models.Model):
     class Meta:
         ordering = ['-is_delegate', 'date_joined']
 
-    def check_for_majority(self):
+    def check_for_majority(self): 
         total_members = GroupMember.objects.filter(group=self.group).filter(is_member = True).count()
         majority_threshold = total_members // 2 + 1  # Majority is (total_members // 2 + 1)
         if self.count_vote_in() >= majority_threshold:
@@ -125,15 +126,7 @@ class GroupMember(models.Model):
     def count_put_forward(self):
         return CircleMember_put_forward.objects.filter(recipient=self).count()
 
-
-class GroupMemberContact(models.Model):
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
-    member = models.ForeignKey(GroupMember, on_delete=models.CASCADE)
-    email = models.CharField(max_length=250)
-    phone = models.CharField(max_length=250)
-
-    def __str__(self) -> str:
-        return str(self.member.user.username) + " - " + str(self.circle.code)
+    
 class CircleBackNForth(models.Model):
     circle = models.ForeignKey(Group, on_delete=models.CASCADE)
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -196,12 +189,16 @@ class CircleStatus(models.Model):
 
 #stores required fields in the contacts table
 class ContactInfo(models.Model):
-    member = models.OneToOneField(GroupMember, null=True, blank=True, on_delete=models.CASCADE, related_name="contact_info")
+    member = models.OneToOneField(GroupMember, null=True, blank=True, on_delete=models.CASCADE)
     address = models.TextField(null=True, blank=True)
     phone = models.CharField(max_length=15, null=True, blank=True)
     email = models.EmailField(max_length=255, blank=True, null=True)
     contact_rules = models.TextField(null=True, blank=True)
     contact = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
-        return self.member
+        return str(self.member)
+
+    class Meta:
+        ordering = ['created_at']

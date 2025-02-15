@@ -277,7 +277,7 @@ class CircleMem(APIView):
     # something we do not want
     def post(self, request):
         try:
-            circle = voteModels.CircleMember.objects.all()
+            circle = voteModels.GroupMember.objects.all()
             return Response(apiSerializers.CIRCLEMemberSer(circle, many=True).data, status=status.HTTP_200_OK)
         except:
             return JsonResponse({False: True})
@@ -414,7 +414,7 @@ class JoinCIRCLE(APIView):
 
 
 def circle_desolve_check(user, circle):
-    members = circle.circlemember_set.filter(is_member=True)
+    members = circle.groupmember_set.filter(is_member=True)
     if members.first().user.username != user.username:
         return False
     if not members.first().is_delegate:
@@ -572,9 +572,10 @@ class ContactInfoViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def update(self, request, *args, **kwargs):
-        print("this is the update and ...")
         user_id = request.user
-        if not voteModels.GroupMember.objects.filter(user__pk=user_id, is_delegate=True).exists():
+        print("yser: ", user_id)
+        if not voteModels.GroupMember.objects.filter(user=user_id, is_delegate=True).exists():
+            print("here: insdie ", )
             return Response(
                 {"error": "Only delegates can modify the contact rules."},
                 status = status.HTTP_403_FORBIDDEN

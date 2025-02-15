@@ -216,13 +216,13 @@ class CircleMember_VoteOutSer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+    
 class CIRCLEMemberSer(serializers.ModelSerializer):
     user = UserSerializer()
     circle = CircleSerializer()
     voteIns = serializers.StringRelatedField(many=True)
     voteOuts = serializers.StringRelatedField(many=True)
     putForward = serializers.StringRelatedField(many=True)
-
     class Meta:
         model = voteModels.GroupMember
         fields = ["is_delegate", "member_number", "id", 'user',
@@ -250,11 +250,11 @@ class User_Serializer(serializers.ModelSerializer):
 # this serializer is being used in Circle consumer file for circle members
 class CircleMemberSerializer(serializers.ModelSerializer):
     user = User_Serializer()
-    # circle = CircleSerializer()
+
 
     class Meta:
         model = voteModels.GroupMember
-        fields = ['id', 'is_member', 'is_delegate',
+        fields = ['id', 'is_member', 'is_delegate', 
                   'date_joined', 'date_updated', 'group', 'user', 'count_vote_in',
                   'count_vote_out', 'count_put_forward']
 
@@ -297,16 +297,18 @@ class UsernameRequestSerializer(serializers.Serializer):
                 "User with given email does not exist")
         return value
 
+
+
 class ContactInfoSerializer(serializers.ModelSerializer):
+    member = CircleMemberSerializer()
 
     class Meta:
         model = voteModels.ContactInfo
-        fields = ['id', 'member', 'email', 'phone', 'address', 'contact_rules', 'contact']
+        fields = ['id', 'member', 'email', 'phone', 'address', 'contact_rules', 'contact', 'created_at']
 
     def validate(self, data):
         if 'contact_rules' in data:
             user = self.context['request'].user
-
             if not voteModels.GroupMember.objects.filter(user__username=user, is_delegate=True).exists():
                 raise serializers.ValidationError("Only delegates can modify the contact rules.")
             

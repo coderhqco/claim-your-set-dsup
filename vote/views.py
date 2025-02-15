@@ -1,6 +1,4 @@
 from rest_framework.views import APIView
-from .serializers import CircleMemberContactSerializer
-from .models import GroupMemberContact
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
@@ -13,13 +11,13 @@ from django.contrib import messages
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes,force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from vote.serializers import CircleMemberContactSerializer
+
 from vote.token import account_activation_token
 from django.core.mail import EmailMessage
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import authenticate, login,logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 import os
 
 def entry_code_generator():
@@ -506,38 +504,3 @@ class Delete_CIRCLE(LoginRequiredMixin, DeleteView):
         data['page_title'] = 'Voter Page'
         return data
 
-
-class CircleMemberContactAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, *args, **kwargs):
-        # check if the user has already a contact
-        try:
-            circle_member_contact = CircleMemberContact.objects.get(
-                member__user=request.user)
-            serializer = CircleMemberContactSerializer(circle_member_contact)
-
-            return self.put(request, *args, **kwargs)
-        except CircleMemberContact.DoesNotExist:
-            # create a new contact
-            serializer = CircleMemberContactSerializer(
-                data=request.data, context={'request': request})
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
-    def put(self, request, *args, **kwargs):
-        try:
-            circle_member_contact = CircleMemberContact.objects.get(
-                member__user=request.user)
-        except CircleMemberContact.DoesNotExist:
-            return Response({'error': 'CircleMemberContact not found.'}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = CircleMemberContactSerializer(
-            circle_member_contact, data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

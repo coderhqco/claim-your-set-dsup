@@ -23,6 +23,4 @@ urlpatterns = [
     path('circle-members/<int:pk>', voteViews.Circle_members.as_view(), name="circleMember"),
     path('circle-remove/<int:pk>', voteViews.Delete_CIRCLE.as_view(), name="circleRemove"),
 
-    path('circlemembercontact', voteViews.CircleMemberContactAPIView.as_view(), name='circlemembercontact-api'),
-
 ]

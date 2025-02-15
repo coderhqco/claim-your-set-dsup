@@ -38,7 +38,7 @@ class CircleConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_members(self):
         MemberInstances = voteModels.GroupMember.objects.filter(group__code=self.circle_name)
-  
+        print("here is the members:", MemberInstances.count())
         members = serializers.CircleMemberSerializer(MemberInstances, many=True)
         return members.data
 

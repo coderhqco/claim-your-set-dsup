@@ -52,17 +52,6 @@ class CircleStatusAdmin(admin.ModelAdmin):
 
 admin.site.register(models.CircleStatus,CircleStatusAdmin)
 
-
-class CircleMemberContact_Admin(admin.ModelAdmin):
-    list_display = ['member', 'group', 'email', 'phone']
-    list_display_links = ['member', 'group', 'email', 'phone']
-    list_filter = ['member', 'group', 'email', 'phone']
-    search_fields = ['member', 'group', 'email', 'phone']
-
-
-admin.site.register(models.GroupMemberContact, CircleMemberContact_Admin)
-
-
 class ContactInfo_Admin(admin.ModelAdmin):
     list_display =['member','address', 'phone','email','contact','contact_rules']
     list_display_links =['address', 'phone','email','contact','contact_rules']
