@@ -566,13 +566,13 @@ class ContactInfoViewSet(viewsets.ModelViewSet):
     serializer_class = apiSerializers.ContactInfoSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    def update(self, request, *args, **kwargs):
-        user_id = request.user
-        print("yser: ", user_id)
-        if not voteModels.GroupMember.objects.filter(user=user_id, is_delegate=True).exists():
-            print("here: insdie ", )
-            return Response(
-                {"error": "Only delegates can modify the contact rules."},
-                status = status.HTTP_403_FORBIDDEN
-            )
-        return super().update(request, *args, **kwargs)
+    # def update(self, request, *args, **kwargs):
+    #     user_id = request.user
+    #     print("yser: ", user_id)
+    #     if not voteModels.GroupMember.objects.filter(user=user_id).exists():
+    #         print("here: insdie ", )
+    #         return Response(
+    #             {"error": "Only delegates can modify the contact rules."},
+    #             status = status.HTTP_403_FORBIDDEN
+    #         )
+    #     return super().update(request, *args, **kwargs)
