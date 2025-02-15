@@ -80,9 +80,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'dsu.wsgi.application'
 ASGI_APPLICATION = "dsu.asgi.application"
 
-
-print("url database",os.environ.get('DB_NAME'))
-
 DATABASES = {
     'default': {
         'ENGINE': os.environ.get('DB_ENGINE'),
