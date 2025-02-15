@@ -212,23 +212,19 @@ class CreateCIRCLE(APIView):
                 user = User.objects.get(username=request.data['user'])
                 district = voteModels.Districts.objects.get(
                     code=request.data['district'])
-                print("user: ", user, "district: ", district)
             else:
-                print("could not get the user and district: ", user, district)
                 messages = "User and District are required."
                 return Response({"message:": messages}, status=status.HTTP_400_BAD_REQUEST)
 
             # check if the userType is not 0 return
-            print("got the user and district and moving to check the user type")
             if user.users.userType != 0:
                 messages = "Already belongs to a circle."
                 return Response({"message": messages}, status=status.HTTP_400_BAD_REQUEST)
-
-            print("user type is zeero and checked. moving to create a circle")
+            
             # create a circle
             code = circle_code_generator()
             invite_code = circle_invitation_generator()
-            print("code: ", code, "invite_code: ", invite_code)
+
             circle = voteModels.Group.objects.create(
                 code=code,
                 district=district,
@@ -236,34 +232,33 @@ class CreateCIRCLE(APIView):
                 group_type=0,
                 parent_group=None
             )
-            
-            print("Cirle to save: ", circle)
-            
+        
             circle.save()
-            print("circle saved")
             # set the userType attribute of the creator to 1
             user.users.userType += 1
-            print("user:, " , user, user.users.userType)
-            # user.save()
-            # print("after save: " , user, user.users.users.userType)
             user.users.save()
-            # print("after save sae--: " , user.users, user.users.userType)
 
             # add the user to circle member as delegate
-            print("circle member to save: ", user.username, circle.code,)
             circle_member_obj = voteModels.GroupMember.objects.create(
                 user=user,
                 group=circle,
                 is_delegate=True,
                 is_member=True
             )
-            print("circle member to save: ", circle_member_obj)
+      
             circle_member_obj.save()
 
-            print("circle member saved")
+            # save delegate member contact info
+            contact_info = voteModels.ContactInfo.objects.create(
+                member=circle_member_obj,
+                address=circle_member_obj.user.users.address,
+                email=circle_member_obj.user.email
+            )
+            contact_info.save()
+            print("circle member saved and so is contact info")
 
             obj = apiSerializers.CircleSerializer(circle)
-            print("obj: ", obj.data)
+        
 
             return JsonResponse(obj.data)
         except:

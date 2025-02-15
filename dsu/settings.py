@@ -102,26 +102,26 @@ host = [{
     }]
 
 # redis has to use TLS as heroku updated their key-value connection setting as this effects the redis connection as well
-CHANNEL_LAYERS = {
-    "default": {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": host,
-            "symmetric_encryption_keys": [SECRET_KEY],
-        },
-    },
-}
-
 # CHANNEL_LAYERS = {
 #     "default": {
-#         "BACKEND": "channels_redis.core.RedisChannelLayer",
-#         "CONFIG": {
-#             "hosts": [{
-#                 "address": os.environ.get('REDIS_URL'),
-#             }],
+#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {
+#             "hosts": host,
+#             "symmetric_encryption_keys": [SECRET_KEY],
 #         },
 #     },
 # }
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [{
+                "address": os.environ.get('REDIS_URL'),
+            }],
+        },
+    },
+}
 
 
 # Password validation
