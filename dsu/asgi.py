@@ -21,7 +21,7 @@ import bills.routing
 django.setup()
 
 application = ProtocolTypeRouter({
-    "http":get_asgi_application(),
+    "https":get_asgi_application(),
     "websocket":AuthMiddlewareStack(
       URLRouter([
           # joins 2 lists to create the URLRouter.

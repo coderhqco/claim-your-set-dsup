@@ -94,16 +94,32 @@ DATABASES = {
         }
     }
 
+
 print("REDIS_URL: ",os.environ.get('REDIS_URL'))
+
+# redis has to use TLS as heroku updated their key-value connection setting as this effects the redis connection as well
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [os.environ.get('REDIS_URL')],
-        },
-        # "ROUTING": "chat.routing.channel_routing",
+         "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "LOCATION": os.environ.get('REDIS_URL'),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "CONNECTION_POOL_KWARGS": {
+                "ssl_cert_reqs": None
+            },}
     },
 }
+
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [{
+#                 "address": os.environ.get('REDIS_URL'),
+#             }],
+#         },
+#     },
+# }
 
 
 # Password validation
