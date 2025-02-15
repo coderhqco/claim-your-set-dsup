@@ -83,7 +83,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
         # set the user profile instance
         user.users.legalName = validated_data['legalName'].upper()
-
         user.users.address = validated_data['address']
 
         # add user district
@@ -302,13 +301,13 @@ class ContactInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = voteModels.ContactInfo
-        fields = ['id', 'member', 'email', 'phone', 'address', 'contact_rules']
+        fields = ['id', 'member', 'email', 'phone', 'address', 'contact_rules', 'contact']
 
     def validate(self, data):
         if 'contact_rules' in data:
             user = self.context['request'].user
 
-            if not voteModels.GroupMember.objects.filter(user=user, is_delegate=True).exists():
+            if not voteModels.GroupMember.objects.filter(user__username=user, is_delegate=True).exists():
                 raise serializers.ValidationError("Only delegates can modify the contact rules.")
             
         return data

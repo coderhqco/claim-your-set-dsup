@@ -572,22 +572,11 @@ class ContactInfoViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def update(self, request, *args, **kwargs):
-        user = request.user
-        if not voteModels.GroupMember.objects.filter(user=user, is_delegate=True).exists():
+        print("this is the update and ...")
+        user_id = request.user
+        if not voteModels.GroupMember.objects.filter(user__pk=user_id, is_delegate=True).exists():
             return Response(
                 {"error": "Only delegates can modify the contact rules."},
                 status = status.HTTP_403_FORBIDDEN
             )
-
         return super().update(request, *args, **kwargs)
-    
-    
-    def create(self, request, *args, **kwargs):
-        user = request.user
-        if not voteModels.GroupMember.objects.filter(user=user, is_delegate=True).exists():
-            return Response(
-                {"error": "Only delegates can create contact rules."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        return super().create(request, *args, **kwargs)

@@ -64,9 +64,9 @@ admin.site.register(models.GroupMemberContact, CircleMemberContact_Admin)
 
 
 class ContactInfo_Admin(admin.ModelAdmin):
-    list_display =['member','address', 'phone','email','contact_rules']
-    list_display_links =['address', 'phone','email','contact_rules']
-    search_fields =['member', 'address', 'phone', 'email', 'contact_rules']
+    list_display =['member','address', 'phone','email','contact','contact_rules']
+    list_display_links =['address', 'phone','email','contact','contact_rules']
+    search_fields =['member', 'address', 'phone','contact', 'email', 'contact_rules']
 
 admin.site.register(models.ContactInfo, ContactInfo_Admin)
 

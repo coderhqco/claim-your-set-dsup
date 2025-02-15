@@ -53,7 +53,7 @@ class Group(models.Model):
     @property
     def is_active(self):
         # check if the member <= 12 and return true
-        if 6 <= self.circlemember_set.filter(is_member = True).count() <= 12:
+        if 6 <= self.groupmember_set.filter(is_member = True).count() <= 12:
             return True
         return False
 
@@ -76,20 +76,22 @@ class GroupMember(models.Model):
         ordering = ['-is_delegate', 'date_joined']
 
     def check_for_majority(self):
-        print("checking for majrity")
         total_members = GroupMember.objects.filter(group=self.group).filter(is_member = True).count()
-
-        print("total member: ", total_members)
         majority_threshold = total_members // 2 + 1  # Majority is (total_members // 2 + 1)
-        print("majoriyt ? :", majority_threshold, self.count_vote_in())
         if self.count_vote_in() >= majority_threshold:
-            print("yeah majority....")
             self.is_member = True
-            
             self.save()
             # Delete related CircleMember_vote_in instances
             CircleMember_vote_in.objects.filter(recipient=self).delete()
-            print("deleted....")
+
+            # create an instance of the contact info
+            ContactInfo.objects.create(
+                member=self,
+                address=self.user.users.address,
+                email=self.user.email
+            )
+         
+       
 
     def check_for_removing(self):
         total_members = GroupMember.objects.filter(group=self.group).filter(is_member = True).count()
@@ -149,7 +151,6 @@ class CircleMember_vote_in(models.Model):
     updated_at  = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        print("saving: -- ", )
         super(CircleMember_vote_in, self).save(*args, **kwargs)
         self.recipient.check_for_majority()
 
@@ -203,4 +204,4 @@ class ContactInfo(models.Model):
     contact = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return self.member.user.users + " - " + self.email + " - " + self.phone + " - " + self.address
+        return self.member
