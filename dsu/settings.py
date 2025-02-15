@@ -94,16 +94,21 @@ DATABASES = {
 
 print("REDIS_URL: ",os.environ.get('REDIS_URL'))
 
+import ssl
+new_context = ssl.SSLContext() # this sets the verify_mode to 'CERT_NONE'
+host = [{
+        'address': os.environ.get('REDIS_URL'),
+        'ssl': new_context ,
+    }]
+
 # redis has to use TLS as heroku updated their key-value connection setting as this effects the redis connection as well
 CHANNEL_LAYERS = {
     "default": {
-         "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "LOCATION": os.environ.get('REDIS_URL'),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "CONNECTION_POOL_KWARGS": {
-                "ssl_cert_reqs": None
-            },}
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": host,
+            "symmetric_encryption_keys": [SECRET_KEY],
+        },
     },
 }
 
