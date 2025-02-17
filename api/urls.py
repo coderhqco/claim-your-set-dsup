@@ -13,6 +13,7 @@ router.register('contact-info', apiViews.ContactInfoViewSet)
 
 # second delegate routes:
 router.register('second-delegate', sec_del_view.SecDelViewSet)
+router.register('second-delegate-members', sec_del_view.SecDelMembersViewSet)
 
 from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,TokenVerifyView,)   # TokenVerifyView added by siva
 

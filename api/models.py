@@ -30,18 +30,19 @@ class SecDelModel(models.Model):
             self.invitation_key = generate_unique_invitation_key()
         super().save(*args, **kwargs)
 
-    # add this property once you create the member model
-    # @property
-    # def is_active(self):
-    #     # check if the member <= 12 and return true
-    #     if 6 <= self.groupmember_set.filter(is_member = True).count() <= 12:
-    #         return True
-    #     return False
+    @property
+    def is_active(self):
+        # check if the member <= 12 and return true
+        if 6 <= self.secdelmembers_set.filter(is_member = True).count() <= 12:
+            return True
+        return False
 
 
+
+# the user can be changed to be Circle delegate only. but being a user is much better
 class SecDelMembers(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    SecDel = models.ForeignKey(SecDelModel, on_delete=models.CASCADE)
+    sec_del = models.ForeignKey(SecDelModel, on_delete=models.CASCADE)
     is_delegate = models.BooleanField(default=False)
     is_member = models.BooleanField(default=False)
     joined_at = models.DateTimeField(auto_now_add=True)
@@ -49,3 +50,4 @@ class SecDelMembers(models.Model):
 
     class Meta:
         ordering = ['-is_delegate', 'joined_at']
+    
