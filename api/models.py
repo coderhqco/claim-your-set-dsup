@@ -1,6 +1,7 @@
 import random
 from django.db import models
 from vote.models import Districts
+from django.contrib.auth.models import User
 
 def generate_unique_code():
     while True:
@@ -37,4 +38,14 @@ class SecDelModel(models.Model):
     #         return True
     #     return False
 
-    
+
+class SecDelMembers(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    SecDel = models.ForeignKey(SecDelModel, on_delete=models.CASCADE)
+    is_delegate = models.BooleanField(default=False)
+    is_member = models.BooleanField(default=False)
+    joined_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-is_delegate', 'joined_at']
