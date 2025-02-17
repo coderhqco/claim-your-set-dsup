@@ -1,6 +1,7 @@
 from rest_framework import routers
 from django.urls import path, include
 from api import views as apiViews
+from api import sec_del_view
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
@@ -9,6 +10,9 @@ router.register('user', apiViews.UserPageView)
 router.register('voter-page', apiViews.VoterPageView)
 router.register('circle', apiViews.CircleList)
 router.register('contact-info', apiViews.ContactInfoViewSet)
+
+# second delegate routes:
+router.register('second-delegate', sec_del_view.SecDelViewSet)
 
 from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,TokenVerifyView,)   # TokenVerifyView added by siva
 
