@@ -9,7 +9,6 @@ __pycache__
 
 staticfiles
 # docker files
-docker-compose.yml
 
 db.sqlite3
 /db.sqlite3
