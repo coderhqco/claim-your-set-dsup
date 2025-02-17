@@ -36,7 +36,5 @@ class SecDelModel(models.Model):
     #     if 6 <= self.groupmember_set.filter(is_member = True).count() <= 12:
     #         return True
     #     return False
-    
-    def __str__(self):
-        return self.code
+
     
