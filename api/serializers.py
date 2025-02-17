@@ -279,12 +279,6 @@ class CircleStatusSerializer(serializers.ModelSerializer):
         model = voteModels.CircleStatus
         fields = "__all__"
 
-
-class TestingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = apiModels.TestingModel
-        fields = "__all__"
-
 class UsernameRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
 

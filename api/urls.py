@@ -33,6 +33,4 @@ urlpatterns = [
     path('circle-put-forward-list/',apiViews.CircleMemeber_putforward.as_view()),
     path('status/circle/',apiViews.CircleStatus.as_view()),
     path('get-username/', apiViews.UsernameRequestView.as_view(), name='get_username'),
-
-    path('testing-api/',apiViews.TestingView.as_view())
 ]

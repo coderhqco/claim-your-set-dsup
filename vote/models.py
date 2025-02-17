@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.utils import timezone
 
 # District model (table) is for listing of all US districts
 class Districts(models.Model):
