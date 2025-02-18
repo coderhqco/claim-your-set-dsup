@@ -30,6 +30,9 @@ class SecDelModel(models.Model):
             self.invitation_key = generate_unique_invitation_key()
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return str(self.code)
+    
     @property
     def is_active(self):
         # check if the member <= 12 and return true
@@ -53,6 +56,9 @@ class SecDelMembers(models.Model):
     class Meta:
         ordering = ['-is_delegate', 'joined_at']
     
+    def __str__(self):
+        return f"{self.user.username} - {self.sec_del.code}"
+    
     def save(self, *args, **kwargs):
         # Calculate if is_member should be true (calculating the majority of vote)
         if self.vote_in_count >= (self.sec_del.secdelmembers_set.filter(is_member=True).count()/2):
@@ -74,8 +80,5 @@ class SecDelMembers(models.Model):
             self.is_member = True
 
         super().save(*args, **kwargs)
-
-
-        
 
 
