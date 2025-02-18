@@ -47,7 +47,35 @@ class SecDelMembers(models.Model):
     is_member = models.BooleanField(default=False)
     joined_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    vote_in_count = models.PositiveSmallIntegerField(default=0)
+    vote_out_count = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         ordering = ['-is_delegate', 'joined_at']
     
+    def save(self, *args, **kwargs):
+        # Calculate if is_member should be true (calculating the majority of vote)
+        if self.vote_in_count >= (self.sec_del.secdelmembers_set.filter(is_member=True).count()/2):
+            self.is_member = True
+        else:
+            self.is_member = False
+
+        # check the user type of the member. it has to be userType 1 
+        # on save, update the userType to 2
+        if self.user.users.userType >= 1:
+            self.user.users.userType = 2
+            self.user.users.save()
+        else:
+            return {"error": "User is not eligible for this operation."}
+        
+        # on each first member, make the member the delegate member by default.
+        if not self.pk and not self.sec_del.secdelmembers_set.exists():
+            self.is_delegate = True
+            self.is_member = True
+
+        super().save(*args, **kwargs)
+
+
+        
+
+
