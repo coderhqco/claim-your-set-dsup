@@ -527,12 +527,6 @@ class CircleStatus(generics.ListAPIView):
     permission_classes = [AllowAny]
 
 
-class TestingView(generics.ListAPIView):
-    serializer_class = apiSerializers.TestingSerializer
-    queryset = apiModels.TestingModel.objects.all()
-    permission_classes = [AllowAny]
-
-
 class UsernameRequestView(APIView):
     permission_classes = (AllowAny,)
     serializer_class = apiSerializers.UsernameRequestSerializer

@@ -1,6 +1,5 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import User
 from vote import models as voteModels
@@ -38,7 +37,6 @@ class CircleConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_members(self):
         MemberInstances = voteModels.GroupMember.objects.filter(group__code=self.circle_name)
-        print("here is the members:", MemberInstances.count())
         members = serializers.CircleMemberSerializer(MemberInstances, many=True)
         return members.data
 

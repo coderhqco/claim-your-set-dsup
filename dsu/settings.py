@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
-ALLOWED_HOSTS = ['localhost', '192.168.0.130', '192.168.0.132', 'dsup-voting-portal.herokuapp.com', '127.0.0.1', 'dsup.herokuapp.com', 'localhost:8000',
+ALLOWED_HOSTS = ['localhost', 'dsup-voting-portal.herokuapp.com', '127.0.0.1','127.0.0.1:8000' ,'dsup.herokuapp.com', 'localhost:8000',
                  'dsu-front.herokuapp.com', 'dsu-front.herokuapp.com:8000', 'dsu-front.herokuapp.com:8080', 'dsu-front.herokuapp.com:', 'claim-your-seat.herokuapp.com']
 
 # Application definition
@@ -93,7 +93,6 @@ DATABASES = {
 
 
 print("REDIS_URL: ",os.environ.get('REDIS_URL'))
-
 import ssl
 new_context = ssl.SSLContext() # this sets the verify_mode to 'CERT_NONE'
 host = [{
@@ -102,26 +101,29 @@ host = [{
     }]
 
 # redis has to use TLS as heroku updated their key-value connection setting as this effects the redis connection as well
-CHANNEL_LAYERS = {
-    "default": {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": host,
-            "symmetric_encryption_keys": [SECRET_KEY],
+if os.environ.get('PRODUCTION') == 'true':
+    print("please make sure you have added the PRODUCTION value to true on Heroku")
+    print("using the prod redis settings...")
+    CHANNEL_LAYERS = {
+        "default": {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                "hosts": host,
+                "symmetric_encryption_keys": [SECRET_KEY],
+            },
         },
-    },
-}
+    }
+else:
+    print("using the test redis settings...")
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+            "hosts": [os.environ.get('REDIS_URL')],
+        },
+        },
+    }
 
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels_redis.core.RedisChannelLayer",
-#         "CONFIG": {
-#             "hosts": [{
-#                 "address": os.environ.get('REDIS_URL'),
-#             }],
-#         },
-#     },
-# }
 
 
 # Password validation
