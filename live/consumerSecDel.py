@@ -12,11 +12,12 @@ class SecDelConsumer(AsyncWebsocketConsumer):
         self.sec_del_name = self.scope['url_route']['kwargs']['sec_del_name']
         self.user_name = self.scope['url_route']['kwargs']['user_name']
         self.room_name =  self.sec_del_name
+        
         # Join room group
         await self.channel_layer.group_add(self.room_name, self.channel_name)
 
         # Fetch existing circle members using database_sync_to_async
-        members = {'status':"success",'message':'listed all members.', 'member_list': await self.get_members()}
+        members = {'status':"success",'action':'member_listing', 'member_list': await self.get_members()}
 
         # Accept the WebSocket connection
         await self.accept()
