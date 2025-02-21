@@ -121,8 +121,9 @@ class RegisterSerializer(serializers.ModelSerializer):
             'uid': urlsafe_base64_encode(force_bytes(user.pk)),
             'token': account_activation_token.make_token(user),
         })
-        send_mail(mail_subject, message,
+        ad = send_mail(mail_subject, message,
                   settings.EMAIL_HOST_USER, [user.email])
+
         return user
 
 
