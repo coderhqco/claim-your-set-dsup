@@ -52,7 +52,7 @@ def ClaimYourSeat(request):
             user.email = form.cleaned_data.get('email')
             user.is_active = False
             user.save()
-
+            
             user.users.legalName = form.cleaned_data.get('legalName')
             user.users.address = form.cleaned_data.get('address')
             usersDistrict = voteModels.Districts.objects.get(code = form.cleaned_data.get('district').upper())
