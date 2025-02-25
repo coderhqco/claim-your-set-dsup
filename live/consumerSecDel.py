@@ -12,6 +12,7 @@ class SecDelConsumer(AsyncWebsocketConsumer):
         self.sec_del_name = self.scope['url_route']['kwargs']['sec_del_name']
         self.user_name = self.scope['url_route']['kwargs']['user_name']
         self.room_name =  self.sec_del_name
+
         # Join room group
         await self.channel_layer.group_add(self.room_name, self.channel_name)
 
@@ -92,16 +93,6 @@ class SecDelConsumer(AsyncWebsocketConsumer):
             case "dissolve":
                 """ the candidate has already joint and only needs to update the Circle list to members"""
                 """here do the deletion of the cirlce"""
-                await self.channel_layer.group_send(self.room_name, {
-                    'type': 'send_members',
-                    'members_list':{'status':"success", 'member_list': await self.get_members()} ,
-                    }
-                )
-                return
-    
-            case _:
-                print("action not found:")
-                pass
 
 
         # if any of the functions returns error, the message being sent will be that error only to that user.

@@ -24,7 +24,6 @@ class SecDelModel(models.Model):
     invitation_key = models.PositiveBigIntegerField(unique=True, default=generate_unique_invitation_key)
 
     def save(self, *args, **kwargs):
-      
         if not self.code:
             self.code = generate_unique_code()
         if not self.invitation_key:
@@ -40,8 +39,6 @@ class SecDelModel(models.Model):
         if 6 <= self.secdelmembers_set.filter(is_member = True).count() <= 12:
             return True
         return False
-
-
 
 # the user can be changed to be Circle delegate only. but being a user is much better
 class SecDelMembers(models.Model):

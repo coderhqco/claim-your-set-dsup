@@ -282,7 +282,6 @@ class UserView(APIView):
     def post(self, request):
         try:
             user = NUL
-        
             if 'user' in request.data:
                 user = User.objects.get(username=request.data['user'])
             else:
