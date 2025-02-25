@@ -60,9 +60,15 @@ class SecDelMembers(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.sec_del.code}"
     
+    def delete(self, using=None, keep_parents=False):
+        self.user.users.userType = 1
+        self.user.users.save()
+        super().delete(using, keep_parents)
+    
     def save(self, *args, **kwargs):
         # Calculate if is_member should be true (calculating the majority of vote)
         if self.vote_in_count >= (self.sec_del.secdelmembers_set.filter(is_member=True).count()/2):
+            print("this message is from saving the instance on the model, the User is a member now...")
             self.is_member = True
         else:
             self.is_member = False
